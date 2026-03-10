@@ -26,6 +26,21 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "studio.listVisibleLabels",
+            description: "List visible labels from key Studio Pro panes and editor surfaces.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "studio.listOpenTabs",
+            description: "List the open page and microflow editor tabs in the top document area.",
+            status: "implemented"
+        },
+        {
+            id: "studio.selectTab",
+            description: "Activate an already open page or microflow editor tab.",
+            status: "implemented"
+        },
+        {
             id: "page.selectExplorerItem",
             description: "Select an exact visible Page Explorer row for the active page.",
             status: "implemented-first-pass"

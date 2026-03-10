@@ -60,6 +60,36 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "list-app-explorer-items": {
+            const result = await client.listAppExplorerItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-page-explorer-items": {
+            const result = await client.listPageExplorerItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-toolbox-items": {
+            const result = await client.listToolboxItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-editor-labels": {
+            const result = await client.listEditorLabels(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-open-tabs": {
+            const result = await client.listOpenTabs(options);
+            formatOutput(result);
+            return;
+        }
+        case "select-tab": {
+            const result = await client.selectTab(options);
+            formatOutput(result);
+            return;
+        }
         case "insert-widget": {
             const result = await client.insertWidget(options);
             formatOutput(result);
@@ -103,6 +133,12 @@ Commands:
   select-app-explorer-item   Select an App Explorer row by exact name
   select-explorer-item        Select a Page Explorer row by exact name
   select-toolbox-item         Select a Toolbox item by exact name
+  list-app-explorer-items     List visible App Explorer labels
+  list-page-explorer-items    List visible Page Explorer labels
+  list-toolbox-items          List visible Toolbox labels
+  list-editor-labels          List visible editor labels
+  list-open-tabs              List open page and microflow editor tabs
+  select-tab                  Activate an open Studio Pro editor tab
   insert-widget              Prepare or execute first-pass widget insertion
   select-microflow-node      Select a visible microflow node label
   insert-action              Prepare or execute first-pass microflow action insertion
@@ -131,6 +167,7 @@ Options:
   --microflow <name>          Microflow to open before node/action operations
   --action-name <name>        Toolbox action name for microflow insertion
   --node <name>               Visible microflow node label to select
+  --tab <name>                Open Studio Pro editor tab name to activate
 `);
 }
 

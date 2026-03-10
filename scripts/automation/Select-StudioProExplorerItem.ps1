@@ -13,8 +13,9 @@ if (-not $Item) {
 }
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+$openMethod = $null
 if ($Page) {
-    Open-StudioProItemByName -Process $attached.Process -Item $Page -DelayMs $DelayMs
+    $openMethod = Open-OrSelectStudioProItem -Process $attached.Process -Root $attached.Element -Item $Page -DelayMs $DelayMs
     Start-Sleep -Milliseconds ($DelayMs + 150)
     $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
 }
@@ -46,6 +47,7 @@ $payload = @{
     page = $Page
     item = $Item
     method = $method
+    openMethod = $openMethod
     target = $match
 }
 

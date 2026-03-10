@@ -23,7 +23,7 @@ if (-not $Widget) {
 }
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-Open-StudioProItemByName -Process $attached.Process -Item $Page -DelayMs $DelayMs
+$openMethod = Open-OrSelectStudioProItem -Process $attached.Process -Root $attached.Element -Item $Page -DelayMs $DelayMs
 Start-Sleep -Milliseconds ($DelayMs + 150)
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
@@ -83,6 +83,7 @@ $payload = @{
     widget = $Widget
     dryRun = [bool]$DryRun
     method = $method
+    openMethod = $openMethod
     resolvedTarget = $targetMatch
     resolvedWidget = $widgetMatch
 }

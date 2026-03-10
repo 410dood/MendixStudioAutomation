@@ -41,6 +41,50 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/Select-StudioProToolboxItem.ps1", normalizeSelectToolboxItemOptions(options));
     }
 
+    async listAppExplorerItems(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
+            ...normalizeProcessOptions(options),
+            Scope: "appExplorer",
+            Limit: numberOrDefault(options.limit, 200)
+        });
+    }
+
+    async listPageExplorerItems(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
+            ...normalizeProcessOptions(options),
+            Scope: "pageExplorer",
+            Limit: numberOrDefault(options.limit, 200)
+        });
+    }
+
+    async listToolboxItems(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
+            ...normalizeProcessOptions(options),
+            Scope: "toolbox",
+            Limit: numberOrDefault(options.limit, 200)
+        });
+    }
+
+    async listEditorLabels(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
+            ...normalizeProcessOptions(options),
+            Scope: "editor",
+            Limit: numberOrDefault(options.limit, 200)
+        });
+    }
+
+    async listOpenTabs(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProOpenTabs.ps1", normalizeProcessOptions(options));
+    }
+
+    async selectTab(options = {}) {
+        return runPowerShellScript("scripts/automation/Select-StudioProTab.ps1", {
+            ...normalizeProcessOptions(options),
+            Tab: options.tab,
+            DelayMs: numberOrDefault(options.delayMs, 250)
+        });
+    }
+
     async insertWidget(options = {}) {
         return runPowerShellScript("scripts/automation/Insert-StudioProWidget.ps1", normalizeInsertWidgetOptions(options));
     }

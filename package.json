@@ -16,6 +16,12 @@
     "select-app-explorer-item": "node src/cli.mjs select-app-explorer-item",
     "select-explorer-item": "node src/cli.mjs select-explorer-item",
     "select-toolbox-item": "node src/cli.mjs select-toolbox-item",
+    "list-app-explorer-items": "node src/cli.mjs list-app-explorer-items",
+    "list-page-explorer-items": "node src/cli.mjs list-page-explorer-items",
+    "list-toolbox-items": "node src/cli.mjs list-toolbox-items",
+    "list-editor-labels": "node src/cli.mjs list-editor-labels",
+    "list-open-tabs": "node src/cli.mjs list-open-tabs",
+    "select-tab": "node src/cli.mjs select-tab",
     "insert-widget": "node src/cli.mjs insert-widget",
     "select-microflow-node": "node src/cli.mjs select-microflow-node",
     "insert-action": "node src/cli.mjs insert-action"

@@ -17,7 +17,7 @@ if (-not $Node) {
 }
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-Open-StudioProItemByName -Process $attached.Process -Item $Microflow -DelayMs $DelayMs
+$openMethod = Open-OrSelectStudioProItem -Process $attached.Process -Root $attached.Element -Item $Microflow -DelayMs $DelayMs
 Start-Sleep -Milliseconds ($DelayMs + 150)
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
@@ -35,6 +35,7 @@ $payload = @{
     microflow = $Microflow
     node = $Node
     method = $method
+    openMethod = $openMethod
     target = $bestMatch
 }
 

@@ -30,9 +30,12 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - open a document by name through Studio Pro's built-in `Go to` workflow
 - select a visible named widget or page element on the active designer surface
 - inspect and wait for Studio Pro popups to clear
+- list open page and microflow editor tabs
+- activate an already open editor tab directly
 - select an `App Explorer` row by exact visible name
 - select a `Page Explorer` row by exact visible name
 - select an exact visible `Toolbox` item by name
+- list visible labels from App Explorer, Page Explorer, Toolbox, and the active editor
 - prepare or execute first-pass widget insertion through Page Explorer + Toolbox
 - select a visible microflow node/action label
 - prepare or execute first-pass microflow action insertion through the Toolbox
@@ -51,9 +54,15 @@ npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run select-widget -- --page "Client_ClinicalDocument_V4" --widget "Olari_Popup_Default"
 npm run popup-status
 npm run wait-ready -- --timeout-ms 60000
+npm run list-open-tabs
+npm run select-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]"
 npm run select-app-explorer-item -- --item "Client_ClinicalDocument_V3"
 npm run select-explorer-item -- --page "Client_ClinicalDocument_V4" --item "SNIP_PopupSubHeader_Program_StageTemplate"
 npm run select-toolbox-item -- --item "Deeply Nested List/Data View"
+npm run list-app-explorer-items
+npm run list-page-explorer-items
+npm run list-toolbox-items
+npm run list-editor-labels
 npm run insert-widget -- --page "Client_ClinicalDocument_V4" --target "container34" --widget "Deeply Nested List/Data View" --dry-run
 npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "Call microflow"
 npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Call microflow" --action-name "Show page" --dry-run
@@ -81,6 +90,7 @@ Phase 1:
 Phase 2:
 
 - higher-level operations: open page, open microflow, expand module, open toolbox category
+- current `open-item`, `select-widget`, `select-explorer-item`, `insert-widget`, `select-microflow-node`, and `insert-action` now prefer an already open matching editor tab before falling back to `Go to`
 - current `select-widget` targets visible named elements on the active page editor; deeper Page Explorer tree selection still needs refinement
 - current `select-explorer-item` targets exact visible row names from the Page Explorer grid
 - current `select-toolbox-item` targets exact visible text items from the Toolbox pane

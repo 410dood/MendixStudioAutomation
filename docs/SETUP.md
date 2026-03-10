@@ -45,6 +45,14 @@ If those work, try a safe selection-only command:
 npm run select-toolbox-item -- --item "Deeply Nested List/Data View"
 ```
 
+You can also confirm that open document tabs are discoverable:
+
+```powershell
+npm run list-open-tabs
+```
+
+If a page or microflow is already open, `open-item` will now reuse that tab before falling back to Studio Pro's `Go to` dialog.
+
 ## Safety Model
 
 - The repo intentionally excludes Mendix project commit and merge operations.

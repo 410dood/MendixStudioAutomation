@@ -12,13 +12,7 @@ if (-not $Item) {
 }
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-Set-StudioProForegroundWindow -Process $attached.Process
-
-Send-KeysToForegroundWindow -Keys "^{g}" -DelayMs $DelayMs
-Send-KeysToForegroundWindow -Keys "^(a)" -DelayMs 100
-Send-KeysToForegroundWindow -Keys "{BACKSPACE}" -DelayMs 100
-Send-KeysToForegroundWindow -Keys (Escape-SendKeysText -Text $Item) -DelayMs $DelayMs
-Send-KeysToForegroundWindow -Keys "{ENTER}" -DelayMs ($DelayMs + 150)
+$openMethod = Open-OrSelectStudioProItem -Process $attached.Process -Root $attached.Element -Item $Item -DelayMs $DelayMs
 
 $payload = @{
     ok = $true
@@ -29,7 +23,8 @@ $payload = @{
     }
     action = "open-item"
     item = $Item
-    method = "ctrl+g"
+    method = $openMethod.method
+    tab = $openMethod.tab
 }
 
 $payload | ConvertTo-Json -Depth 10

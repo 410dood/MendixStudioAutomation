@@ -53,7 +53,21 @@ npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run open-item -- --item "ClinicalDocument_ShowPage"
 ```
 
-This uses Studio Pro's built-in `Go to` flow. It is useful, but not yet perfect for every unopened document.
+If a matching page or microflow is already open, the automation now reuses that tab first. Otherwise it falls back to Studio Pro's built-in `Go to` flow.
+
+### Open tab control
+
+List the currently open page and microflow tabs:
+
+```powershell
+npm run list-open-tabs
+```
+
+Activate one directly:
+
+```powershell
+npm run select-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]"
+```
 
 ### Page authoring helpers
 
@@ -113,6 +127,7 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 
 - Some Studio Pro panes expose rows as text, some as data rows, and some as custom WPF controls.
 - The active pane layout affects which selectors are valid.
+- Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 
