@@ -1,0 +1,23 @@
+{
+  "name": "mendix-studio-automation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Windows automation scaffold for controlling Mendix Studio Pro through PowerShell UI Automation.",
+  "scripts": {
+    "status": "node src/cli.mjs status",
+    "snapshot": "node src/cli.mjs snapshot",
+    "find": "node src/cli.mjs find",
+    "click": "node src/cli.mjs click",
+    "open-item": "node src/cli.mjs open-item",
+    "select-widget": "node src/cli.mjs select-widget",
+    "popup-status": "node src/cli.mjs popup-status",
+    "wait-ready": "node src/cli.mjs wait-ready",
+    "select-app-explorer-item": "node src/cli.mjs select-app-explorer-item",
+    "select-explorer-item": "node src/cli.mjs select-explorer-item",
+    "select-toolbox-item": "node src/cli.mjs select-toolbox-item",
+    "insert-widget": "node src/cli.mjs insert-widget",
+    "select-microflow-node": "node src/cli.mjs select-microflow-node",
+    "insert-action": "node src/cli.mjs insert-action"
+  }
+}
