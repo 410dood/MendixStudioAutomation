@@ -1035,7 +1035,7 @@ export class StudioProClient {
 
         const diff = compareDialogItemSets(expectedItems, liveResult.items);
         return {
-            ok: diff.missing.length === 0,
+            ok: diff.missing.length === 0 && diff.changed.length === 0,
             action: "compare-dialog-items",
             dialog: options.dialog,
             batchSource: batchSource.kind,
@@ -5434,7 +5434,10 @@ function summarizeDialogItem(item) {
         controlType: item?.controlType ?? null,
         automationId: item?.automationId ?? null,
         className: item?.className ?? null,
-        textValue: item?.textValue ?? null
+        textValue: item?.textValue ?? null,
+        toggleState: item?.toggleState ?? null,
+        isEnabled: item?.isEnabled ?? null,
+        isOffscreen: item?.isOffscreen ?? null
     };
 }
 
@@ -5444,11 +5447,32 @@ function compareDialogItemSets(expectedItems, liveItems) {
     const expectedMap = new Map(expectedItems.map(item => [makeDialogItemSignature(item), item]));
 
     const missing = [];
+    const changed = [];
     for (const [signature, item] of expectedMap.entries()) {
-        if (!liveMap.has(signature)) {
+        const live = liveMap.get(signature);
+        if (!live) {
             missing.push({
                 signature,
                 expected: summarizeDialogItem(item)
+            });
+            continue;
+        }
+
+        const expectedSummary = summarizeDialogItem(item);
+        const liveSummary = summarizeDialogItem(live);
+        const changedKeys = [];
+        for (const key of ["textValue", "toggleState", "isEnabled", "isOffscreen"]) {
+            if ((expectedSummary[key] ?? null) !== (liveSummary[key] ?? null)) {
+                changedKeys.push(key);
+            }
+        }
+
+        if (changedKeys.length > 0) {
+            changed.push({
+                signature,
+                changedKeys,
+                expected: expectedSummary,
+                live: liveSummary
             });
         }
     }
@@ -5463,7 +5487,7 @@ function compareDialogItemSets(expectedItems, liveItems) {
         }
     }
 
-    return { missing, extra };
+    return { changed, missing, extra };
 }
 
 function normalizeDialogFieldExportFormat(raw) {

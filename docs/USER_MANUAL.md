@@ -150,7 +150,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
 `list-dialog-fields` is the higher-level inspection command when you want label/value pairs instead of a raw control inventory.
 `export-dialog-items` writes the raw visible control inventory to JSON when you need to inspect or diff a dialog outside the live Studio Pro session.
-`compare-dialog-items` compares a saved raw control inventory against the live dialog and reports missing and extra controls by stable signature.
+`compare-dialog-items` compares a saved raw control inventory against the live dialog and reports missing, extra, and changed controls by stable signature.
 `export-dialog-fields` writes those label/value pairs to JSON so they can be edited and fed back into `set-dialog-fields --fields-file ...`.
 `compare-dialog-fields` compares a saved JSON field plan with the live dialog and reports changed, missing, and extra fields before you mutate anything.
 `sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan. Use `--dry-run true` to emit the planned edits without mutating Studio Pro.
