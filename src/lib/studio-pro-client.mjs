@@ -1,6 +1,7 @@
 import { runPowerShellScript } from "./powershell.mjs";
 import { clearLastKnownActiveTab, readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
 import { HybridExtensionClient } from "./extension-client.mjs";
+import { listKnowledgeGaps, recordKnowledgeGap, summarizeKnowledgeGaps } from "./knowledge-gap-store.mjs";
 
 export class StudioProClient {
     constructor() {
@@ -973,6 +974,55 @@ export class StudioProClient {
             source: "uia-fallback",
             extension: extensionStatus,
             fallback: await this.getActiveContext(options)
+        };
+    }
+
+    async recordKnowledgeGap(options = {}) {
+        if (!options.topic && !options.requestedCapability && !options.observedIssue) {
+            return {
+                ok: false,
+                action: "record-knowledge-gap",
+                error: "Provide at least one of --topic, --requested-capability, or --observed-issue."
+            };
+        }
+
+        const gap = await recordKnowledgeGap({
+            topic: options.topic,
+            requestedCapability: options.requestedCapability,
+            observedIssue: options.observedIssue,
+            impact: options.impact,
+            context: options.context,
+            source: options.source,
+            status: options.status
+        });
+
+        return {
+            ok: true,
+            action: "record-knowledge-gap",
+            gap
+        };
+    }
+
+    async listKnowledgeGaps(options = {}) {
+        const items = await listKnowledgeGaps({
+            status: options.status,
+            limit: options.limit
+        });
+
+        return {
+            ok: true,
+            action: "list-knowledge-gaps",
+            count: items.length,
+            items
+        };
+    }
+
+    async summarizeKnowledgeGaps(options = {}) {
+        const summary = await summarizeKnowledgeGaps(options);
+        return {
+            ok: true,
+            action: "summarize-knowledge-gaps",
+            summary
         };
     }
 

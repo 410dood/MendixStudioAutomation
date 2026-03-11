@@ -282,6 +282,16 @@ Click a placement point relative to a visible editor element:
 npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType" --offset-x 220 --offset-y 0
 ```
 
+### Knowledge gap tracking
+
+Record and track capability gaps while developing automation:
+
+```powershell
+npm run record-knowledge-gap -- --requested-capability "page.insertWidget" --observed-issue "Intermittent selector drift in Select Widget dialog" --impact "Blocks repeatable page automation" --context "Client_ClinicalDocument_V3"
+npm run list-knowledge-gaps -- --status open --limit 20
+npm run summarize-knowledge-gaps
+```
+
 ## Recommended Operating Sequence
 
 1. Run `popup-status` or `wait-ready`.

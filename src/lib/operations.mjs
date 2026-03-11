@@ -126,6 +126,21 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "knowledge.recordGap",
+            description: "Record an automation capability gap for prioritization and hardening.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "knowledge.listGaps",
+            description: "List recorded automation capability gaps.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "knowledge.summarizeGaps",
+            description: "Summarize gap counts by status and requested capability.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "studio.createClientsPage",
             description: "Create a Clients scaffold page and optionally add it to Web navigation.",
             status: "implemented-first-pass"

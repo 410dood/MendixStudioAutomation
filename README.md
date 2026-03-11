@@ -33,6 +33,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - trigger first-pass local run and responsive web shortcuts from Studio Pro
 - create pages through Studio Pro's native `New Document` and `Create Page` wizards
 - query an in-Studio hybrid extension over a supported local webserver route
+- track and summarize automation knowledge gaps locally for prioritization
 - add opened pages to the web navigation profile via the hybrid extension route
 - insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Retrieve from database`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`)
 - open native Studio Pro properties dialogs from selected editor targets
@@ -90,6 +91,9 @@ npm run extension-context
 npm run extension-capabilities
 npm run extension-search-documents -- --query ClinicalDocument --module Az_ClientManagement --limit 10
 npm run extension-open-document -- --name "ClinicalDocument_ShowPage" --module Az_ClientManagement
+npm run record-knowledge-gap -- --requested-capability "page.insertWidget" --observed-issue "Intermittent selector drift in Select Widget dialog" --impact "Blocks repeatable page automation" --context "Client_ClinicalDocument_V3"
+npm run list-knowledge-gaps -- --status open --limit 20
+npm run summarize-knowledge-gaps
 npm run add-navigation-shortcut -- --page "Client_ClinicalDocument_V3" --caption "Clinical Document" --module Az_ClientManagement
 npm run hybrid-context
 npm run list-scope-elements -- --microflow "ClinicalDocument_ShowPage" --scope editor --near-name "DS_AppConfig" --radius 320
@@ -152,6 +156,7 @@ node src/cli.mjs snapshot --title "Olari"
 - [Setup](docs/SETUP.md)
 - [User Manual](docs/USER_MANUAL.md)
 - [Hybrid Architecture](docs/HYBRID_ARCHITECTURE.md)
+- [External References Review](docs/EXTERNAL_REFERENCES.md)
 - [Release Notes](RELEASE_NOTES.md)
 
 ## Hybrid Extension

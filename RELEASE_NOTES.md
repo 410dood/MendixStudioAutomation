@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.2.10
+
+External-reference adoption milestone.
+
+- Reviewed and incorporated useful patterns from:
+  - `@jordnlvr/mendix-mcp-server`
+  - `ruvnet` MCP gist
+- Added local knowledge-gap tracking to prioritize automation hardening:
+  - new store: `.automation-state/knowledge-gaps.json`
+  - new CLI commands:
+    - `record-knowledge-gap`
+    - `list-knowledge-gaps`
+    - `summarize-knowledge-gaps`
+  - new operation catalog entries:
+    - `knowledge.recordGap`
+    - `knowledge.listGaps`
+    - `knowledge.summarizeGaps`
+- Added external-reference review document:
+  - `docs/EXTERNAL_REFERENCES.md`
+
 ## 0.2.9
 
 Hybrid write-path expansion for microflow rollback actions.

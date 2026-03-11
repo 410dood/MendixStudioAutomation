@@ -250,6 +250,21 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "record-knowledge-gap": {
+            const result = await client.recordKnowledgeGap(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-knowledge-gaps": {
+            const result = await client.listKnowledgeGaps(options);
+            formatOutput(result);
+            return;
+        }
+        case "summarize-knowledge-gaps": {
+            const result = await client.summarizeKnowledgeGaps(options);
+            formatOutput(result);
+            return;
+        }
         case "select-tab": {
             const result = await client.selectTab(options);
             formatOutput(result);
@@ -341,6 +356,9 @@ Commands:
   add-microflow-change-attribute Add a microflow Change attribute activity through the extension
   create-clients-page         Create a Clients page and insert a default DataGrid widget
   hybrid-context              Prefer the extension context and fall back to UI automation
+  record-knowledge-gap        Record an automation capability gap for later hardening
+  list-knowledge-gaps         List recorded automation capability gaps
+  summarize-knowledge-gaps    Summarize gap counts by status and capability
   select-tab                  Activate an open Studio Pro editor tab
   close-tab                   Close a specific open Studio Pro editor tab
   insert-widget              Prepare or execute first-pass widget insertion
@@ -412,6 +430,13 @@ Options:
   --change-type <name>        Change type for change-attribute action: Set|Add|Remove
   --x-path-constraint <text>  Optional XPath constraint for retrieve-database action
   --retrieve-first <true|false> Retrieve first object instead of a list
+  --requested-capability <text> Capability requested when recording a knowledge gap
+  --observed-issue <text>     What failed or is missing
+  --impact <text>             Why the gap matters
+  --context <text>            Optional context such as page/microflow/environment
+  --source <text>             Source of the gap report (default: manual)
+  --status <text>             Gap status: open|in_progress|resolved|blocked
+  --limit <n>                 Limit records returned by list-knowledge-gaps
   --caption <text>            Optional explicit caption for add-navigation-shortcut
 `);
 }
