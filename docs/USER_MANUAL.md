@@ -328,6 +328,24 @@ Insert a reduce-aggregate activity in a microflow through the extension API:
 npm run add-microflow-reduce-aggregate -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ReducedVersionTotal" --aggregate-expression '$currentValue + $currentObject/VersionNumber' --initial-expression "0" --reduce-type Decimal
 ```
 
+Insert a list-head activity in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-list-head -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstClientDocument"
+```
+
+Insert a list-tail activity in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-list-tail -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentListTail"
+```
+
+Insert a list-contains activity in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-list-contains -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --object-variable "ClientDocumentObj" --output-variable-name "HasClientDocument"
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -435,6 +453,9 @@ npm run summarize-knowledge-gaps
 - `add-microflow-change-list` inserts `Change list` activities only at the start of the selected microflow.
 - `add-microflow-sort-list` inserts `Sort list` activities only at the start of the selected microflow.
 - `add-microflow-reduce-aggregate` inserts `Reduce aggregate` activities only at the start of the selected microflow.
+- `add-microflow-list-head` inserts `List head` activities only at the start of the selected microflow.
+- `add-microflow-list-tail` inserts `List tail` activities only at the start of the selected microflow.
+- `add-microflow-list-contains` inserts `List contains` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.

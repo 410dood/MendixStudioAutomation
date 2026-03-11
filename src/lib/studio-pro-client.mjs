@@ -1663,6 +1663,175 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowListHead(options = {}) {
+        const normalized = normalizeMicroflowListOperationOptions(options, "ListHead");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-list-head",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-head",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-list-head",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listHead"))) {
+            return {
+                ok: false,
+                action: "add-microflow-list-head",
+                error: "Extension capabilities do not include microflow.listHead."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowListHead({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-list-head",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
+    async addMicroflowListTail(options = {}) {
+        const normalized = normalizeMicroflowListOperationOptions(options, "ListTail");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-list-tail",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-tail",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-list-tail",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listTail"))) {
+            return {
+                ok: false,
+                action: "add-microflow-list-tail",
+                error: "Extension capabilities do not include microflow.listTail."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowListTail({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-list-tail",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
+    async addMicroflowListContains(options = {}) {
+        const normalized = normalizeMicroflowListContainsOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-list-contains",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-contains",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (!normalized.objectVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-contains",
+                error: "An --object-variable (or --value) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-list-contains",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listContains"))) {
+            return {
+                ok: false,
+                action: "add-microflow-list-contains",
+                error: "Extension capabilities do not include microflow.listContains."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowListContains({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            objectVariable: normalized.objectVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-list-contains",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            objectVariable: normalized.objectVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -2798,6 +2967,24 @@ function normalizeMicroflowReduceAggregateOptions(options) {
         aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
         initialExpression: options.initialExpression ?? options.initialValue ?? options.initial,
         reduceType: options.reduceType ?? options.dataType ?? options.type ?? "Decimal"
+    };
+}
+
+function normalizeMicroflowListOperationOptions(options, defaultOutputVariableName = "ListOperationResult") {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName
+    };
+}
+
+function normalizeMicroflowListContainsOptions(options) {
+    return {
+        ...normalizeMicroflowListOperationOptions(options, "ListContainsResult"),
+        objectVariable: options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable
     };
 }
 

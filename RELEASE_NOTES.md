@@ -1,5 +1,39 @@
 # Release Notes
 
+## 0.2.21
+
+Hybrid write-path expansion for microflow list-operation endpoints.
+
+- Added new extension routes:
+  - `/mendix-studio-automation/microflows/list-head`
+  - `/mendix-studio-automation/microflows/list-tail`
+  - `/mendix-studio-automation/microflows/list-contains`
+- Added extension capabilities:
+  - `microflow.listHead`
+  - `microflow.listTail`
+  - `microflow.listContains`
+- Added Studio Pro client support for:
+  - inserting a `List head` action into a selected microflow via extension service APIs
+  - inserting a `List tail` action into a selected microflow via extension service APIs
+  - inserting a `List contains` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm scripts:
+  - `add-microflow-list-head`
+  - `add-microflow-list-tail`
+  - `add-microflow-list-contains`
+  - `npm run add-microflow-list-head`
+  - `npm run add-microflow-list-tail`
+  - `npm run add-microflow-list-contains`
+- Added CLI option:
+  - `--object-variable`
+- Updated operation catalog with:
+  - `microflow.listHead`
+  - `microflow.listTail`
+  - `microflow.listContains`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.20
 
 Hybrid write-path expansion for microflow reduce-aggregate operations.
