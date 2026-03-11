@@ -2069,12 +2069,12 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var attributeName = request.QueryString["attribute"];
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
-        var filterExpressionText = request.QueryString["filterExpression"] ?? request.QueryString["expression"] ?? request.QueryString["value"];
         var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
             ?? request.QueryString["insertBefore"]
             ?? request.QueryString["beforeActivity"]
             ?? request.QueryString["beforeCaption"];
         var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
+        var filterExpressionText = request.QueryString["filterExpression"] ?? request.QueryString["expression"] ?? request.QueryString["value"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -2599,6 +2599,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var moduleName = request.QueryString["module"];
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (!TryParseAggregateFunctionEnum(request.QueryString["aggregateFunction"] ?? request.QueryString["function"], out var aggregateFunction))
         {
@@ -2683,15 +2688,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 aggregateFunction);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert an Aggregate list activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert an Aggregate list activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -2705,6 +2720,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 listVariable = sourceList,
                 outputVariableName = output,
                 aggregateFunction = aggregateFunction.ToString(),
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/aggregate-list",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -2737,6 +2757,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var attributeName = request.QueryString["attribute"];
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (!TryParseAggregateFunctionEnum(request.QueryString["aggregateFunction"] ?? request.QueryString["function"], out var aggregateFunction))
         {
@@ -2845,15 +2870,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 aggregateFunction);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert an Aggregate by attribute activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert an Aggregate by attribute activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -2870,6 +2905,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 listVariable = sourceList,
                 outputVariableName = output,
                 aggregateFunction = aggregateFunction.ToString(),
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/aggregate-by-attribute",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -2901,6 +2941,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
         var aggregateExpressionText = request.QueryString["aggregateExpression"] ?? request.QueryString["expression"] ?? request.QueryString["value"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (!TryParseAggregateFunctionEnum(request.QueryString["aggregateFunction"] ?? request.QueryString["function"], out var aggregateFunction))
         {
@@ -2996,15 +3041,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 aggregateFunction);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert an Aggregate by expression activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert an Aggregate by expression activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3019,6 +3074,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 outputVariableName = output,
                 aggregateExpression = aggregateExpressionText.Trim(),
                 aggregateFunction = aggregateFunction.ToString(),
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/aggregate-by-expression",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);

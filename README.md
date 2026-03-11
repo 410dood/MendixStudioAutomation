@@ -154,6 +154,9 @@ npm run add-microflow-find-by-expression -- --microflow "ClinicalDocument_ShowPa
 npm run add-microflow-aggregate-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentCount" --aggregate-function Count
 npm run add-microflow-aggregate-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "VersionNumber" --list-variable "ClientDocumentList" --output-variable-name "TotalVersionNumber" --aggregate-function Sum
 npm run add-microflow-aggregate-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "WeightedTotal" --aggregate-expression '$currentObject/VersionNumber * 1' --aggregate-function Sum
+npm run add-microflow-aggregate-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentCount" --aggregate-function Count --insert-before-index 16
+npm run add-microflow-aggregate-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "VersionNumber" --list-variable "ClientDocumentList" --output-variable-name "TotalVersionNumber" --aggregate-function Sum --insert-before-activity "Retrieve"
+npm run add-microflow-aggregate-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "WeightedTotal" --aggregate-expression '$currentObject/VersionNumber * 1' --aggregate-function Sum --insert-before-activity "Create object"
 npm run add-microflow-change-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --change-list-operation Add --value '$ClientDocumentObj'
 npm run add-microflow-sort-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "SortedClientDocumentList" --sort-descending false
 npm run add-microflow-reduce-aggregate -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ReducedVersionTotal" --aggregate-expression '$currentValue + $currentObject/VersionNumber' --initial-expression "0" --reduce-type Decimal
@@ -295,6 +298,7 @@ Phase 2:
 - current `add-microflow-aggregate-list` now inserts SDK-backed `Aggregate list` activities through the hybrid extension route
 - current `add-microflow-aggregate-by-attribute` now inserts SDK-backed `Aggregate by attribute` activities through the hybrid extension route
 - current `add-microflow-aggregate-by-expression` now inserts SDK-backed `Aggregate by expression` activities through the hybrid extension route
+- current aggregate actions (`aggregate-list`, `aggregate-by-attribute`, `aggregate-by-expression`) now also support optional `--insert-before-activity` and `--insert-before-index`
 - current `add-microflow-change-list` now inserts SDK-backed `Change list` activities through the hybrid extension route
 - current `add-microflow-sort-list` now inserts SDK-backed `Sort list` activities through the hybrid extension route
 - current `add-microflow-reduce-aggregate` now inserts SDK-backed `Reduce aggregate` activities through the hybrid extension route

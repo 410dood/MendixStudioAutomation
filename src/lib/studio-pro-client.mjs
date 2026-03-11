@@ -1498,7 +1498,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            aggregateFunction: normalized.aggregateFunction
+            aggregateFunction: normalized.aggregateFunction,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1508,7 +1510,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            aggregateFunction: normalized.aggregateFunction
+            aggregateFunction: normalized.aggregateFunction,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1563,7 +1567,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            aggregateFunction: normalized.aggregateFunction
+            aggregateFunction: normalized.aggregateFunction,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1575,7 +1581,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            aggregateFunction: normalized.aggregateFunction
+            aggregateFunction: normalized.aggregateFunction,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1629,7 +1637,9 @@ export class StudioProClient {
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
             aggregateExpression: normalized.aggregateExpression,
-            aggregateFunction: normalized.aggregateFunction
+            aggregateFunction: normalized.aggregateFunction,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1640,7 +1650,9 @@ export class StudioProClient {
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
             aggregateExpression: normalized.aggregateExpression,
-            aggregateFunction: normalized.aggregateFunction
+            aggregateFunction: normalized.aggregateFunction,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -3445,7 +3457,9 @@ function normalizeMicroflowAggregateListOptions(options, defaultOutputVariableNa
         module: options.module,
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
-        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count"
+        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3459,7 +3473,9 @@ function normalizeMicroflowAggregateAttributeOptions(options, defaultOutputVaria
         attribute: options.attribute,
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
-        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count"
+        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3472,7 +3488,9 @@ function normalizeMicroflowAggregateExpressionOptions(options, defaultOutputVari
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
         aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
-        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count"
+        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 

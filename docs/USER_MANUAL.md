@@ -394,16 +394,34 @@ Aggregate a list in a microflow through the extension API:
 npm run add-microflow-aggregate-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentCount" --aggregate-function Count
 ```
 
+Insert the aggregate-list activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-aggregate-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentCount" --aggregate-function Count --insert-before-index 16
+```
+
 Aggregate a list by attribute in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-aggregate-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "VersionNumber" --list-variable "ClientDocumentList" --output-variable-name "TotalVersionNumber" --aggregate-function Sum
 ```
 
+Insert the aggregate-by-attribute activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-aggregate-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "VersionNumber" --list-variable "ClientDocumentList" --output-variable-name "TotalVersionNumber" --aggregate-function Sum --insert-before-activity "Retrieve"
+```
+
 Aggregate a list by expression in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-aggregate-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "WeightedTotal" --aggregate-expression '$currentObject/VersionNumber * 1' --aggregate-function Sum
+```
+
+Insert the aggregate-by-expression activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-aggregate-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "WeightedTotal" --aggregate-expression '$currentObject/VersionNumber * 1' --aggregate-function Sum --insert-before-activity "Create object"
 ```
 
 Change a list in a microflow through the extension API:
@@ -642,9 +660,9 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - `add-microflow-filter-by-attribute` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-find-by-attribute` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-find-by-expression` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
-- `add-microflow-aggregate-list` inserts `Aggregate list` activities only at the start of the selected microflow.
-- `add-microflow-aggregate-by-attribute` inserts `Aggregate by attribute` activities only at the start of the selected microflow.
-- `add-microflow-aggregate-by-expression` inserts `Aggregate by expression` activities only at the start of the selected microflow.
+- `add-microflow-aggregate-list` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-aggregate-by-attribute` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-aggregate-by-expression` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-change-list` inserts `Change list` activities only at the start of the selected microflow.
 - `add-microflow-sort-list` inserts `Sort list` activities only at the start of the selected microflow.
 - `add-microflow-reduce-aggregate` inserts `Reduce aggregate` activities only at the start of the selected microflow.

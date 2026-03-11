@@ -1,5 +1,29 @@
 # Release Notes
 
+## 0.2.34
+
+Insert-before targeting for aggregate microflow operations.
+
+- Enhanced extension routes:
+  - `/mendix-studio-automation/microflows/aggregate-list`
+  - `/mendix-studio-automation/microflows/aggregate-by-attribute`
+  - `/mendix-studio-automation/microflows/aggregate-by-expression`
+- Added optional query argument support:
+  - `insertBeforeActivity` (aliases: `insertBefore`, `beforeActivity`, `beforeCaption`)
+  - `insertBeforeIndex` (alias: `beforeIndex`)
+- Added Node/CLI propagation for:
+  - `add-microflow-aggregate-list`
+  - `add-microflow-aggregate-by-attribute`
+  - `add-microflow-aggregate-by-expression`
+- Insertion behavior:
+  - default remains insert after microflow start
+  - when `insertBeforeActivity` is supplied, insertion matches by caption/action type
+  - when `insertBeforeIndex` is supplied, insertion is index-based from `list-microflow-activities`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.33
 
 Insert-before targeting for filter/find microflow operations.
