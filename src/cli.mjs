@@ -120,6 +120,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-dialog-fields": {
+            const result = await client.exportDialogFields(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-dialog-control": {
             const result = await client.invokeDialogControl(options);
             formatOutput(result);
@@ -475,6 +480,7 @@ Commands:
   invoke-scope-element-action Click or invoke a scoped Studio Pro element by runtime id
   list-dialog-items           List visible named controls inside a Studio Pro dialog
   list-dialog-fields          List visible dialog labels that resolve to field/value pairs
+  export-dialog-fields        Export dialog field/value pairs to a JSON file for reuse
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
   get-dialog-field            Read a native Studio Pro dialog field by its visible label
   set-dialog-fields           Set multiple native Studio Pro dialog fields from JSON input
@@ -576,6 +582,8 @@ Options:
   --poll-ms <n>               Wait poll interval in milliseconds
   --dialog <name>             Open Studio Pro dialog window name
   --label-contains <text>     Filter list-dialog-fields results to labels containing text
+  --output-file <path>        Output file path for export-dialog-fields
+  --format <name>             Output format for export-dialog-fields: object|array
   --near-name <name>          Sort/filter scope elements around a visible named element
   --radius <n>                Optional max pixel distance from --near-name
   --control <name>            Visible control name inside a Studio Pro dialog

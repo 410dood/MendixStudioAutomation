@@ -116,6 +116,7 @@ Use `find` to inspect what Studio Pro is exposing through UI Automation before b
 npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run list-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --control-type CheckBox
+npm run export-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --output-file ".automation-state/dialog-fields.json"
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Text"
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
@@ -132,6 +133,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
 `list-dialog-fields` is the higher-level inspection command when you want label/value pairs instead of a raw control inventory.
+`export-dialog-fields` writes those label/value pairs to JSON so they can be edited and fed back into `set-dialog-fields --fields-file ...`.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ. Use `--fields-file` when the payload is large enough that shell quoting becomes brittle.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.

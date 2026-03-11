@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { runPowerShellScript } from "./powershell.mjs";
 import { clearLastKnownActiveTab, readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
@@ -415,6 +415,49 @@ export class StudioProClient {
 
     async listDialogFields(options = {}) {
         return runPowerShellScript("scripts/automation/List-StudioProDialogFields.ps1", normalizeDialogFieldListOptions(options));
+    }
+
+    async exportDialogFields(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-dialog-fields",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const format = normalizeDialogFieldExportFormat(options.format ?? options.outputFormat);
+        let result;
+        try {
+            result = await this.listDialogFields(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "export-dialog-fields",
+                dialog: options.dialog,
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        if (!result?.ok) {
+            return {
+                ...result,
+                action: "export-dialog-fields"
+            };
+        }
+
+        const exported = buildDialogFieldExportPayload(result.fields, format);
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(exported, null, 2)}\n`, "utf8");
+
+        return {
+            ok: true,
+            action: "export-dialog-fields",
+            dialog: options.dialog,
+            format,
+            outputFile,
+            count: Array.isArray(result.fields) ? result.fields.length : 0
+        };
     }
 
     async invokeDialogControl(options = {}) {
@@ -4523,6 +4566,48 @@ function normalizeDialogFieldBatchEntry(entry) {
         verifyValueContains: entry.verifyValueContains,
         verifyToggleState: entry.verifyToggleState
     };
+}
+
+function normalizeDialogFieldExportFormat(raw) {
+    const value = String(raw ?? "object").trim().toLowerCase();
+    return value === "array" ? "array" : "object";
+}
+
+function buildDialogFieldExportPayload(fields, format = "object") {
+    const items = Array.isArray(fields) ? fields : [];
+    if (format === "array") {
+        return items.map(field => ({
+            label: field?.label?.name ?? field?.label ?? "",
+            value: field?.observedValue?.textValue ?? "",
+            controlType: field?.field?.controlType ?? null,
+            verifyToggleState: field?.observedValue?.toggleState ?? null
+        }));
+    }
+
+    const payload = {};
+    for (const field of items) {
+        const label = field?.label?.name ?? field?.label ?? "";
+        if (!label) {
+            continue;
+        }
+
+        const controlType = field?.field?.controlType ?? null;
+        if (controlType === "CheckBox" || controlType === "ToggleButton") {
+            payload[label] = {
+                value: field?.observedValue?.isToggled,
+                controlType,
+                verifyToggleState: field?.observedValue?.toggleState ?? null
+            };
+            continue;
+        }
+
+        payload[label] = {
+            value: field?.observedValue?.textValue ?? "",
+            controlType
+        };
+    }
+
+    return payload;
 }
 
 async function resolveDialogFieldBatchSource(options = {}) {
