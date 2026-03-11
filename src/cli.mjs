@@ -95,6 +95,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-sync-properties-dialog-items": {
+            const result = await client.exportSyncPropertiesDialogItems(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-properties-dialog-control": {
             const result = await client.invokePropertiesDialogControl(options);
             formatOutput(result);
@@ -187,6 +192,11 @@ async function main() {
         }
         case "sync-dialog-items": {
             const result = await client.syncDialogItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-sync-dialog-items": {
+            const result = await client.exportSyncDialogItems(options);
             formatOutput(result);
             return;
         }
@@ -560,6 +570,7 @@ Commands:
   export-properties-dialog-items Open a properties dialog and export raw visible controls to JSON
   compare-properties-dialog-items Open a properties dialog and compare raw visible controls to JSON
   sync-properties-dialog-items Open a properties dialog and build a raw-control sync plan
+  export-sync-properties-dialog-items Open a properties dialog and export a raw-control sync plan to JSON
   invoke-properties-dialog-control Open a properties dialog and invoke a named control inside it
   get-properties-dialog-field Open a properties dialog and read one labeled field
   set-properties-dialog-fields Open a properties dialog and apply batch field edits
@@ -579,6 +590,7 @@ Commands:
   export-dialog-items         Export raw visible dialog controls to JSON
   compare-dialog-items        Compare raw visible dialog controls to JSON
   sync-dialog-items           Build a raw-control sync plan from dialog comparison
+  export-sync-dialog-items    Export a raw-control sync plan to JSON
   list-dialog-fields          List visible dialog labels that resolve to field/value pairs
   export-dialog-fields        Export dialog field/value pairs to a JSON file for reuse
   compare-dialog-fields       Compare a live dialog against a JSON field plan

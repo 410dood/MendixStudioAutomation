@@ -92,6 +92,7 @@ npm run list-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --it
 npm run export-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-items.json"
 npm run compare-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --items-file ".automation-state/structure-mode-items.json"
 npm run sync-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --items-file ".automation-state/structure-mode-items.json" --finalize-dialog "Cancel"
+npm run export-sync-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --items-file ".automation-state/structure-mode-items.json" --output-file ".automation-state/structure-mode-sync-plan.json" --finalize-dialog "Cancel"
 npm run invoke-properties-dialog-control -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control "Apply" --control-type Button
 npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --control-type Edit
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
@@ -136,6 +137,7 @@ npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run export-dialog-items -- --dialog "Select Widget" --output-file ".automation-state/select-widget-items.json"
 npm run compare-dialog-items -- --dialog "Select Widget" --items-file ".automation-state/select-widget-items.json"
 npm run sync-dialog-items -- --dialog "Select Widget" --items-file ".automation-state/select-widget-items.json"
+npm run export-sync-dialog-items -- --dialog "Select Widget" --items-file ".automation-state/select-widget-items.json" --output-file ".automation-state/select-widget-sync-plan.json"
 npm run list-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --control-type CheckBox
 npm run export-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --output-file ".automation-state/dialog-fields.json"
 npm run compare-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json"

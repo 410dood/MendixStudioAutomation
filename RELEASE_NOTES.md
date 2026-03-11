@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.59
+
+Persisted raw dialog sync plans.
+
+- Added `export-sync-dialog-items` to write a raw dialog sync plan to JSON.
+- Added `export-sync-properties-dialog-items` to persist the same sync plan from a real page or microflow properties target.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.58
 
 Raw dialog sync planning for generic and target-first workflows.
