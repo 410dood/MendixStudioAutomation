@@ -48,7 +48,9 @@ npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-properties.json"
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
+npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control-type Edit
 npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --control-type Edit
+npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run set-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --value "structureMode1" --control-type Edit --verify-value "structureMode1"
 npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json"
 ```
@@ -145,7 +147,9 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan.
 `export-properties-dialog` composes `open-properties` with `export-dialog-fields`, so a page/widget/explorer target can emit a reviewable JSON field plan in one command.
 `compare-properties-dialog` composes `open-properties` with `compare-dialog-fields`, so a target can be checked against a saved plan without manually naming the transient dialog window.
+`list-properties-dialog-fields` composes `open-properties` with `list-dialog-fields`, so field discovery can start from a real page/widget/explorer target.
 `get-properties-dialog-field` composes `open-properties` with `get-dialog-field`, so single-field reads can target a page/widget/explorer surface directly.
+`set-properties-dialog-fields` composes `open-properties` with `set-dialog-fields`, so batch property edits can also avoid hard-coded dialog captions.
 `set-properties-dialog-field` composes `open-properties` with `set-dialog-field`, so single-field edits and verification no longer need a hard-coded dialog caption.
 `sync-properties-dialog` composes `open-properties` with `sync-dialog-fields`, so a page/widget/explorer target can be opened and synchronized from one command.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.

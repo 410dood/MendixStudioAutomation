@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.51
+
+Target-first property discovery and batch editing.
+
+- Added `list-properties-dialog-fields` to open a Studio Pro properties dialog from a page or microflow target and enumerate resolved field/value pairs.
+- Added `set-properties-dialog-fields` to open a Studio Pro properties dialog from a page or microflow target and apply batch field edits with the existing JSON plan format.
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.50
 
 Direct single-field properties editing workflows.

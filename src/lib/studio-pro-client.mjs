@@ -431,6 +431,54 @@ export class StudioProClient {
         };
     }
 
+    async listPropertiesDialogFields(options = {}) {
+        let openResult;
+        try {
+            openResult = await this.openProperties(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "list-properties-dialog-fields",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        const dialogName = extractDialogWindowName(openResult);
+        if (!openResult?.ok || !dialogName) {
+            return {
+                ok: false,
+                action: "list-properties-dialog-fields",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: openResult?.error ?? "Properties dialog did not open or did not report a dialog window name.",
+                openResult
+            };
+        }
+
+        const listResult = await this.listDialogFields({
+            ...options,
+            dialog: dialogName
+        });
+
+        return {
+            ok: Boolean(openResult?.ok) && Boolean(listResult?.ok),
+            action: "list-properties-dialog-fields",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            dialog: dialogName,
+            openResult,
+            listResult
+        };
+    }
+
     async getPropertiesDialogField(options = {}) {
         let openResult;
         try {
@@ -517,6 +565,54 @@ export class StudioProClient {
         return {
             ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok),
             action: "set-properties-dialog-field",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            dialog: dialogName,
+            openResult,
+            fieldResult
+        };
+    }
+
+    async setPropertiesDialogFields(options = {}) {
+        let openResult;
+        try {
+            openResult = await this.openProperties(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "set-properties-dialog-fields",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        const dialogName = extractDialogWindowName(openResult);
+        if (!openResult?.ok || !dialogName) {
+            return {
+                ok: false,
+                action: "set-properties-dialog-fields",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: openResult?.error ?? "Properties dialog did not open or did not report a dialog window name.",
+                openResult
+            };
+        }
+
+        const fieldResult = await this.setDialogFields({
+            ...options,
+            dialog: dialogName
+        });
+
+        return {
+            ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok),
+            action: "set-properties-dialog-fields",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
             item: options.item ?? options.widget ?? options.node ?? null,
