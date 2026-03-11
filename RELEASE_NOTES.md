@@ -1,5 +1,18 @@
 # Release Notes
 
+## 0.2.37
+
+Run-local verification without forced rerun.
+
+- Added `verifyOnly` / `skipRun` support to `run-local-verify`:
+  - skip sending `F5`
+  - perform only HTTP verification assertions against the target URL
+- Added CLI flag:
+  - `--verify-only <bool>`
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.36
 
 Richer local runtime verification assertions.

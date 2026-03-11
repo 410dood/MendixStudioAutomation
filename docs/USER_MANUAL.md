@@ -37,6 +37,7 @@ npm run send-keys -- --keys "{ESC}"
 npm run run-local
 npm run run-local-verify -- --url "http://localhost:8080" --verify-timeout-ms 120000 --verify-poll-ms 2000
 npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-text "Mendix"
+npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-status 200
 npm run stop-local
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
@@ -700,7 +701,7 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.
-- `run-local-verify` now supports `--verify-status`, `--verify-text`, and `--verify-location` checks, but it still validates HTTP responses only (not full browser UX behavior).
+- `run-local-verify` now supports `--verify-status`, `--verify-text`, and `--verify-location` checks, plus `--verify-only` to skip sending `F5`; it still validates HTTP responses only (not full browser UX behavior).
 - the hybrid extension currently reports active app and document context, but not selected-element identity or Mendix error count yet.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 

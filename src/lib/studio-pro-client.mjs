@@ -40,7 +40,14 @@ export class StudioProClient {
     }
 
     async runLocalAndVerify(options = {}) {
-        const runResult = await this.runLocalApp(options);
+        const verifyOnly = toBoolean(options.verifyOnly ?? options.skipRun, false);
+        const runResult = verifyOnly
+            ? {
+                ok: true,
+                action: "run-local-verify",
+                skippedRun: true
+            }
+            : await this.runLocalApp(options);
         const url = options.url || options.verifyUrl || process.env.MENDIX_LOCAL_URL || "http://localhost:8080";
         const timeoutMs = numberOrDefault(options.verifyTimeoutMs ?? options.timeoutMs, 120000);
         const pollMs = numberOrDefault(options.verifyPollMs ?? options.pollMs, 2000);
@@ -61,6 +68,7 @@ export class StudioProClient {
             url,
             timeoutMs,
             pollMs,
+            verifyOnly,
             expectedStatus,
             expectedText,
             expectedLocation,
@@ -3947,4 +3955,25 @@ function parseExpectedStatusCodes(raw) {
         .split(",")
         .map(value => Number.parseInt(value.trim(), 10))
         .filter(Number.isFinite);
+}
+
+function toBoolean(raw, fallback = false) {
+    if (raw === undefined || raw === null || raw === "") {
+        return fallback;
+    }
+
+    if (typeof raw === "boolean") {
+        return raw;
+    }
+
+    const value = String(raw).trim().toLowerCase();
+    if (["1", "true", "yes", "y", "on"].includes(value)) {
+        return true;
+    }
+
+    if (["0", "false", "no", "n", "off"].includes(value)) {
+        return false;
+    }
+
+    return fallback;
 }
