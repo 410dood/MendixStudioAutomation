@@ -135,6 +135,16 @@ function Convert-AutomationElement {
         $isSelected = $null
     }
 
+    $textValue = $null
+    try {
+        $valuePattern = $null
+        if ($Element.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$valuePattern)) {
+            $textValue = $valuePattern.Current.Value
+        }
+    } catch {
+        $textValue = $null
+    }
+
     $toggleState = $null
     $isToggled = $null
     try {
@@ -161,6 +171,7 @@ function Convert-AutomationElement {
         isEnabled = $Element.Current.IsEnabled
         isOffscreen = $Element.Current.IsOffscreen
         isSelected = $isSelected
+        textValue = $textValue
         toggleState = $toggleState
         isToggled = $isToggled
         boundingRectangle = Convert-BoundingRectangle -Rect $Element.Current.BoundingRectangle

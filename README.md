@@ -293,6 +293,7 @@ Phase 2:
 - current dialog inspection is sufficient to read local-run blockers such as Studio Pro `Information` dialogs
 - current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
 - current `get-dialog-field` can inspect native dialog field values and toggle state by visible label
+- current dialog/listed automation elements now expose `textValue` when a native control supports `ValuePattern`
 - current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` controls
 - current `set-dialog-field` now reports the observed post-write text/toggle state so dialog mutations can be verified directly
 - current `set-dialog-field` now supports `--verify-value` and `--verify-toggle-state` to fail fast when the observed dialog state does not match the expected result

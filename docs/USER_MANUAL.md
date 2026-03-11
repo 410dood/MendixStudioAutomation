@@ -128,6 +128,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
+`list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.
 `set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened. It currently supports `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` fields, and checkbox/toggle values accept `true/false`, `yes/no`, `on/off`, and `1/0`. Successful writes now also report the observed post-write text/toggle state. Use `--verify-value` or `--verify-toggle-state` when the command should fail if the dialog did not actually land on the expected value/state.
 
 ### Properties dialogs
