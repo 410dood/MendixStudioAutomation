@@ -123,6 +123,9 @@ export class StudioProClient {
                 if (!status?.available) {
                     navigationError = `Navigation update skipped: extension not available (${status?.reason || "not available"}).`;
                 }
+                else if (!await this.hasExtensionCapability(normalized.processId, normalized.title, "navigation.populate")) {
+                    navigationError = "Navigation update skipped: extension capabilities do not include navigation.populate.";
+                }
                 else {
                     navigation = await this.addNavigationShortcut({
                         processId: normalized.processId,
@@ -192,6 +195,21 @@ export class StudioProClient {
             module: normalized.module,
             type: normalized.type
         });
+    }
+
+    async hasExtensionCapability(processId, title, capability) {
+        const capabilities = await this.getExtensionCapabilities({
+            processId,
+            title
+        });
+
+        const values = Array.isArray(capabilities?.capabilities)
+            ? capabilities.capabilities
+            : Array.isArray(capabilities?.payload?.capabilities)
+                ? capabilities.payload.capabilities
+                : [];
+
+        return values.includes(capability);
     }
 
     async openProperties(options = {}) {
