@@ -1132,6 +1132,7 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
 - `create-page` is currently strongest when the desired template is already visible in the right-hand template panel. Left-side template-category switching in the wizard still needs more hardening.
+- `get-dialog-field` and `set-dialog-field` now support `--verify-value-contains` for substring-based text verification.
 - Native automation element snapshots now include `textValue` whenever the control exposes a `ValuePattern`, improving `list-dialog-items` and related inspection output.
 - Added `get-dialog-field` to inspect native Studio Pro dialog fields by visible label, including observed text and toggle state.
 - `set-dialog-field` now supports `--verify-value` and `--verify-toggle-state`, so callers can require an exact observed post-write text or toggle state.

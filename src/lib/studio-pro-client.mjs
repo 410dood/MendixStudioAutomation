@@ -4061,25 +4061,35 @@ function normalizeGetDialogFieldOptions(options) {
 
 function verifySetDialogFieldResult(result, options = {}) {
     const expectedValue = normalizeExpectedDialogTextValue(options.verifyValue ?? options.expectedValue);
+    const expectedValueContains = normalizeExpectedDialogTextValue(options.verifyValueContains ?? options.expectedValueContains);
     const expectedToggleState = parseExpectedDialogToggleState(options.verifyToggleState ?? options.expectedToggleState);
     const observedValue = result?.observedValue ?? {};
+    const observedTextValue = observedValue?.textValue ?? null;
+    const observedToggleState = observedValue?.toggleState ?? null;
     const verification = {
         expectedValue,
+        expectedValueContains,
         expectedToggleState,
-        observedTextValue: observedValue?.textValue ?? null,
-        observedToggleState: observedValue?.toggleState ?? null,
+        observedTextValue,
+        observedToggleState,
         observedIsToggled: observedValue?.isToggled ?? null,
         valueMatched: expectedValue === null
             ? null
-            : String(observedValue?.textValue ?? "") === expectedValue,
+            : String(observedTextValue ?? "") === expectedValue,
+        valueContainsMatched: expectedValueContains === null
+            ? null
+            : String(observedTextValue ?? "").includes(expectedValueContains),
         toggleMatched: expectedToggleState === null
             ? null
-            : String(observedValue?.toggleState ?? "").toLowerCase() === expectedToggleState.toLowerCase()
+            : String(observedToggleState ?? "").toLowerCase() === expectedToggleState.toLowerCase()
     };
 
     const failures = [];
     if (verification.valueMatched === false) {
         failures.push(`observed text value '${verification.observedTextValue ?? ""}' did not match expected '${expectedValue}'`);
+    }
+    if (verification.valueContainsMatched === false) {
+        failures.push(`observed text value '${verification.observedTextValue ?? ""}' did not contain expected substring '${expectedValueContains}'`);
     }
     if (verification.toggleMatched === false) {
         failures.push(`observed toggle state '${verification.observedToggleState ?? ""}' did not match expected '${expectedToggleState}'`);

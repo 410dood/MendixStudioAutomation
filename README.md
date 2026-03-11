@@ -122,6 +122,7 @@ npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
+npm run get-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --control-type Edit --verify-value-contains "container"
 npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
 npm run set-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --value true --control-type CheckBox --verify-toggle-state On
 npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
@@ -297,6 +298,7 @@ Phase 2:
 - current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` controls
 - current `set-dialog-field` now reports the observed post-write text/toggle state so dialog mutations can be verified directly
 - current `set-dialog-field` now supports `--verify-value` and `--verify-toggle-state` to fail fast when the observed dialog state does not match the expected result
+- current `get-dialog-field` and `set-dialog-field` now support `--verify-value-contains` for substring-based text verification
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - current `insert-action` now records before/after microflow-editor snapshots and any post-action dialog so failed action-insert gestures are diagnosable instead of opaque

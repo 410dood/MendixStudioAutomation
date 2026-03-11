@@ -118,6 +118,7 @@ npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Text"
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
+npm run get-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --control-type Edit --verify-value-contains "container"
 npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
 npm run set-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --value true --control-type CheckBox --verify-toggle-state On
 npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
@@ -129,7 +130,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.
-`set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened. It currently supports `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` fields, and checkbox/toggle values accept `true/false`, `yes/no`, `on/off`, and `1/0`. Successful writes now also report the observed post-write text/toggle state. Use `--verify-value` or `--verify-toggle-state` when the command should fail if the dialog did not actually land on the expected value/state.
+`set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened. It currently supports `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` fields, and checkbox/toggle values accept `true/false`, `yes/no`, `on/off`, and `1/0`. Successful writes now also report the observed post-write text/toggle state. Use `--verify-value`, `--verify-value-contains`, or `--verify-toggle-state` when the command should fail if the dialog did not actually land on the expected value/state.
 
 ### Properties dialogs
 
