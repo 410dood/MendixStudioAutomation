@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.57
+
+Raw dialog comparison for generic and target-first workflows.
+
+- Added `compare-dialog-items` to diff a live dialog's raw visible controls against a saved JSON inventory.
+- Added `compare-properties-dialog-items` to perform the same comparison from a real page or microflow properties target.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.56
 
 Raw dialog export for generic and target-first workflows.

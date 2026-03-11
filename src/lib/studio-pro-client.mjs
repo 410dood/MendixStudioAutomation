@@ -588,6 +588,56 @@ export class StudioProClient {
         };
     }
 
+    async comparePropertiesDialogItems(options = {}) {
+        let openResult;
+        try {
+            openResult = await this.openProperties(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "compare-properties-dialog-items",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        const dialogName = extractDialogWindowName(openResult);
+        if (!openResult?.ok || !dialogName) {
+            return {
+                ok: false,
+                action: "compare-properties-dialog-items",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: openResult?.error ?? "Properties dialog did not open or did not report a dialog window name.",
+                openResult
+            };
+        }
+
+        const comparison = await this.compareDialogItems({
+            ...options,
+            dialog: dialogName
+        });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, comparison?.ok);
+
+        return {
+            ok: Boolean(openResult?.ok) && Boolean(comparison?.ok) && finalizeSucceeded(finalizeResult),
+            action: "compare-properties-dialog-items",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            dialog: dialogName,
+            openResult,
+            comparison,
+            finalizeResult
+        };
+    }
+
     async invokePropertiesDialogControl(options = {}) {
         let openResult;
         try {
@@ -950,6 +1000,49 @@ export class StudioProClient {
             dialog: options.dialog,
             outputFile,
             count: exported.length
+        };
+    }
+
+    async compareDialogItems(options = {}) {
+        const batchSource = await resolveDialogItemBatchSource(options);
+        const expectedItems = parseDialogItemBatch(batchSource.raw);
+        if (expectedItems.length === 0) {
+            return {
+                ok: false,
+                action: "compare-dialog-items",
+                error: "At least one dialog item entry is required. Pass --items-json or --items-file with a JSON array."
+            };
+        }
+
+        let liveResult;
+        try {
+            liveResult = await this.listDialogItems(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "compare-dialog-items",
+                dialog: options.dialog,
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        if (!liveResult?.ok) {
+            return {
+                ...liveResult,
+                action: "compare-dialog-items"
+            };
+        }
+
+        const diff = compareDialogItemSets(expectedItems, liveResult.items);
+        return {
+            ok: diff.missing.length === 0,
+            action: "compare-dialog-items",
+            dialog: options.dialog,
+            batchSource: batchSource.kind,
+            itemsFile: batchSource.itemsFile ?? null,
+            expectedCount: expectedItems.length,
+            liveCount: Array.isArray(liveResult.items) ? liveResult.items.length : 0,
+            diff
         };
     }
 
@@ -5208,6 +5301,27 @@ function parseDialogFieldBatch(raw) {
     throw new Error("--fields-json must be a JSON object or array.");
 }
 
+function parseDialogItemBatch(raw) {
+    if (raw === undefined || raw === null || raw === "") {
+        return [];
+    }
+
+    let parsed = raw;
+    if (typeof raw === "string") {
+        try {
+            parsed = JSON.parse(raw);
+        } catch (error) {
+            throw new Error(`Failed to parse --items-json: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    if (!Array.isArray(parsed)) {
+        throw new Error("Dialog item batches must be a JSON array.");
+    }
+
+    return parsed.filter(Boolean);
+}
+
 function normalizeDialogFieldBatchEntry(entry) {
     if (!entry || typeof entry !== "object") {
         return null;
@@ -5306,6 +5420,52 @@ function compareDialogFieldSets(expectedFields, liveFields) {
     };
 }
 
+function makeDialogItemSignature(item) {
+    const name = String(item?.name ?? "").trim();
+    const controlType = String(item?.controlType ?? "").trim();
+    const automationId = String(item?.automationId ?? "").trim();
+    const className = String(item?.className ?? "").trim();
+    return [name, controlType, automationId, className].join("|");
+}
+
+function summarizeDialogItem(item) {
+    return {
+        name: item?.name ?? null,
+        controlType: item?.controlType ?? null,
+        automationId: item?.automationId ?? null,
+        className: item?.className ?? null,
+        textValue: item?.textValue ?? null
+    };
+}
+
+function compareDialogItemSets(expectedItems, liveItems) {
+    const liveList = Array.isArray(liveItems) ? liveItems : [];
+    const liveMap = new Map(liveList.map(item => [makeDialogItemSignature(item), item]));
+    const expectedMap = new Map(expectedItems.map(item => [makeDialogItemSignature(item), item]));
+
+    const missing = [];
+    for (const [signature, item] of expectedMap.entries()) {
+        if (!liveMap.has(signature)) {
+            missing.push({
+                signature,
+                expected: summarizeDialogItem(item)
+            });
+        }
+    }
+
+    const extra = [];
+    for (const [signature, item] of liveMap.entries()) {
+        if (!expectedMap.has(signature)) {
+            extra.push({
+                signature,
+                live: summarizeDialogItem(item)
+            });
+        }
+    }
+
+    return { missing, extra };
+}
+
 function normalizeDialogFieldExportFormat(raw) {
     const value = String(raw ?? "object").trim().toLowerCase();
     return value === "array" ? "array" : "object";
@@ -5399,5 +5559,30 @@ async function resolveDialogFieldBatchSource(options = {}) {
     return {
         kind: "inline",
         raw: options.fieldsJson ?? options.fields ?? options.fieldMap
+    };
+}
+
+async function resolveDialogItemBatchSource(options = {}) {
+    if (options.itemsFile) {
+        const outputFile = resolve(process.cwd(), String(options.itemsFile));
+        return {
+            kind: "file",
+            itemsFile: outputFile,
+            raw: await readFile(outputFile, "utf8")
+        };
+    }
+
+    if (options.itemsJson !== undefined && options.itemsJson !== null && options.itemsJson !== "") {
+        return {
+            kind: "inline",
+            itemsFile: null,
+            raw: options.itemsJson
+        };
+    }
+
+    return {
+        kind: "inline",
+        itemsFile: null,
+        raw: ""
     };
 }
