@@ -50,6 +50,7 @@ npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control-type Edit
 npm run list-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --limit 50
+npm run export-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-items.json"
 npm run invoke-properties-dialog-control -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control "Apply" --control-type Button
 npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --control-type Edit
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
@@ -125,6 +126,7 @@ Use `find` to inspect what Studio Pro is exposing through UI Automation before b
 ```powershell
 npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
+npm run export-dialog-items -- --dialog "Select Widget" --output-file ".automation-state/select-widget-items.json"
 npm run list-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --control-type CheckBox
 npm run export-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --output-file ".automation-state/dialog-fields.json"
 npm run compare-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json"
@@ -145,6 +147,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
 `list-dialog-fields` is the higher-level inspection command when you want label/value pairs instead of a raw control inventory.
+`export-dialog-items` writes the raw visible control inventory to JSON when you need to inspect or diff a dialog outside the live Studio Pro session.
 `export-dialog-fields` writes those label/value pairs to JSON so they can be edited and fed back into `set-dialog-fields --fields-file ...`.
 `compare-dialog-fields` compares a saved JSON field plan with the live dialog and reports changed, missing, and extra fields before you mutate anything.
 `sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan. Use `--dry-run true` to emit the planned edits without mutating Studio Pro.
@@ -152,6 +155,7 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `compare-properties-dialog` composes `open-properties` with `compare-dialog-fields`, so a target can be checked against a saved plan without manually naming the transient dialog window.
 `list-properties-dialog-fields` composes `open-properties` with `list-dialog-fields`, so field discovery can start from a real page/widget/explorer target.
 `list-properties-dialog-items` composes `open-properties` with `list-dialog-items`, so you can inspect the raw dialog controls when field heuristics are not enough.
+`export-properties-dialog-items` composes `open-properties` with `export-dialog-items`, so raw properties dialog controls can be captured to JSON from a real Studio Pro target.
 `invoke-properties-dialog-control` composes `open-properties` with `invoke-dialog-control`, so nonstandard dialog buttons can be triggered from the same target-first workflow.
 `get-properties-dialog-field` composes `open-properties` with `get-dialog-field`, so single-field reads can target a page/widget/explorer surface directly.
 `set-properties-dialog-fields` composes `open-properties` with `set-dialog-fields`, so batch property edits can also avoid hard-coded dialog captions.

@@ -80,6 +80,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-properties-dialog-items": {
+            const result = await client.exportPropertiesDialogItems(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-properties-dialog-control": {
             const result = await client.invokePropertiesDialogControl(options);
             formatOutput(result);
@@ -157,6 +162,11 @@ async function main() {
         }
         case "list-dialog-items": {
             const result = await client.listDialogItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-dialog-items": {
+            const result = await client.exportDialogItems(options);
             formatOutput(result);
             return;
         }
@@ -527,6 +537,7 @@ Commands:
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
   list-properties-dialog-fields Open a properties dialog and list resolved field/value pairs
   list-properties-dialog-items Open a properties dialog and list raw visible controls
+  export-properties-dialog-items Open a properties dialog and export raw visible controls to JSON
   invoke-properties-dialog-control Open a properties dialog and invoke a named control inside it
   get-properties-dialog-field Open a properties dialog and read one labeled field
   set-properties-dialog-fields Open a properties dialog and apply batch field edits
@@ -543,6 +554,7 @@ Commands:
   list-scope-elements         List visible elements inside a scoped Studio Pro surface
   invoke-scope-element-action Click or invoke a scoped Studio Pro element by runtime id
   list-dialog-items           List visible named controls inside a Studio Pro dialog
+  export-dialog-items         Export raw visible dialog controls to JSON
   list-dialog-fields          List visible dialog labels that resolve to field/value pairs
   export-dialog-fields        Export dialog field/value pairs to a JSON file for reuse
   compare-dialog-fields       Compare a live dialog against a JSON field plan

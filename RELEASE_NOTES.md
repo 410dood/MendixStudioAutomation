@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.56
+
+Raw dialog export for generic and target-first workflows.
+
+- Added `export-dialog-items` to write the raw visible control inventory of any open Studio Pro dialog to JSON.
+- Added `export-properties-dialog-items` to do the same from a real page or microflow properties target.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.55
 
 Target-first raw properties dialog inspection.

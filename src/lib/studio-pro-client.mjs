@@ -538,6 +538,56 @@ export class StudioProClient {
         };
     }
 
+    async exportPropertiesDialogItems(options = {}) {
+        let openResult;
+        try {
+            openResult = await this.openProperties(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "export-properties-dialog-items",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        const dialogName = extractDialogWindowName(openResult);
+        if (!openResult?.ok || !dialogName) {
+            return {
+                ok: false,
+                action: "export-properties-dialog-items",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: openResult?.error ?? "Properties dialog did not open or did not report a dialog window name.",
+                openResult
+            };
+        }
+
+        const exportResult = await this.exportDialogItems({
+            ...options,
+            dialog: dialogName
+        });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, exportResult?.ok);
+
+        return {
+            ok: Boolean(openResult?.ok) && Boolean(exportResult?.ok) && finalizeSucceeded(finalizeResult),
+            action: "export-properties-dialog-items",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            dialog: dialogName,
+            openResult,
+            exportResult,
+            finalizeResult
+        };
+    }
+
     async invokePropertiesDialogControl(options = {}) {
         let openResult;
         try {
@@ -860,6 +910,47 @@ export class StudioProClient {
 
     async listDialogItems(options = {}) {
         return runPowerShellScript("scripts/automation/List-StudioProDialogItems.ps1", normalizeDialogItemOptions(options));
+    }
+
+    async exportDialogItems(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-dialog-items",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        let result;
+        try {
+            result = await this.listDialogItems(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "export-dialog-items",
+                dialog: options.dialog,
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        if (!result?.ok) {
+            return {
+                ...result,
+                action: "export-dialog-items"
+            };
+        }
+
+        const exported = Array.isArray(result.items) ? result.items : [];
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(exported, null, 2)}\n`, "utf8");
+
+        return {
+            ok: true,
+            action: "export-dialog-items",
+            dialog: options.dialog,
+            outputFile,
+            count: exported.length
+        };
     }
 
     async listDialogFields(options = {}) {
