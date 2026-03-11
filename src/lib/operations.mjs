@@ -16,6 +16,11 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "studio.runLocalVerify",
+            description: "Run the current app locally from Studio Pro and wait for a local URL to respond.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "studio.stopLocal",
             description: "Stop the currently running local app from Studio Pro.",
             status: "implemented-first-pass"

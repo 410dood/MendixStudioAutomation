@@ -38,6 +38,27 @@ export class StudioProClient {
         });
     }
 
+    async runLocalAndVerify(options = {}) {
+        const runResult = await this.runLocalApp(options);
+        const url = options.url || options.verifyUrl || process.env.MENDIX_LOCAL_URL || "http://localhost:8080";
+        const timeoutMs = numberOrDefault(options.verifyTimeoutMs ?? options.timeoutMs, 120000);
+        const pollMs = numberOrDefault(options.verifyPollMs ?? options.pollMs, 2000);
+        const verify = await waitForHttpReachable(url, {
+            timeoutMs,
+            pollMs
+        });
+
+        return {
+            ok: Boolean(runResult?.ok) && Boolean(verify?.ok),
+            action: "run-local-verify",
+            url,
+            timeoutMs,
+            pollMs,
+            runResult,
+            verify
+        };
+    }
+
     async stopLocalApp(options = {}) {
         return this.sendKeys({
             ...options,
@@ -2930,4 +2951,46 @@ function numberOrDefault(value, fallback) {
 
     const parsed = Number.parseInt(String(value), 10);
     return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+async function waitForHttpReachable(url, options = {}) {
+    const timeoutMs = numberOrDefault(options.timeoutMs, 120000);
+    const pollMs = numberOrDefault(options.pollMs, 2000);
+    const startedAt = Date.now();
+    let attempts = 0;
+    let lastStatus = null;
+    let lastError = null;
+
+    while (Date.now() - startedAt <= timeoutMs) {
+        attempts += 1;
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+                redirect: "manual"
+            });
+            lastStatus = response.status;
+            if (response.status >= 200 && response.status < 500) {
+                return {
+                    ok: true,
+                    url,
+                    attempts,
+                    status: response.status,
+                    elapsedMs: Date.now() - startedAt
+                };
+            }
+        } catch (error) {
+            lastError = error instanceof Error ? error.message : String(error);
+        }
+
+        await sleep(pollMs);
+    }
+
+    return {
+        ok: false,
+        url,
+        attempts,
+        status: lastStatus,
+        elapsedMs: Date.now() - startedAt,
+        error: lastError ?? `Timed out waiting for ${url} to become reachable.`
+    };
 }

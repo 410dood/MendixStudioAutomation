@@ -35,6 +35,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "run-local-verify": {
+            const result = await client.runLocalAndVerify(options);
+            formatOutput(result);
+            return;
+        }
         case "stop-local": {
             const result = await client.stopLocalApp(options);
             formatOutput(result);
@@ -383,6 +388,7 @@ Commands:
   click                       Invoke or click a matched element
   send-keys                   Send a Studio Pro key chord to the foreground editor
   run-local                   Run the current app locally in Studio Pro
+  run-local-verify            Run the app locally and wait until a local URL responds
   stop-local                  Stop a locally running app in Studio Pro
   show-responsive-web         Open the app in Studio Pro's responsive browser view
   create-page                 Create a Mendix page through the native Studio Pro wizard
@@ -462,6 +468,9 @@ Options:
   --runtime-id <a.b.c>        Runtime id returned by find/snapshot
   --max-results <n>           Max matches returned by find
   --keys <value>              Studio Pro key chord for send-keys, e.g. "{F5}" or "^,"
+  --url <url>                 URL used by run-local-verify (default: http://localhost:8080)
+  --verify-timeout-ms <n>     Max wait for run-local-verify URL readiness (default: 120000)
+  --verify-poll-ms <n>        Poll interval for run-local-verify URL readiness (default: 2000)
   --page-name <name>          Page name for create-page
   --scope <name>              editor, pageExplorer, toolbox, or another named scope
   --item <name>               Document, page, snippet, microflow, or entity name to open

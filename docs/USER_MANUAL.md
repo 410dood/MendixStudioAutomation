@@ -35,6 +35,7 @@ npm run popup-status
 npm run wait-ready -- --timeout-ms 15000
 npm run send-keys -- --keys "{ESC}"
 npm run run-local
+npm run run-local-verify -- --url "http://localhost:8080" --verify-timeout-ms 120000 --verify-poll-ms 2000
 npm run stop-local
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
@@ -435,7 +436,7 @@ npm run summarize-knowledge-gaps
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.
-- `run-local`, `stop-local`, and `show-responsive-web` now expose blocking Studio Pro dialogs cleanly, but they still do not verify runtime readiness or browser content.
+- `run-local-verify` can now confirm basic URL readiness after `F5`, but it is still an HTTP reachability check, not a full page-level UX validation.
 - the hybrid extension currently reports active app and document context, but not selected-element identity or Mendix error count yet.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 

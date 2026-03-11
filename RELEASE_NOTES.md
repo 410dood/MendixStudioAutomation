@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.2.19
+
+Runtime verification expansion for local runs.
+
+- Added new CLI command:
+  - `run-local-verify`
+  - `npm run run-local-verify`
+- Added Studio Pro client support for:
+  - triggering local run via `F5`
+  - polling a configured URL until it responds (basic readiness check)
+- Added CLI options:
+  - `--url`
+  - `--verify-timeout-ms`
+  - `--verify-poll-ms`
+- Updated operation catalog with:
+  - `studio.runLocalVerify`
+- Updated documentation:
+  - README
+  - User Manual
+
 ## 0.2.18
 
 Hybrid write-path expansion for microflow sort-list operations.

@@ -30,7 +30,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - open a document by name through Studio Pro's built-in `Go to` workflow
 - select a visible named widget or page element on the active designer surface
 - send arbitrary key chords to Studio Pro or the active editor context
-- trigger first-pass local run and responsive web shortcuts from Studio Pro
+- trigger first-pass local run and responsive web shortcuts from Studio Pro, including URL readiness verification
 - create pages through Studio Pro's native `New Document` and `Create Page` wizards
 - query an in-Studio hybrid extension over a supported local webserver route
 - open an in-Studio quick create-object modal dialog (menu, context menu, or CLI trigger)
@@ -73,6 +73,7 @@ npm run find -- --control-type TreeItem --name "Document"
 npm run click -- --runtime-id "42.333896.3.1"
 npm run send-keys -- --page "Client_ClinicalDocument_V3" --scope editor --keys "^,"
 npm run run-local
+npm run run-local-verify -- --url "http://localhost:8080" --verify-timeout-ms 120000 --verify-poll-ms 2000
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"

@@ -11,6 +11,7 @@
     "click": "node src/cli.mjs click",
     "send-keys": "node src/cli.mjs send-keys",
     "run-local": "node src/cli.mjs run-local",
+    "run-local-verify": "node src/cli.mjs run-local-verify",
     "stop-local": "node src/cli.mjs stop-local",
     "show-responsive-web": "node src/cli.mjs show-responsive-web",
     "build-extension": "dotnet build .\\extensions\\MendixStudioAutomation_Extension\\MendixStudioAutomation_Extension.csproj",
