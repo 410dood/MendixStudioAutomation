@@ -1132,6 +1132,7 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
 - `create-page` is currently strongest when the desired template is already visible in the right-hand template panel. Left-side template-category switching in the wizard still needs more hardening.
+- Added `compare-dialog-fields` to diff a live Studio Pro dialog against a saved JSON field plan.
 - Added `export-dialog-fields` to write live dialog field/value pairs into reusable JSON files.
 - `set-dialog-fields` now also supports `--fields-file`, which avoids shell-escaping issues for larger dialog property batches.
 - Added `set-dialog-fields` for batch dialog property updates from JSON payloads, with optional per-field verification rules.

@@ -460,6 +460,49 @@ export class StudioProClient {
         };
     }
 
+    async compareDialogFields(options = {}) {
+        const batchSource = await resolveDialogFieldBatchSource(options);
+        const expectedFields = parseDialogFieldBatch(batchSource.raw);
+        if (expectedFields.length === 0) {
+            return {
+                ok: false,
+                action: "compare-dialog-fields",
+                error: "At least one dialog field entry is required. Pass --fields-json or --fields-file with a JSON object or array."
+            };
+        }
+
+        let liveResult;
+        try {
+            liveResult = await this.listDialogFields(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "compare-dialog-fields",
+                dialog: options.dialog,
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        if (!liveResult?.ok) {
+            return {
+                ...liveResult,
+                action: "compare-dialog-fields"
+            };
+        }
+
+        const diff = compareDialogFieldSets(expectedFields, liveResult.fields);
+        return {
+            ok: diff.changed.length === 0 && diff.missing.length === 0,
+            action: "compare-dialog-fields",
+            dialog: options.dialog,
+            batchSource: batchSource.kind,
+            fieldsFile: batchSource.fieldsFile ?? null,
+            expectedCount: expectedFields.length,
+            liveCount: Array.isArray(liveResult.fields) ? liveResult.fields.length : 0,
+            diff
+        };
+    }
+
     async invokeDialogControl(options = {}) {
         return runPowerShellScript("scripts/automation/Invoke-StudioProDialogControl.ps1", normalizeDialogControlOptions(options));
     }
@@ -4565,6 +4608,84 @@ function normalizeDialogFieldBatchEntry(entry) {
         verifyValue: entry.verifyValue,
         verifyValueContains: entry.verifyValueContains,
         verifyToggleState: entry.verifyToggleState
+    };
+}
+
+function compareDialogFieldSets(expectedFields, liveFields) {
+    const expectedMap = new Map(expectedFields.map(field => [field.label, field]));
+    const liveMap = new Map(
+        (Array.isArray(liveFields) ? liveFields : [])
+            .map(field => {
+                const label = field?.label?.name ?? field?.label ?? "";
+                if (!label) {
+                    return null;
+                }
+
+                return [label, {
+                    label,
+                    controlType: field?.field?.controlType ?? null,
+                    textValue: field?.observedValue?.textValue ?? null,
+                    toggleState: field?.observedValue?.toggleState ?? null,
+                    isToggled: field?.observedValue?.isToggled ?? null
+                }];
+            })
+            .filter(Boolean)
+    );
+
+    const changed = [];
+    const missing = [];
+    for (const [label, expected] of expectedMap.entries()) {
+        const live = liveMap.get(label);
+        if (!live) {
+            missing.push({
+                label,
+                expected
+            });
+            continue;
+        }
+
+        const expectedToggleState = parseExpectedDialogToggleState(expected.verifyToggleState);
+        const expectedValue = normalizeExpectedDialogTextValue(expected.verifyValue ?? expected.value);
+        const expectedValueContains = normalizeExpectedDialogTextValue(expected.verifyValueContains);
+        const liveTextValue = live.textValue ?? "";
+        const liveToggleState = live.toggleState ?? null;
+        const matchesValue = expectedValue === null ? true : String(liveTextValue) === expectedValue;
+        const matchesContains = expectedValueContains === null ? true : String(liveTextValue).includes(expectedValueContains);
+        const matchesToggle = expectedToggleState === null
+            ? true
+            : String(liveToggleState ?? "").toLowerCase() === expectedToggleState.toLowerCase();
+
+        if (!matchesValue || !matchesContains || !matchesToggle) {
+            changed.push({
+                label,
+                expected: {
+                    value: expected.value ?? null,
+                    verifyValue: expected.verifyValue ?? null,
+                    verifyValueContains: expected.verifyValueContains ?? null,
+                    verifyToggleState: expected.verifyToggleState ?? null,
+                    controlType: expected.controlType ?? null
+                },
+                live,
+                mismatches: {
+                    value: !matchesValue,
+                    valueContains: !matchesContains,
+                    toggleState: !matchesToggle
+                }
+            });
+        }
+    }
+
+    const extra = [];
+    for (const [label, live] of liveMap.entries()) {
+        if (!expectedMap.has(label)) {
+            extra.push(live);
+        }
+    }
+
+    return {
+        changed,
+        missing,
+        extra
     };
 }
 
