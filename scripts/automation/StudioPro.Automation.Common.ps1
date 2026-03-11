@@ -1185,7 +1185,7 @@ function Wait-ForStudioProReady {
     $deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMs)
     do {
         $attached = Get-StudioProWindowElement -ProcessId $Process.Id
-        $popups = Get-StudioProPopupWindows -Root $attached.Element
+        $popups = @(Get-StudioProPopupWindows -Root $attached.Element)
         if ($popups.Length -eq 0) {
             return @{
                 ready = $true
@@ -1198,7 +1198,7 @@ function Wait-ForStudioProReady {
     } while ([DateTime]::UtcNow -lt $deadline)
 
     $attached = Get-StudioProWindowElement -ProcessId $Process.Id
-    $remaining = Get-StudioProPopupSummary -Root $attached.Element
+    $remaining = @(Get-StudioProPopupSummary -Root $attached.Element)
     return @{
         ready = $false
         popupCount = $remaining.Length
@@ -1213,7 +1213,39 @@ function Select-PageExplorerItemByName {
         [string]$Item
     )
 
-    return Find-VisibleNamedElementInScope -Root $Root -Scope "pageExplorer" -Name $Item
+    $scopeBounds = Get-ScopeBounds -Root $Root -Scope "pageExplorer"
+
+    foreach ($controlType in @("TreeItem", "ListItem", "DataItem", "Custom", "Text")) {
+        $matches = @(Find-MatchingElements -Root $Root -Depth 25 -MaxResults 100 -Name $Item -ControlType $controlType | Where-Object {
+            $bounds = $_.boundingRectangle
+            $isWithinPageExplorer = $false
+            if ($controlType -in @("TreeItem", "ListItem", "DataItem", "Custom")) {
+                $isWithinPageExplorer = (
+                    $bounds.left -ne $null -and
+                    $bounds.top -ne $null -and
+                    $bounds.bottom -ne $null -and
+                    $bounds.left -ge $scopeBounds.left -and
+                    $bounds.top -ge $scopeBounds.top -and
+                    $bounds.bottom -le $scopeBounds.bottom
+                )
+            } else {
+                $isWithinPageExplorer = Test-RectangleWithinBounds -Bounds $bounds -Container $scopeBounds
+            }
+
+            $_ -and
+            $_.name -eq $Item -and
+            -not $_.isOffscreen -and
+            $isWithinPageExplorer
+        })
+
+        if ($matches.Length -gt 0) {
+            return ($matches | Sort-Object `
+                @{ Expression = { $_.boundingRectangle.top } }, `
+                @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1)
+        }
+    }
+
+    return $null
 }
 
 function Select-AppExplorerItemByName {

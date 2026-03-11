@@ -6,7 +6,7 @@ param(
 . "$PSScriptRoot\StudioPro.Automation.Common.ps1"
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-$popups = Get-StudioProPopupSummary -Root $attached.Element
+$popups = @(Get-StudioProPopupSummary -Root $attached.Element)
 
 $payload = @{
     ok = $true
@@ -16,7 +16,7 @@ $payload = @{
         mainWindowTitle = $attached.Process.MainWindowTitle
     }
     popupCount = $popups.Length
-    popups = $popups
+    popups = @($popups)
 }
 
 $payload | ConvertTo-Json -Depth 20
