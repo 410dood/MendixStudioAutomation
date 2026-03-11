@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.49
+
+Review-first properties dialog workflows.
+
+- Added `export-properties-dialog` to open a Studio Pro properties dialog from a page or microflow target and export its field/value plan directly to JSON.
+- Added `compare-properties-dialog` to open a Studio Pro properties dialog from a page or microflow target and diff it against a saved JSON field plan before mutating anything.
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.48
 
 Direct document-id support in public open commands.

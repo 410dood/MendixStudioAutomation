@@ -46,6 +46,8 @@ npm run stop-local
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
+npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-properties.json"
+npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json"
 ```
 
@@ -139,6 +141,8 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `export-dialog-fields` writes those label/value pairs to JSON so they can be edited and fed back into `set-dialog-fields --fields-file ...`.
 `compare-dialog-fields` compares a saved JSON field plan with the live dialog and reports changed, missing, and extra fields before you mutate anything.
 `sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan.
+`export-properties-dialog` composes `open-properties` with `export-dialog-fields`, so a page/widget/explorer target can emit a reviewable JSON field plan in one command.
+`compare-properties-dialog` composes `open-properties` with `compare-dialog-fields`, so a target can be checked against a saved plan without manually naming the transient dialog window.
 `sync-properties-dialog` composes `open-properties` with `sync-dialog-fields`, so a page/widget/explorer target can be opened and synchronized from one command.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ. Use `--fields-file` when the payload is large enough that shell quoting becomes brittle.

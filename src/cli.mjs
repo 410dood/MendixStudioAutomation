@@ -60,6 +60,16 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-properties-dialog": {
+            const result = await client.exportPropertiesDialog(options);
+            formatOutput(result);
+            return;
+        }
+        case "compare-properties-dialog": {
+            const result = await client.comparePropertiesDialog(options);
+            formatOutput(result);
+            return;
+        }
         case "sync-properties-dialog": {
             const result = await client.syncPropertiesDialog(options);
             formatOutput(result);
@@ -483,6 +493,8 @@ Commands:
   show-responsive-web         Open the app in Studio Pro's responsive browser view
   create-page                 Create a Mendix page through the native Studio Pro wizard
   open-properties             Open the properties dialog for a selected Studio Pro item
+  export-properties-dialog    Open a properties dialog and export its field plan to JSON
+  compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
   sync-properties-dialog      Open a properties dialog and sync it from a JSON field plan
   open-item                   Open a Studio Pro document by name with Ctrl+G
   select-widget               Select a visible named widget or page element

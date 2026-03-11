@@ -16,6 +16,8 @@
     "show-responsive-web": "node src/cli.mjs show-responsive-web",
     "build-extension": "dotnet build .\\extensions\\MendixStudioAutomation_Extension\\MendixStudioAutomation_Extension.csproj",
     "create-page": "node src/cli.mjs create-page",
+    "export-properties-dialog": "node src/cli.mjs export-properties-dialog",
+    "compare-properties-dialog": "node src/cli.mjs compare-properties-dialog",
     "sync-properties-dialog": "node src/cli.mjs sync-properties-dialog",
     "add-navigation-shortcut": "node src/cli.mjs add-navigation-shortcut",
     "add-microflow-create-object": "node src/cli.mjs add-microflow-create-object",
