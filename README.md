@@ -266,6 +266,7 @@ Phase 2:
 - current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
 - current `extension-status`, `extension-context`, and `hybrid-context` can discover and query the in-Studio hybrid extension when its `runtime/endpoint.json` file exists
 - current `extension-open-document` now verifies the requested editor tab appears and updates remembered active-tab state for follow-up commands
+- current `open-item` now falls back to extension-backed document search and opens a unique or exact search match when direct extension open by name fails
 - current `list-microflow-activities` returns activity/action metadata for a target microflow, including available variable names
 - current `find-microflow-activities` filters microflow activity metadata by query text, action type, and variable name
 - current hybrid extension project is a real Mendix `WebServerExtension` plus `MenuExtension`, not a placeholder stub

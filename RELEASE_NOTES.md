@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.2.41
+
+Extension-backed search fallback for document opening.
+
+- Enhanced `open-item` so the extension path now:
+  - first tries direct document open by requested name
+  - falls back to extension document search when direct open fails
+  - opens a unique or exact search match and verifies the editor tab
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.40
 
 Verified extension-backed document opening.

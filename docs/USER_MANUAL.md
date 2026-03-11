@@ -712,6 +712,7 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - `run-local-verify` now supports `--verify-status`, `--verify-text`, `--verify-location`, `--verify-title`, `--verify-content-type`, and `--verify-header`, plus `--verify-only` to skip sending `F5`; it still validates HTTP responses only (not full browser UX behavior).
 - the hybrid extension currently reports active app and document context, but not selected-element identity or Mendix error count yet.
 - `extension-open-document` now waits for a matching editor tab and updates remembered active-tab state when the open succeeds.
+- `open-item` now uses extension-backed document search as a fallback when direct extension open by name does not succeed and there is a unique or exact search hit.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 
 ## Non-Goal

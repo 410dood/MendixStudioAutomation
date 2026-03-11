@@ -3170,10 +3170,62 @@ async function tryOpenItemViaExtension(client, options) {
             return null;
         }
 
-        const openResult = await client.openExtensionDocument({
+        let openResult = await client.openExtensionDocument({
             ...options,
             name: options.item
         });
+
+        if (!openResult?.payload?.opened) {
+            const searchResult = await client.searchExtensionDocuments({
+                ...options,
+                query: options.item,
+                module: options.module,
+                type: options.type,
+                limit: 10
+            });
+            const rawItems = Array.isArray(searchResult?.documents?.items)
+                ? searchResult.documents.items
+                : Array.isArray(searchResult?.items)
+                    ? searchResult.items
+                    : [];
+
+            const exactNameMatch = rawItems.find(item =>
+                typeof item?.name === "string" &&
+                item.name.localeCompare(options.item, undefined, { sensitivity: "accent" }) === 0
+            );
+            const uniqueMatch = rawItems.length === 1 ? rawItems[0] : null;
+            const selectedMatch = exactNameMatch ?? uniqueMatch ?? null;
+
+            if (!selectedMatch?.name) {
+                return null;
+            }
+
+            openResult = await client.openExtensionDocument({
+                ...options,
+                name: selectedMatch.name,
+                module: selectedMatch.moduleName ?? options.module,
+                type: selectedMatch.type ?? options.type
+            });
+
+            if (!openResult?.payload?.opened) {
+                return null;
+            }
+
+            const matchedTabFromSearch = await waitForOpenTabByItemName(client, selectedMatch.name, options);
+            if (matchedTabFromSearch) {
+                await writeLastKnownActiveTab(matchedTabFromSearch);
+            }
+
+            return {
+                ok: true,
+                method: "extensionSearchThenOpenDocument",
+                verifiedOpen: Boolean(matchedTabFromSearch),
+                attempts: 2,
+                tab: matchedTabFromSearch ?? null,
+                selectedDocument: selectedMatch,
+                extension: openResult.payload
+            };
+        }
 
         if (!openResult?.payload?.opened) {
             return null;
