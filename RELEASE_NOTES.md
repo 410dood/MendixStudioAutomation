@@ -1,5 +1,59 @@
 # Release Notes
 
+## 0.2.5
+
+Hybrid write-path expansion for object lifecycle microflow activities.
+
+- Added new extension routes:
+  - `/mendix-studio-automation/microflows/delete-object`
+  - `/mendix-studio-automation/microflows/commit-object`
+- Added Studio Pro client support for:
+  - inserting a `Delete object` action into a selected microflow via extension service APIs
+  - inserting a `Commit object` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm scripts:
+  - `add-microflow-delete-object`
+  - `add-microflow-commit-object`
+  - `npm run add-microflow-delete-object`
+  - `npm run add-microflow-commit-object`
+- Added options to support new microflow action insertion:
+  - `--variable`
+  - `--with-events`
+  - `--refresh-in-client`
+- Updated operation catalog with:
+  - `microflow.deleteObject`
+  - `microflow.commitObject`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+- Kept commit-related behavior unchanged (review-first workflow; no version-control commits).
+
+## 0.2.4
+
+Hybrid write-path expansion for microflow model creation.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/create-object`
+- Added Studio Pro client support for:
+  - inserting a `Create object` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm script:
+  - `add-microflow-create-object`
+  - `npm run add-microflow-create-object`
+- Added options to support microflow action insertion:
+  - `--microflow`
+  - `--module`
+  - `--entity`
+  - `--output-variable-name`
+  - `--commit`
+  - `--refresh-in-client`
+  - `--initial-values`
+- Updated operation catalog with `microflow.createObject`.
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+- Kept commit-related behavior unchanged (review-first workflow; no version-control commits).
+
 ## 0.2.3
 
 Top-level navigation shortcut automation milestone.

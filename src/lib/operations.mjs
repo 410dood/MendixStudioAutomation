@@ -171,6 +171,21 @@ export const operationCatalog = {
             status: "planned"
         },
         {
+            id: "microflow.createObject",
+            description: "Insert a Create object activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.deleteObject",
+            description: "Insert a Delete object activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.commitObject",
+            description: "Insert a Commit object activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.selectNode",
             description: "Select a visible microflow node or activity label on the editor surface.",
             status: "implemented-validated"

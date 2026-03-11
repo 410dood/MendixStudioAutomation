@@ -543,6 +543,170 @@ export class StudioProClient {
         return this.extensionClient.openDocument(options);
     }
 
+    async addMicroflowCreateObject(options = {}) {
+        const normalized = normalizeAddMicroflowCreateObjectOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-create-object",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.entity) {
+            return {
+                ok: false,
+                action: "add-microflow-create-object",
+                error: "An --entity argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-create-object",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.createObject"))) {
+            return {
+                ok: false,
+                action: "add-microflow-create-object",
+                error: "Extension capabilities do not include microflow.createObject."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowCreateObject({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            outputVariableName: normalized.outputVariableName,
+            commit: normalized.commit,
+            refreshInClient: normalized.refreshInClient,
+            initialValues: normalized.initialValues
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-create-object",
+            microflow: normalized.microflow,
+            entity: normalized.entity,
+            module: normalized.module,
+            outputVariableName: normalized.outputVariableName,
+            commit: normalized.commit,
+            refreshInClient: normalized.refreshInClient
+        };
+    }
+
+    async addMicroflowDeleteObject(options = {}) {
+        const normalized = normalizeMicroflowVariableActionOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-delete-object",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.variable) {
+            return {
+                ok: false,
+                action: "add-microflow-delete-object",
+                error: "A --variable argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-delete-object",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.deleteObject"))) {
+            return {
+                ok: false,
+                action: "add-microflow-delete-object",
+                error: "Extension capabilities do not include microflow.deleteObject."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowDeleteObject({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            variable: normalized.variable
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-delete-object",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            variable: normalized.variable
+        };
+    }
+
+    async addMicroflowCommitObject(options = {}) {
+        const normalized = normalizeMicroflowVariableActionOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-commit-object",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.variable) {
+            return {
+                ok: false,
+                action: "add-microflow-commit-object",
+                error: "A --variable argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-commit-object",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.commitObject"))) {
+            return {
+                ok: false,
+                action: "add-microflow-commit-object",
+                error: "Extension capabilities do not include microflow.commitObject."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowCommitObject({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            variable: normalized.variable,
+            withEvents: normalized.withEvents,
+            refreshInClient: normalized.refreshInClient
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-commit-object",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            variable: normalized.variable,
+            withEvents: normalized.withEvents,
+            refreshInClient: normalized.refreshInClient
+        };
+    }
+
     async getHybridContext(options = {}) {
         const extensionStatus = await this.getExtensionStatus(options);
         if (extensionStatus?.available) {
@@ -1090,6 +1254,36 @@ function normalizeCreateClientsPageOptions(options) {
         timeoutMs: numberOrDefault(options.timeoutMs, 15000),
         pageExplorerLimit: numberOrDefault(options.pageExplorerLimit, 200),
         capabilities: options.capabilities
+    };
+}
+
+function normalizeAddMicroflowCreateObjectOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        outputVariableName: options.outputVariableName || "CreatedObject",
+        commit: options.commit || "No",
+        refreshInClient: options.refreshInClient ?? "false",
+        initialValues: options.initialValues
+    };
+}
+
+function normalizeMicroflowVariableActionOptions(options) {
+    const normalizedMicroflow = options.microflow ?? options.item;
+    const normalizedModule = options.module;
+    const normalizedVariable = options.variable ?? options.target;
+
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: normalizedMicroflow,
+        module: normalizedModule,
+        variable: normalizedVariable,
+        withEvents: options.withEvents ?? "false",
+        refreshInClient: options.refreshInClient ?? "false"
     };
 }
 

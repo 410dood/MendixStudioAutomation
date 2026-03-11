@@ -161,6 +161,64 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowDeleteObject(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/delete-object", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            variable: options.variable
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowCommitObject(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/commit-object", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            variable: options.variable,
+            withEvents: options.withEvents,
+            refreshInClient: options.refreshInClient
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addNavigationShortcut(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -178,6 +236,38 @@ export class HybridExtensionClient {
             caption: options.caption,
             module: options.module,
             type: options.type ?? "Page"
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowCreateObject(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/create-object", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            outputVariableName: options.outputVariableName ?? options.outputVariable,
+            commit: options.commit,
+            refreshInClient: options.refreshInClient,
+            initialValues: options.initialValues
         }), options.timeoutMs);
 
         return {
@@ -245,11 +335,14 @@ async function resolveEndpointDiscovery(options) {
             contextUrl: parsed.contextUrl,
             capabilitiesUrl: parsed.capabilitiesUrl
                 ?? `${(parsed.baseUrl ?? "").replace(/\/$/, "")}/mendix-studio-automation/capabilities`,
-            navigationPopulateUrl: parsed.navigationPopulateUrl,
-            baseUrl: parsed.baseUrl,
-            routePrefix: parsed.routePrefix
-        }
-    };
+                navigationPopulateUrl: parsed.navigationPopulateUrl,
+                microflowCreateObjectUrl: parsed.microflowCreateObjectUrl,
+                microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
+                microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
+                baseUrl: parsed.baseUrl,
+                routePrefix: parsed.routePrefix
+            }
+        };
 }
 
 async function resolveEndpointFileFromInstallMetadata() {

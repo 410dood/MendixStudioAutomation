@@ -205,6 +205,21 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-create-object": {
+            const result = await client.addMicroflowCreateObject(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-delete-object": {
+            const result = await client.addMicroflowDeleteObject(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-commit-object": {
+            const result = await client.addMicroflowCommitObject(options);
+            formatOutput(result);
+            return;
+        }
         case "create-clients-page": {
             const result = await client.createClientsPage(options);
             formatOutput(result);
@@ -297,6 +312,9 @@ Commands:
   extension-search-documents  Search project documents through the in-Studio hybrid extension
   extension-open-document     Open a project document through the in-Studio hybrid extension
   add-navigation-shortcut     Add a document to the web navigation profile through the extension
+  add-microflow-create-object Add a microflow Create object activity through the extension
+  add-microflow-delete-object Add a microflow Delete object activity through the extension
+  add-microflow-commit-object Add a microflow Commit object activity through the extension
   create-clients-page         Create a Clients page and insert a default DataGrid widget
   hybrid-context              Prefer the extension context and fall back to UI automation
   select-tab                  Activate an open Studio Pro editor tab
@@ -358,6 +376,13 @@ Options:
   --timeout-ms <n>            Wait timeout in milliseconds
   --add-navigation            Attempt to add the created/opened page to web navigation via extension
   --navigation-caption <text>  Optional caption for the generated navigation item
+  --entity <name>             Module-qualified or local entity to instantiate, e.g. Document.ClientDocument
+  --output-variable-name <text> Output variable name for the created object (default: CreatedObject)
+  --commit <name>             Create object commit mode: Yes|YesWithoutEvents|No
+  --refresh-in-client <true|false> Refresh client after create
+  --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}
+  --variable <name>           Existing scope variable name for delete/commit object actions
+  --with-events <true|false>  Include events when committing objects
   --caption <text>            Optional explicit caption for add-navigation-shortcut
 `);
 }

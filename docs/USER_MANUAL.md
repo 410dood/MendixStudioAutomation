@@ -223,6 +223,24 @@ Prepare a microflow action insertion:
 npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 ```
 
+Create an object activity in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false --initial-values '{\"Name\":\"Acme\"}'
+```
+
+Delete a scoped variable in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
+```
+
+Commit a scoped variable in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
+```
+
 As with page insertion, keep `--dry-run` on until the selector path is confirmed.
 The real `insert-action` path now returns before/after microflow-editor snapshots and any post-action Studio Pro dialog, which is useful when the gesture does something unexpected on the canvas.
 
@@ -273,6 +291,9 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `--module` can be used with open-tab commands to disambiguate tabs that share the same document name.
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
+- `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
+- `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
+- `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.

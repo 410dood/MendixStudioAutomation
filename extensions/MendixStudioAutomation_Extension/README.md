@@ -13,6 +13,12 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/health`
   - `/mendix-studio-automation/context`
   - `/mendix-studio-automation/capabilities`
+  - `/mendix-studio-automation/documents/search`
+  - `/mendix-studio-automation/documents/open`
+  - `/mendix-studio-automation/navigation/populate`
+  - `/mendix-studio-automation/microflows/create-object`
+  - `/mendix-studio-automation/microflows/delete-object`
+  - `/mendix-studio-automation/microflows/commit-object`
 - tracks the active Studio Pro document through `ActiveDocumentChanged`
 - writes a runtime discovery file to `runtime/endpoint.json`
 - adds a small `Mendix Studio Automation` menu in Studio Pro for manual verification
@@ -55,6 +61,11 @@ That keeps the extension root in the Mendix-documented shape:
 
 - selected element inspection is not implemented yet
 - error-count reporting is not implemented yet
-- write operations are not implemented yet
+- write operations now include a limited, targeted microflow mutation path:
+  - create a `Create object` activity in a target microflow
+  - add a `Delete object` activity in a target microflow
+  - add a `Commit object` activity in a target microflow
+
+Remaining write operations are intentionally not implemented yet.
 
 This is intentionally the smallest supported in-Studio slice: stable context and transport first, model mutation second.
