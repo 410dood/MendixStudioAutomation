@@ -3,6 +3,9 @@ param(
     [string]$WindowTitlePattern = "",
     [string]$Item = "",
     [string]$Element = "",
+    [string]$RuntimeId = "",
+    [int]$OffsetX = 0,
+    [int]$OffsetY = 0,
     [int]$DelayMs = 250
 )
 
@@ -17,6 +20,9 @@ $contextMenu = Open-EditorElementContextMenu `
     -WindowTitlePattern $WindowTitlePattern `
     -Item $Item `
     -ElementName $Element `
+    -ElementRuntimeId $RuntimeId `
+    -OffsetX $OffsetX `
+    -OffsetY $OffsetY `
     -DelayMs $DelayMs
 
 if (-not $contextMenu) {

@@ -138,6 +138,37 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(options, "appExplorer"));
     }
 
+    async listScopeElements(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/List-StudioProScopeElements.ps1", {
+            ProcessId: options.processId,
+            WindowTitlePattern: options.title,
+            Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
+            Scope: options.scope || "editor",
+            ControlType: options.controlType,
+            NearName: options.nearName ?? options.element ?? options.node ?? options.widget,
+            Radius: numberOrDefault(options.radius, 0),
+            Limit: numberOrDefault(options.limit, 200)
+        });
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
+    }
+
+    async invokeScopeElementAction(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/Invoke-StudioProScopeElementAction.ps1", {
+            ProcessId: options.processId,
+            WindowTitlePattern: options.title,
+            Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
+            Scope: options.scope || "editor",
+            RuntimeId: options.runtimeId,
+            Action: options.action || "click",
+            DelayMs: numberOrDefault(options.delayMs, 250)
+        });
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
+    }
+
     async listDialogs(options = {}) {
         return runPowerShellScript("scripts/automation/List-StudioProDialogs.ps1", normalizeProcessOptions(options));
     }
@@ -161,6 +192,9 @@ export class StudioProClient {
             WindowTitlePattern: options.title,
             Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
             Element: options.element ?? options.itemName ?? options.node ?? options.widget ?? options.item,
+            RuntimeId: options.runtimeId,
+            OffsetX: numberOrDefault(options.offsetX, 0),
+            OffsetY: numberOrDefault(options.offsetY, 0),
             DelayMs: numberOrDefault(options.delayMs, 250)
         });
         await rememberActiveTabFromPayload(result?.openMethod);
@@ -174,6 +208,9 @@ export class StudioProClient {
             WindowTitlePattern: options.title,
             Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
             Element: options.element ?? options.itemName ?? options.node ?? options.widget ?? options.item,
+            RuntimeId: options.runtimeId,
+            OffsetX: numberOrDefault(options.offsetX, 0),
+            OffsetY: numberOrDefault(options.offsetY, 0),
             MenuItem: options.menuItem,
             DelayMs: numberOrDefault(options.delayMs, 250)
         });
@@ -188,6 +225,9 @@ export class StudioProClient {
             WindowTitlePattern: options.title,
             Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
             Element: options.element ?? options.itemName ?? options.node ?? options.widget ?? options.item,
+            RuntimeId: options.runtimeId,
+            OffsetX: numberOrDefault(options.offsetX, 0),
+            OffsetY: numberOrDefault(options.offsetY, 0),
             MenuPath: options.menuPath,
             DelayMs: numberOrDefault(options.delayMs, 250),
             DryRun: Boolean(options.dryRun)

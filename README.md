@@ -36,6 +36,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
 - set native Studio Pro dialog fields by visible label on an experimental basis
 - list and invoke nested editor context-menu paths
+- inspect scoped editor surfaces and invoke raw runtime-id elements for microflow probing
 - fall back from `Shift+F10` to native right-click when selected editor labels open properties instead of a menu
 - click a point relative to a visible editor element for placement and hotspot testing
 - list open page and microflow editor tabs
@@ -78,6 +79,8 @@ npm run list-open-tabs -- --kind microflow
 npm run list-open-tabs -- --module Az_ClientManagement
 npm run active-tab
 npm run active-context
+npm run list-scope-elements -- --microflow "ClinicalDocument_ShowPage" --scope editor --near-name "DS_AppConfig" --radius 320
+npm run invoke-scope-element-action -- --microflow "ClinicalDocument_ShowPage" --scope editor --runtime-id "42.1050910.4.15.1.1135" --action rightClick
 npm run select-tab -- --tab "Client_ClinicalDocument_V3" --module "Az_ClientManagement"
 npm run close-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]" --dry-run
 npm run close-tab -- --dry-run

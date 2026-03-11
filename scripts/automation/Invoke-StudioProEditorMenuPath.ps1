@@ -3,6 +3,9 @@ param(
     [string]$WindowTitlePattern = "",
     [string]$Item = "",
     [string]$Element = "",
+    [string]$RuntimeId = "",
+    [int]$OffsetX = 0,
+    [int]$OffsetY = 0,
     [string]$MenuPath = "",
     [int]$DelayMs = 250,
     [switch]$DryRun
@@ -41,6 +44,9 @@ $contextMenu = Open-EditorElementContextMenu `
     -WindowTitlePattern $WindowTitlePattern `
     -Item $Item `
     -ElementName $Element `
+    -ElementRuntimeId $RuntimeId `
+    -OffsetX $OffsetX `
+    -OffsetY $OffsetY `
     -DelayMs $DelayMs
 
 if (-not $contextMenu) {
@@ -108,6 +114,9 @@ $payload = @{
     action = "invoke-editor-menu-path"
     item = $Item
     element = $Element
+    runtimeId = $RuntimeId
+    offsetX = $OffsetX
+    offsetY = $OffsetY
     menuPath = $MenuPath
     dryRun = [bool]$DryRun
     openMethod = $contextMenu.EditorContext.OpenMethod

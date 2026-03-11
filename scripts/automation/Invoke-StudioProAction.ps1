@@ -12,7 +12,7 @@ param(
 . "$PSScriptRoot\StudioPro.Automation.Common.ps1"
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-$matches = Find-MatchingElements `
+$matches = @(Find-MatchingElements `
     -Root $attached.Element `
     -Depth 8 `
     -MaxResults 2 `
@@ -20,7 +20,7 @@ $matches = Find-MatchingElements `
     -AutomationId $AutomationId `
     -ClassName $ClassName `
     -ControlType $ControlType `
-    -RuntimeId $RuntimeId
+    -RuntimeId $RuntimeId)
 
 if ($matches.Length -eq 0) {
     throw "No matching Studio Pro element found for action."
@@ -31,22 +31,22 @@ if ($matches.Length -gt 1 -and -not $RuntimeId) {
 }
 
 $targetMatch = $matches[0]
-$elements = Find-MatchingElements `
+$elements = @(Find-MatchingElements `
     -Root $attached.Element `
     -Depth 8 `
     -MaxResults 1 `
-    -RuntimeId $targetMatch.runtimeId
+    -RuntimeId $targetMatch.runtimeId)
 
 if ($elements.Length -eq 0) {
     throw "Could not resolve the target element for the requested action."
 }
 
 $resolved = $elements[0]
-$targetElements = Find-MatchingElements `
+$targetElements = @(Find-MatchingElements `
     -Root $attached.Element `
     -Depth 8 `
     -MaxResults 1 `
-    -RuntimeId $resolved.runtimeId
+    -RuntimeId $resolved.runtimeId)
 
 if ($targetElements.Length -eq 0) {
     throw "Could not reacquire the target automation element."

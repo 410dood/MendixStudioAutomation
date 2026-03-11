@@ -48,6 +48,8 @@ Included in this release:
 - `insert-action` now records before/after microflow-editor snapshots plus any post-action dialog for live microflow mutation debugging
 - editor context-menu automation now supports nested menu paths such as `Add > Activity`
 - editor context-menu automation now falls back from `Shift+F10` to native right-click when selected microflow labels open the properties dialog instead of a menu
+- editor context-menu automation now supports runtime-id targeting and offset-aware right-click probing for microflow surfaces
+- scoped editor inspection can now enumerate and click raw runtime-id elements near a visible label for Mendix microflow reverse engineering
 - `click-editor-offset` now provides a placement primitive for clicking relative to a visible editor element
 - scoped commands now fail fast if they cannot confirm that the requested page or microflow actually opened
 
@@ -70,6 +72,7 @@ Known limitations:
 - `set-dialog-field` is present but still experimental; it needs more validation across a wider range of Studio Pro property dialogs.
 - the current real `insert-action` gesture is still not inserting a visible activity on `ClinicalDocument_ShowPage`; current instrumentation shows it can open the parent microflow properties dialog instead.
 - the current `Add > Activity` menu path is stable on `ClinicalDocument_ShowPage`, but it still does not produce a confirmed visible activity mutation by itself or after the current placement-click experiment.
+- current runtime-id probing can reliably identify parameter and activity context menus, but connector insertion surfaces still do not expose a stable add-action menu path.
 - run and responsive-browser commands now surface blocking Studio Pro dialogs, but they still do not verify a healthy Mendix runtime or browser content.
 - `open-properties` is currently strongest on the page designer and `pageExplorer`; other scopes may still need more hardening.
 - unopened documents that Studio Pro does not resolve through `Go to` now fail explicitly instead of returning misleading editor results.

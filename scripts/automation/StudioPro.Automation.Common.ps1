@@ -233,7 +233,18 @@ function Test-ElementMatch {
     }
 
     if ($ControlType) {
-        $actualControlType = $Element.Current.ControlType.ProgrammaticName -replace "^ControlType\.", ""
+        $programmaticName = $null
+        try {
+            $programmaticName = $Element.Current.ControlType.ProgrammaticName
+        } catch {
+            $programmaticName = $null
+        }
+
+        if (-not $programmaticName) {
+            return $false
+        }
+
+        $actualControlType = $programmaticName -replace "^ControlType\.", ""
         if ($actualControlType -ne $ControlType) {
             return $false
         }
@@ -1894,6 +1905,9 @@ function Open-EditorElementContextMenu {
         [string]$WindowTitlePattern = "",
         [string]$Item = "",
         [string]$ElementName = "",
+        [string]$ElementRuntimeId = "",
+        [int]$OffsetX = 0,
+        [int]$OffsetY = 0,
         [string]$MenuItemName = "",
         [int]$DelayMs = 250,
         [int]$Attempts = 4
@@ -1907,7 +1921,14 @@ function Open-EditorElementContextMenu {
     $attached = $editorContext.Attached
     $targetMatch = $null
     $lastPostDialog = $null
-    if ($ElementName) {
+    $searchRoot = Get-ScopeSearchRoot -Root $attached.Element -Scope "editor" -Item $Item
+    if ($ElementRuntimeId) {
+        $runtimeMatch = @(Find-MatchingElements -Root $searchRoot -Depth 25 -MaxResults 5 -RuntimeId $ElementRuntimeId)
+        if ($runtimeMatch.Length -eq 0) {
+            throw "Could not find a visible editor element with runtime id '$ElementRuntimeId'."
+        }
+        $targetMatch = $runtimeMatch[0]
+    } elseif ($ElementName) {
         $targetMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $ElementName -Surface "editor" -Item $Item
         if (-not $targetMatch) {
             throw "Could not find a visible editor element named '$ElementName'."
@@ -1919,14 +1940,82 @@ function Open-EditorElementContextMenu {
         $candidate = $null
         $candidateSelection = $null
 
-        if ($ElementName) {
-            $candidate = Find-BestVisibleNamedElement -Root $currentRoot -Name $ElementName -Surface "editor" -Item $Item
-            if (-not $candidate) {
-                $candidate = $targetMatch
+        if ($targetMatch) {
+            if ($ElementRuntimeId) {
+                $currentSearchRoot = Get-ScopeSearchRoot -Root $currentRoot -Scope "editor" -Item $Item
+                $runtimeMatch = @(Find-MatchingElements -Root $currentSearchRoot -Depth 25 -MaxResults 5 -RuntimeId $ElementRuntimeId)
+                $candidate = if ($runtimeMatch.Length -gt 0) { $runtimeMatch[0] } else { $targetMatch }
+            } else {
+                $candidate = Find-BestVisibleNamedElement -Root $currentRoot -Name $ElementName -Surface "editor" -Item $Item
+                if (-not $candidate) {
+                    $candidate = $targetMatch
+                }
             }
-
             $candidateSelection = Select-AutomationMatch -Root $currentRoot -Match $candidate -DelayMs ([Math]::Max(120, $DelayMs))
             Start-Sleep -Milliseconds 80
+        }
+
+        if ($candidate -and ($OffsetX -ne 0 -or $OffsetY -ne 0)) {
+            $offsetPoint = @{
+                x = [int][math]::Round($candidate.boundingRectangle.left + ($candidate.boundingRectangle.width / 2) + $OffsetX)
+                y = [int][math]::Round($candidate.boundingRectangle.top + ($candidate.boundingRectangle.height / 2) + $OffsetY)
+            }
+
+            Set-StudioProForegroundWindow -Process $attached.Process
+            [NativeMouse]::SetCursorPos([int]$offsetPoint.x, [int]$offsetPoint.y) | Out-Null
+            Start-Sleep -Milliseconds 50
+            [NativeMouse]::mouse_event([NativeMouse]::RIGHTDOWN, 0, 0, 0, [UIntPtr]::Zero)
+            Start-Sleep -Milliseconds 50
+            [NativeMouse]::mouse_event([NativeMouse]::RIGHTUP, 0, 0, 0, [UIntPtr]::Zero)
+            Start-Sleep -Milliseconds ($DelayMs + 100)
+
+            $attachedAfter = Get-StudioProWindowElement -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern
+            $menuItems = @(Find-MatchingElements -Root $attachedAfter.Element -Depth 15 -MaxResults 150 -ControlType "MenuItem" | Where-Object {
+                $_ -and
+                -not $_.isOffscreen -and
+                $_.name -and
+                $_.name -notin @("File", "Edit", "View", "App", "Run", "Version Control", "Language", "Help")
+            })
+
+            if (-not $MenuItemName -and $menuItems.Length -gt 0) {
+                return @{
+                    Attached = $attachedAfter
+                    EditorContext = $editorContext
+                    TargetSelection = $candidateSelection
+                    Target = $candidate
+                    MenuItems = $menuItems
+                    PostDialog = $null
+                    Trigger = @{
+                        attempt = $attempt + 1
+                        method = "nativeOffsetRightClick"
+                        point = $offsetPoint
+                    }
+                }
+            }
+
+            if ($MenuItemName) {
+                $match = Find-MenuItemMatch -MenuItems $menuItems -MenuItemName $MenuItemName
+                if ($match) {
+                    return @{
+                        Attached = $attachedAfter
+                        EditorContext = $editorContext
+                        TargetSelection = $candidateSelection
+                        Target = $candidate
+                        MenuItem = $match
+                        MenuItems = $menuItems
+                        PostDialog = $null
+                        Trigger = @{
+                            attempt = $attempt + 1
+                            method = "nativeOffsetRightClick"
+                            point = $offsetPoint
+                        }
+                    }
+                }
+            }
+
+            if ($menuItems.Length -gt 0) {
+                Send-KeysToForegroundWindow -Keys "{ESC}" -DelayMs 100
+            }
         }
 
         Set-StudioProForegroundWindow -Process $attached.Process

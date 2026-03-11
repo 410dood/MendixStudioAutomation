@@ -22,6 +22,8 @@
     "select-explorer-item": "node src/cli.mjs select-explorer-item",
     "select-toolbox-item": "node src/cli.mjs select-toolbox-item",
     "list-dialogs": "node src/cli.mjs list-dialogs",
+    "list-scope-elements": "node src/cli.mjs list-scope-elements",
+    "invoke-scope-element-action": "node src/cli.mjs invoke-scope-element-action",
     "list-dialog-items": "node src/cli.mjs list-dialog-items",
     "invoke-dialog-control": "node src/cli.mjs invoke-dialog-control",
     "set-dialog-field": "node src/cli.mjs set-dialog-field",

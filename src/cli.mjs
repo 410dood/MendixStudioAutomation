@@ -90,6 +90,16 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "list-scope-elements": {
+            const result = await client.listScopeElements(options);
+            formatOutput(result);
+            return;
+        }
+        case "invoke-scope-element-action": {
+            const result = await client.invokeScopeElementAction(options);
+            formatOutput(result);
+            return;
+        }
         case "list-dialog-items": {
             const result = await client.listDialogItems(options);
             formatOutput(result);
@@ -219,6 +229,8 @@ Commands:
   select-explorer-item        Select a Page Explorer row by exact name
   select-toolbox-item         Select a Toolbox item by exact name
   list-dialogs                List open Studio Pro modal/editor dialogs
+  list-scope-elements         List visible elements inside a scoped Studio Pro surface
+  invoke-scope-element-action Click or invoke a scoped Studio Pro element by runtime id
   list-dialog-items           List visible named controls inside a Studio Pro dialog
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
   set-dialog-field            Set a native Studio Pro dialog field by its visible label
@@ -260,6 +272,8 @@ Options:
   --timeout-ms <n>            Wait timeout in milliseconds
   --poll-ms <n>               Wait poll interval in milliseconds
   --dialog <name>             Open Studio Pro dialog window name
+  --near-name <name>          Sort/filter scope elements around a visible named element
+  --radius <n>                Optional max pixel distance from --near-name
   --control <name>            Visible control name inside a Studio Pro dialog
   --label <name>              Visible field label inside a Studio Pro dialog
   --value <text>              Value to set into a native Studio Pro dialog field
