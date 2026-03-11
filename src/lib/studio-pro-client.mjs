@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { runPowerShellScript } from "./powershell.mjs";
 import { clearLastKnownActiveTab, readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
 import { HybridExtensionClient } from "./extension-client.mjs";
@@ -429,12 +431,13 @@ export class StudioProClient {
     }
 
     async setDialogFields(options = {}) {
-        const fields = parseDialogFieldBatch(options.fieldsJson ?? options.fields ?? options.fieldMap);
+        const batchSource = await resolveDialogFieldBatchSource(options);
+        const fields = parseDialogFieldBatch(batchSource.raw);
         if (fields.length === 0) {
             return {
                 ok: false,
                 action: "set-dialog-fields",
-                error: "At least one dialog field entry is required. Pass --fields-json with a JSON object or array."
+                error: "At least one dialog field entry is required. Pass --fields-json or --fields-file with a JSON object or array."
             };
         }
 
@@ -474,6 +477,8 @@ export class StudioProClient {
             ok: results.length > 0 && results.every(entry => entry?.ok),
             action: "set-dialog-fields",
             dialog: options.dialog,
+            batchSource: batchSource.kind,
+            fieldsFile: batchSource.fieldsFile ?? null,
             continueOnError,
             count: results.length,
             requestedCount: fields.length,
@@ -4517,5 +4522,22 @@ function normalizeDialogFieldBatchEntry(entry) {
         verifyValue: entry.verifyValue,
         verifyValueContains: entry.verifyValueContains,
         verifyToggleState: entry.verifyToggleState
+    };
+}
+
+async function resolveDialogFieldBatchSource(options = {}) {
+    if (options.fieldsFile) {
+        const fieldsFile = resolve(process.cwd(), String(options.fieldsFile));
+        const raw = await readFile(fieldsFile, "utf8");
+        return {
+            kind: "file",
+            fieldsFile,
+            raw
+        };
+    }
+
+    return {
+        kind: "inline",
+        raw: options.fieldsJson ?? options.fields ?? options.fieldMap
     };
 }

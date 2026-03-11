@@ -121,6 +121,7 @@ npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --c
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
 npm run get-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --control-type Edit --verify-value-contains "container"
 npm run set-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-json "{\"Name\":{\"value\":\"ClientGrid\",\"verifyValue\":\"ClientGrid\"},\"Show search bar\":{\"value\":true,\"controlType\":\"CheckBox\",\"verifyToggleState\":\"On\"}}"
+npm run set-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json"
 npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
 npm run set-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --value true --control-type CheckBox --verify-toggle-state On
 npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
@@ -132,7 +133,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
 `list-dialog-fields` is the higher-level inspection command when you want label/value pairs instead of a raw control inventory.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
-`set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ.
+`set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ. Use `--fields-file` when the payload is large enough that shell quoting becomes brittle.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.
 `set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened. It currently supports `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` fields, and checkbox/toggle values accept `true/false`, `yes/no`, `on/off`, and `1/0`. Successful writes now also report the observed post-write text/toggle state. Use `--verify-value`, `--verify-value-contains`, or `--verify-toggle-state` when the command should fail if the dialog did not actually land on the expected value/state.
 

@@ -125,6 +125,7 @@ npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --c
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
 npm run get-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --control-type Edit --verify-value-contains "container"
 npm run set-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-json "{\"Name\":{\"value\":\"ClientGrid\",\"verifyValue\":\"ClientGrid\"},\"Show search bar\":{\"value\":true,\"controlType\":\"CheckBox\",\"verifyToggleState\":\"On\"}}"
+npm run set-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json"
 npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
 npm run set-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --value true --control-type CheckBox --verify-toggle-state On
 npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
@@ -298,6 +299,7 @@ Phase 2:
 - current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
 - current `get-dialog-field` can inspect native dialog field values and toggle state by visible label
 - current `set-dialog-fields` can apply multiple dialog property changes from one JSON payload
+- current `set-dialog-fields` also accepts `--fields-file` so larger property batches do not depend on shell-escaped JSON
 - current dialog/listed automation elements now expose `textValue` when a native control supports `ValuePattern`
 - current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` controls
 - current `set-dialog-field` now reports the observed post-write text/toggle state so dialog mutations can be verified directly

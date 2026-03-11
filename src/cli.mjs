@@ -582,6 +582,7 @@ Options:
   --label <name>              Visible field label inside a Studio Pro dialog
   --value <text>              Value to set into a native Studio Pro dialog field
   --fields-json <json>        JSON object/array for set-dialog-fields batch updates
+  --fields-file <path>        JSON file for set-dialog-fields batch updates
   --verify-value <text>       Require set-dialog-field to observe an exact post-write text value
   --verify-value-contains <t> Require get/set-dialog-field to observe a post-read/write text substring
   --verify-toggle-state <t>   Require set-dialog-field to observe toggle state On|Off|Indeterminate (also accepts true/false)
