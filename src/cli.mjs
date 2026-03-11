@@ -540,6 +540,8 @@ Options:
   --verify-status <codes>     Comma-separated expected HTTP status codes for run-local-verify
   --verify-text <text>        Required substring in HTTP response body for run-local-verify
   --verify-location <text>    Required substring in HTTP Location header for run-local-verify
+  --verify-title <text>       Required substring in HTML <title> for run-local-verify
+  --verify-content-type <t>   Required substring in HTTP Content-Type for run-local-verify
   --verify-only <bool>        Skip F5 and only perform run-local-verify HTTP checks
   --page-name <name>          Page name for create-page
   --scope <name>              UI scope (editor/pageExplorer/toolbox) or comma-separated rag-search sources

@@ -54,12 +54,16 @@ export class StudioProClient {
         const expectedStatus = parseExpectedStatusCodes(options.verifyStatus ?? options.expectedStatus ?? options.status);
         const expectedText = options.verifyText ?? options.expectedText ?? null;
         const expectedLocation = options.verifyLocation ?? options.expectedLocation ?? null;
+        const expectedTitle = options.verifyTitle ?? options.expectedTitle ?? null;
+        const expectedContentType = options.verifyContentType ?? options.expectedContentType ?? null;
         const verify = await waitForHttpReachable(url, {
             timeoutMs,
             pollMs,
             expectedStatus,
             expectedText,
-            expectedLocation
+            expectedLocation,
+            expectedTitle,
+            expectedContentType
         });
 
         return {
@@ -72,6 +76,8 @@ export class StudioProClient {
             expectedStatus,
             expectedText,
             expectedLocation,
+            expectedTitle,
+            expectedContentType,
             runResult,
             verify
         };
@@ -3868,10 +3874,18 @@ async function waitForHttpReachable(url, options = {}) {
     const expectedLocation = typeof options.expectedLocation === "string" && options.expectedLocation.length > 0
         ? options.expectedLocation
         : null;
+    const expectedTitle = typeof options.expectedTitle === "string" && options.expectedTitle.length > 0
+        ? options.expectedTitle
+        : null;
+    const expectedContentType = typeof options.expectedContentType === "string" && options.expectedContentType.length > 0
+        ? options.expectedContentType
+        : null;
     const startedAt = Date.now();
     let attempts = 0;
     let lastStatus = null;
     let lastLocation = null;
+    let lastContentType = null;
+    let lastTitle = null;
     let lastBodySnippet = null;
     let lastError = null;
 
@@ -3884,8 +3898,11 @@ async function waitForHttpReachable(url, options = {}) {
             });
             lastStatus = response.status;
             lastLocation = response.headers.get("location");
-            const bodyText = expectedText ? await response.text() : null;
+            lastContentType = response.headers.get("content-type");
+            const shouldReadBody = Boolean(expectedText || expectedTitle);
+            const bodyText = shouldReadBody ? await response.text() : null;
             lastBodySnippet = bodyText ? bodyText.slice(0, 240) : null;
+            lastTitle = bodyText ? extractHtmlTitle(bodyText) : null;
 
             const statusOk = expectedStatusCodes.length > 0
                 ? expectedStatusCodes.includes(response.status)
@@ -3894,17 +3911,25 @@ async function waitForHttpReachable(url, options = {}) {
             const locationOk = expectedLocation
                 ? Boolean(lastLocation && lastLocation.includes(expectedLocation))
                 : true;
+            const titleOk = expectedTitle ? Boolean(lastTitle && lastTitle.includes(expectedTitle)) : true;
+            const contentTypeOk = expectedContentType
+                ? Boolean(lastContentType && lastContentType.toLowerCase().includes(expectedContentType.toLowerCase()))
+                : true;
 
-            if (statusOk && textOk && locationOk) {
+            if (statusOk && textOk && locationOk && titleOk && contentTypeOk) {
                 return {
                     ok: true,
                     url,
                     attempts,
                     status: response.status,
                     location: lastLocation,
+                    contentType: lastContentType,
+                    title: lastTitle,
                     expectedStatus: expectedStatusCodes,
                     expectedText,
                     expectedLocation,
+                    expectedTitle,
+                    expectedContentType,
                     elapsedMs: Date.now() - startedAt
                 };
             }
@@ -3917,6 +3942,10 @@ async function waitForHttpReachable(url, options = {}) {
                 lastError = `Response did not contain expected text '${expectedText}'.`;
             } else if (!locationOk) {
                 lastError = `Redirect location did not contain expected value '${expectedLocation}'.`;
+            } else if (!titleOk) {
+                lastError = `HTML title did not contain expected value '${expectedTitle}'.`;
+            } else if (!contentTypeOk) {
+                lastError = `Content-Type did not contain expected value '${expectedContentType}'.`;
             }
         } catch (error) {
             lastError = error instanceof Error ? error.message : String(error);
@@ -3931,10 +3960,14 @@ async function waitForHttpReachable(url, options = {}) {
         attempts,
         status: lastStatus,
         location: lastLocation,
+        contentType: lastContentType,
+        title: lastTitle,
         responseSnippet: lastBodySnippet,
         expectedStatus: expectedStatusCodes,
         expectedText,
         expectedLocation,
+        expectedTitle,
+        expectedContentType,
         elapsedMs: Date.now() - startedAt,
         error: lastError ?? `Timed out waiting for ${url} to become reachable.`
     };
@@ -3976,4 +4009,13 @@ function toBoolean(raw, fallback = false) {
     }
 
     return fallback;
+}
+
+function extractHtmlTitle(bodyText) {
+    if (typeof bodyText !== "string" || bodyText.length === 0) {
+        return null;
+    }
+
+    const match = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(bodyText);
+    return match?.[1]?.trim() || null;
 }

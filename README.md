@@ -76,6 +76,7 @@ npm run send-keys -- --page "Client_ClinicalDocument_V3" --scope editor --keys "
 npm run run-local
 npm run run-local-verify -- --url "http://localhost:8080" --verify-timeout-ms 120000 --verify-poll-ms 2000
 npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-text "Mendix"
+npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-content-type "text/html" --verify-title "Olari"
 npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-status 200
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"

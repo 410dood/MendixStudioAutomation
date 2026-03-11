@@ -1,5 +1,19 @@
 # Release Notes
 
+## 0.2.38
+
+Richer page-level HTTP validation for local runtime checks.
+
+- Enhanced `run-local-verify` with optional assertions for:
+  - HTML title via `verifyTitle` / `expectedTitle`
+  - response content type via `verifyContentType` / `expectedContentType`
+- Verification output now includes:
+  - observed `contentType`
+  - parsed HTML `title`
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.37
 
 Run-local verification without forced rerun.
