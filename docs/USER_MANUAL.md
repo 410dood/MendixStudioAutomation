@@ -9,7 +9,7 @@ It is designed to help with:
 - opening assets
 - selecting visible page and microflow elements
 - navigating common Studio Pro panes
-- preparing insertion flows for widgets and microflow actions
+- executing real insertion flows for validated widget and microflow targets
 
 It is not a Mendix replacement and it does not perform Mendix version-control commits.
 
@@ -58,9 +58,11 @@ npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Text"
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
+npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
 ```
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
+`set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened.
 
 ### Properties dialogs
 
@@ -147,7 +149,7 @@ npm run insert-widget -- --page "Client_ClinicalDocument_V3" --target "container
 
 Remove `--dry-run` only when you want to execute the current first-pass insertion flow.
 
-The current insertion path prefers the native `Page Explorer -> Add widget... -> Select Widget` dialog. It can open and inspect that dialog, but the final page mutation is still being hardened.
+The current insertion path prefers the native `Page Explorer -> Add widget... -> Select Widget` dialog. It is now producing confirmed Page Explorer mutations on `Client_ClinicalDocument_V3` for visible targets such as `container39` and `container38`.
 
 ### Microflow helpers
 
@@ -180,6 +182,8 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - The Toolbox pane is now discovered from its own dock container, which is substantially more reliable than the earlier whole-window scan.
 - The page-designer path is now validated on `Client_ClinicalDocument_V3`, including `Structure mode`, `Olari_Popup_Default`, and real Page Explorer rows like `container34`.
 - Native dialog commands are now reliable enough to inspect and drive WPF dialogs like `Select Widget`.
+- `insert-widget` now performs real native widget insertion on validated visible page-explorer targets, not just dry-run resolution.
+- `invoke-dialog-control` now reports whether the target dialog actually closed after the control click.
 - Editor-surface property opening is validated on `Client_ClinicalDocument_V3` for targets like `Structure mode` and `Parameters (8)`.
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
@@ -190,7 +194,8 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
-- `run-local`, `stop-local`, and `show-responsive-web` currently verify that the correct Studio Pro shortcuts were sent, but they do not yet verify runtime readiness or browser content.
+- `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
+- `run-local`, `stop-local`, and `show-responsive-web` now expose blocking Studio Pro dialogs cleanly, but they still do not verify runtime readiness or browser content.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 
 ## Non-Goal

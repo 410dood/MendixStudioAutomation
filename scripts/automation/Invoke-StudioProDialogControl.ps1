@@ -42,6 +42,19 @@ $match = $matches | Sort-Object `
 
 $selection = Select-AutomationMatch -Root $nativeDialog -Match $match -DelayMs $DelayMs
 
+$dialogClosed = $false
+$remainingDialog = $null
+$deadline = [DateTime]::UtcNow.AddMilliseconds([Math]::Max(1200, ($DelayMs * 4)))
+do {
+    Start-Sleep -Milliseconds 120
+    $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+    $remainingDialog = Get-StudioProWindowMatchByName -Root $attached.Element -Name $Dialog
+    if (-not $remainingDialog) {
+        $dialogClosed = $true
+        break
+    }
+} while ([DateTime]::UtcNow -lt $deadline)
+
 $payload = @{
     ok = $true
     action = "invoke-dialog-control"
@@ -54,6 +67,8 @@ $payload = @{
     supportsSelectionItem = $selection.supportsSelectionItem
     supportsInvoke = $selection.supportsInvoke
     window = $dialogMatch
+    dialogClosed = $dialogClosed
+    remainingDialog = $remainingDialog
 }
 
 $payload | ConvertTo-Json -Depth 20

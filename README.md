@@ -34,6 +34,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
+- set native Studio Pro dialog fields by visible label on an experimental basis
 - list open page and microflow editor tabs
 - report the best-known active editor tab
 - parse the active editor tab into document/module context
@@ -45,7 +46,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - list visible labels from App Explorer, Page Explorer, Toolbox, and the active editor
 - scope page/toolbox/editor discovery to the active Studio Pro dock container instead of scanning the whole window
 - fail fast when a page or microflow command cannot confirm that Studio Pro actually opened the requested document
-- prepare or execute first-pass widget insertion through Page Explorer + Toolbox
+- execute native widget insertion through `Page Explorer -> Add widget... -> Select Widget`
 - detect real page-designer controls on `Client_ClinicalDocument_V3`, including `Structure mode`, `Parameters (8)`, `Olari_Popup_Default`, and real Page Explorer rows such as `container34`
 - select a visible microflow node/action label
 - prepare or execute first-pass microflow action insertion through the Toolbox
@@ -83,6 +84,7 @@ npm run select-toolbox-item -- --item "Text"
 npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
+npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
 npm run list-app-explorer-items
 npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
 npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3"
@@ -120,9 +122,13 @@ Phase 2:
 - current `select-widget` is validated against real page-designer labels on `Client_ClinicalDocument_V3`
 - current `select-explorer-item` targets exact visible Page Explorer rows from the Page Explorer dock container and is validated against `container34`
 - current `select-toolbox-item` targets exact visible Toolbox items from the Toolbox dock container and is validated for both page and microflow toolbox content
-- current `insert-widget` supports a dry-run verification mode and is validated end-to-end for resolving `container34` + `Text`
+- current `insert-widget` supports a dry-run verification mode and is validated end-to-end for resolving visible container targets plus `Text`
 - current `insert-widget` can open and traverse the native `Select Widget` dialog, including disambiguating duplicate widget names like `Text`
 - current `insert-widget` records native accept attempts (`Select` button, `Enter`, double-click) plus before/after Page Explorer snapshots for debugging
+- current `insert-widget` is now producing confirmed Page Explorer mutations on `Client_ClinicalDocument_V3`, including live insertions under `container39` and `container38`
+- current dialog inspection is sufficient to read local-run blockers such as Studio Pro `Information` dialogs
+- current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
+- current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit` and `ComboBox` controls
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - current dialog commands are validated against native Studio Pro dialogs such as `Select Widget` and `Edit Template Grid 'templateGrid1'`

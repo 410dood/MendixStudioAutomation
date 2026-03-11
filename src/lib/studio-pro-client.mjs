@@ -150,6 +150,10 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/Invoke-StudioProDialogControl.ps1", normalizeDialogControlOptions(options));
     }
 
+    async setDialogField(options = {}) {
+        return runPowerShellScript("scripts/automation/Set-StudioProDialogField.ps1", normalizeDialogFieldOptions(options));
+    }
+
     async listPageExplorerItems(options = {}) {
         const resolvedOptions = await resolvePageOption(this, options, { required: false });
         const result = await runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(resolvedOptions, "pageExplorer"));
@@ -723,6 +727,18 @@ function normalizeDialogControlOptions(options) {
         WindowTitlePattern: options.title,
         Dialog: options.dialog,
         Control: options.control,
+        ControlType: options.controlType,
+        DelayMs: numberOrDefault(options.delayMs, 250)
+    };
+}
+
+function normalizeDialogFieldOptions(options) {
+    return {
+        ProcessId: options.processId,
+        WindowTitlePattern: options.title,
+        Dialog: options.dialog,
+        Label: options.label,
+        Value: options.value ?? "",
         ControlType: options.controlType,
         DelayMs: numberOrDefault(options.delayMs, 250)
     };

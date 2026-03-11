@@ -24,6 +24,7 @@ Included in this release:
 - `find` now handles single-match results correctly
 - first-pass editor selection for page widgets
 - native Studio Pro dialog discovery, dialog item listing, and dialog control invocation
+- experimental native dialog field editing by visible label
 - first-pass selection for:
   - App Explorer items
   - Page Explorer items
@@ -35,6 +36,9 @@ Included in this release:
 - `insert-widget` now reaches the native `Select Widget` dialog from Page Explorer targets
 - `insert-widget` now disambiguates duplicate widget names in the `Select Widget` dialog by testing whether the `Select` button becomes enabled
 - `insert-widget` now records accept-strategy attempts and before/after Page Explorer snapshots for mutation debugging
+- `insert-widget` is now validated for real Page Explorer mutations on visible page containers such as `container39` and `container38`
+- dialog-control invocation now reports whether the dialog actually closed
+- local-run validation can now surface and inspect Studio Pro `Information` dialogs when deployment is blocked
 - `open-properties` is now validated against editor-surface targets that open `Edit Template Grid 'templateGrid1'`
 - `open-properties` is now validated against `pageExplorer` targets such as `container34`
 - page-side widget selection is now validated against live page-designer controls and page-explorer rows
@@ -58,7 +62,8 @@ Known limitations:
 - `select-app-explorer-item` still needs more hardening against alternate left-pane states.
 - page explorer can still report Studio Pro's empty-state placeholder for some page tabs; the command now reports that cleanly instead of scraping unrelated panes.
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
-- `insert-widget` can now open the native widget picker dialog, but the final page-model mutation is not yet reliable enough to treat as complete authoring.
-- run and responsive-browser commands currently verify shortcut delivery, not full runtime/browser readiness.
+- `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
+- `set-dialog-field` is present but still experimental; it needs more validation across a wider range of Studio Pro property dialogs.
+- run and responsive-browser commands now surface blocking Studio Pro dialogs, but they still do not verify a healthy Mendix runtime or browser content.
 - `open-properties` is currently strongest on the page designer and `pageExplorer`; other scopes may still need more hardening.
 - unopened documents that Studio Pro does not resolve through `Go to` now fail explicitly instead of returning misleading editor results.

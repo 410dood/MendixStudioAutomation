@@ -43,7 +43,7 @@ export const operationCatalog = {
         {
             id: "page.insertWidget",
             description: "Insert a toolbox widget into the active page.",
-            status: "implemented-dry-run-validated"
+            status: "implemented-validated"
         },
         {
             id: "toolbox.selectItem",
@@ -64,6 +64,11 @@ export const operationCatalog = {
             id: "dialog.invokeControl",
             description: "Click or select a visible named control inside an open Studio Pro dialog.",
             status: "implemented"
+        },
+        {
+            id: "dialog.setField",
+            description: "Set a native Studio Pro dialog field by visible label.",
+            status: "implemented-experimental"
         },
         {
             id: "studio.listVisibleLabels",

@@ -100,6 +100,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "set-dialog-field": {
+            const result = await client.setDialogField(options);
+            formatOutput(result);
+            return;
+        }
         case "list-app-explorer-items": {
             const result = await client.listAppExplorerItems(options);
             formatOutput(result);
@@ -196,6 +201,7 @@ Commands:
   list-dialogs                List open Studio Pro modal/editor dialogs
   list-dialog-items           List visible named controls inside a Studio Pro dialog
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
+  set-dialog-field            Set a native Studio Pro dialog field by its visible label
   list-app-explorer-items     List visible App Explorer labels
   list-page-explorer-items    List visible Page Explorer labels
   list-toolbox-items          List visible Toolbox labels
@@ -231,6 +237,8 @@ Options:
   --poll-ms <n>               Wait poll interval in milliseconds
   --dialog <name>             Open Studio Pro dialog window name
   --control <name>            Visible control name inside a Studio Pro dialog
+  --label <name>              Visible field label inside a Studio Pro dialog
+  --value <text>              Value to set into a native Studio Pro dialog field
   --target <name>             Page Explorer target container/row for insertion
   --dry-run                   Resolve the insertion path without executing it
   --microflow <name>          Microflow to open before node/action operations
@@ -239,6 +247,7 @@ Options:
   --tab <name>                Open Studio Pro editor tab name to activate or close
   --kind <name>               Filter open tabs by kind, e.g. microflow or page-or-document
   --module <name>             Filter or disambiguate by Mendix module name
+  --control-type <name>       Optional dialog field type filter such as Edit or ComboBox
 `);
 }
 

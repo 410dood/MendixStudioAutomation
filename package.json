@@ -24,6 +24,7 @@
     "list-dialogs": "node src/cli.mjs list-dialogs",
     "list-dialog-items": "node src/cli.mjs list-dialog-items",
     "invoke-dialog-control": "node src/cli.mjs invoke-dialog-control",
+    "set-dialog-field": "node src/cli.mjs set-dialog-field",
     "list-app-explorer-items": "node src/cli.mjs list-app-explorer-items",
     "list-page-explorer-items": "node src/cli.mjs list-page-explorer-items",
     "list-toolbox-items": "node src/cli.mjs list-toolbox-items",
