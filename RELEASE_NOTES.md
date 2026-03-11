@@ -1,5 +1,30 @@
 # Release Notes
 
+## 0.2.30
+
+Local RAG-style retrieval for automation procedures and capabilities.
+
+- Added local knowledge search command:
+  - `rag-search`
+  - `npm run rag-search`
+- Added ranked retrieval over local files:
+  - `README.md`
+  - `RELEASE_NOTES.md`
+  - `docs/`
+  - `extensions/MendixStudioAutomation_Extension/README.md`
+  - `src/lib/operations.mjs`
+  - `src/cli.mjs`
+- Added search filters/options:
+  - `--query` required
+  - `--scope` optional comma-separated source paths
+  - `--limit` global match limit (default `20`)
+  - `--per-file-limit` per-file pre-rank limit (default `8`)
+- Added operation catalog entry:
+  - `knowledge.ragSearch`
+- Updated documentation:
+  - README
+  - User Manual
+
 ## 0.2.29
 
 Insert-before targeting expansion for object mutation microflow actions.

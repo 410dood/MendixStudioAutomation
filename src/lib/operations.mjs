@@ -151,6 +151,11 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "knowledge.ragSearch",
+            description: "Run local RAG-style ranked search across automation docs and source files.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "studio.createClientsPage",
             description: "Create a Clients scaffold page and optionally add it to Web navigation.",
             status: "implemented-first-pass"

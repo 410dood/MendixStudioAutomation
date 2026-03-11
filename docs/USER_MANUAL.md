@@ -521,6 +521,7 @@ Record and track capability gaps while developing automation:
 npm run record-knowledge-gap -- --requested-capability "page.insertWidget" --observed-issue "Intermittent selector drift in Select Widget dialog" --impact "Blocks repeatable page automation" --context "Client_ClinicalDocument_V3"
 npm run list-knowledge-gaps -- --status open --limit 20
 npm run summarize-knowledge-gaps
+npm run rag-search -- --query "insert-before-index create-object" --scope "README.md,docs,src/lib" --limit 12 --per-file-limit 4
 ```
 
 ## Recommended Operating Sequence
@@ -563,6 +564,7 @@ npm run summarize-knowledge-gaps
 - `add-microflow-retrieve-database` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-retrieve-association` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `find-microflow-activities` filters `list-microflow-activities` results by `--query`, `--action-type`, and `--variable`.
+- `rag-search` is lexical ranking over local docs/source; it is not an embedding/vector database.
 - `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.
 - `add-microflow-find-by-association` inserts `Find by association` activities only at the start of the selected microflow.
 - `add-microflow-filter-by-attribute` inserts `Filter by attribute` activities only at the start of the selected microflow.

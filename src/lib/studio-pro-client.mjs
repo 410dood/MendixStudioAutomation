@@ -2,6 +2,7 @@ import { runPowerShellScript } from "./powershell.mjs";
 import { clearLastKnownActiveTab, readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
 import { HybridExtensionClient } from "./extension-client.mjs";
 import { listKnowledgeGaps, recordKnowledgeGap, summarizeKnowledgeGaps } from "./knowledge-gap-store.mjs";
+import { searchAutomationKnowledgeBase } from "./rag-search.mjs";
 
 export class StudioProClient {
     constructor() {
@@ -2666,6 +2667,10 @@ export class StudioProClient {
             action: "summarize-knowledge-gaps",
             summary
         };
+    }
+
+    async ragSearch(options = {}) {
+        return searchAutomationKnowledgeBase(options);
     }
 
     async selectTab(options = {}) {

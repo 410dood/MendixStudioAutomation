@@ -390,6 +390,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "rag-search": {
+            const result = await client.ragSearch(options);
+            formatOutput(result);
+            return;
+        }
         case "select-tab": {
             const result = await client.selectTab(options);
             formatOutput(result);
@@ -509,6 +514,7 @@ Commands:
   record-knowledge-gap        Record an automation capability gap for later hardening
   list-knowledge-gaps         List recorded automation capability gaps
   summarize-knowledge-gaps    Summarize gap counts by status and capability
+  rag-search                  Local RAG search across automation docs and source files
   select-tab                  Activate an open Studio Pro editor tab
   close-tab                   Close a specific open Studio Pro editor tab
   insert-widget              Prepare or execute first-pass widget insertion
@@ -532,7 +538,7 @@ Options:
   --verify-timeout-ms <n>     Max wait for run-local-verify URL readiness (default: 120000)
   --verify-poll-ms <n>        Poll interval for run-local-verify URL readiness (default: 2000)
   --page-name <name>          Page name for create-page
-  --scope <name>              editor, pageExplorer, toolbox, or another named scope
+  --scope <name>              UI scope (editor/pageExplorer/toolbox) or comma-separated rag-search sources
   --item <name>               Document, page, snippet, microflow, or entity name to open
   --template <name>           Visible template name for create-page
   --page <name>               Page to open before selecting a widget
@@ -611,6 +617,7 @@ Options:
   --observed-issue <text>     What failed or is missing
   --impact <text>             Why the gap matters
   --context <text>            Optional context such as page/microflow/environment
+  --per-file-limit <n>        Max RAG matches per file before global ranking
   --source <text>             Source of the gap report (default: manual)
   --status <text>             Gap status: open|in_progress|resolved|blocked
   --limit <n>                 Limit records returned by list-knowledge-gaps

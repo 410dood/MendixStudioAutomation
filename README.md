@@ -100,6 +100,7 @@ npm run open-quick-create-object-dialog -- --microflow "ClinicalDocument_ShowPag
 npm run record-knowledge-gap -- --requested-capability "page.insertWidget" --observed-issue "Intermittent selector drift in Select Widget dialog" --impact "Blocks repeatable page automation" --context "Client_ClinicalDocument_V3"
 npm run list-knowledge-gaps -- --status open --limit 20
 npm run summarize-knowledge-gaps
+npm run rag-search -- --query "insert-before-index create-object" --scope "README.md,docs,src/lib"
 npm run add-navigation-shortcut -- --page "Client_ClinicalDocument_V3" --caption "Clinical Document" --module Az_ClientManagement
 npm run hybrid-context
 npm run list-scope-elements -- --microflow "ClinicalDocument_ShowPage" --scope editor --near-name "DS_AppConfig" --radius 320
@@ -297,6 +298,7 @@ Phase 2:
 - current `add-microflow-change-attribute` now inserts SDK-backed `Change attribute` activities through the hybrid extension route
 - current `add-microflow-change-association` now inserts SDK-backed `Change association` activities through the hybrid extension route
 - current object mutation actions (`delete`, `commit`, `rollback`, `change-attribute`, `change-association`) now also support optional `--insert-before-activity` and `--insert-before-index`
+- current `rag-search` provides local RAG-style ranked retrieval across automation docs/source for faster MCP prompt grounding
 - current editor context-menu commands can traverse nested menu paths such as `Add > Activity`
 - current node-level editor context menus fall back to native right-click when `Shift+F10` opens the microflow properties dialog instead of a menu
 - current `click-editor-offset` provides a placement primitive for clicking relative to a visible page or microflow element
