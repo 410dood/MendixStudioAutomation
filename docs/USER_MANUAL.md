@@ -51,9 +51,9 @@ npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item 
 npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control-type Edit
 npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --control-type Edit
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
-npm run set-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --value "structureMode1" --control-type Edit --verify-value "structureMode1"
+npm run set-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --value "structureMode1" --control-type Edit --verify-value "structureMode1" --finalize-dialog "OK"
 npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json"
-npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json" --dry-run true
+npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json" --dry-run true --finalize-dialog "Cancel"
 ```
 
 Use these first when Studio Pro behaves unexpectedly or a command seems blocked by a popup.
@@ -153,6 +153,7 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `set-properties-dialog-fields` composes `open-properties` with `set-dialog-fields`, so batch property edits can also avoid hard-coded dialog captions.
 `set-properties-dialog-field` composes `open-properties` with `set-dialog-field`, so single-field edits and verification no longer need a hard-coded dialog caption.
 `sync-properties-dialog` composes `open-properties` with `sync-dialog-fields`, so a page/widget/explorer target can be opened and synchronized from one command. Use `--dry-run true` to preview the exact field edits before applying them.
+Use `--finalize-dialog "OK"` when a property edit should be committed, or `--finalize-dialog "Cancel"` / `"Close"` when a review-style command should dismiss the window after inspection.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ. Use `--fields-file` when the payload is large enough that shell quoting becomes brittle.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.

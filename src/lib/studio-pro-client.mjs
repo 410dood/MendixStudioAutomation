@@ -321,9 +321,10 @@ export class StudioProClient {
             ...options,
             dialog: dialogName
         });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, syncResult?.ok);
 
         return {
-            ok: Boolean(openResult?.ok) && Boolean(syncResult?.ok),
+            ok: Boolean(openResult?.ok) && Boolean(syncResult?.ok) && finalizeSucceeded(finalizeResult),
             action: "sync-properties-dialog",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
@@ -332,7 +333,8 @@ export class StudioProClient {
             dialog: dialogName,
             dryRun: toBoolean(options.dryRun, false),
             openResult,
-            syncResult
+            syncResult,
+            finalizeResult
         };
     }
 
@@ -370,9 +372,10 @@ export class StudioProClient {
             ...options,
             dialog: dialogName
         });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, exportResult?.ok);
 
         return {
-            ok: Boolean(openResult?.ok) && Boolean(exportResult?.ok),
+            ok: Boolean(openResult?.ok) && Boolean(exportResult?.ok) && finalizeSucceeded(finalizeResult),
             action: "export-properties-dialog",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
@@ -380,7 +383,8 @@ export class StudioProClient {
             scope: options.scope || "editor",
             dialog: dialogName,
             openResult,
-            exportResult
+            exportResult,
+            finalizeResult
         };
     }
 
@@ -418,9 +422,10 @@ export class StudioProClient {
             ...options,
             dialog: dialogName
         });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, comparison?.ok);
 
         return {
-            ok: Boolean(openResult?.ok) && Boolean(comparison?.ok),
+            ok: Boolean(openResult?.ok) && Boolean(comparison?.ok) && finalizeSucceeded(finalizeResult),
             action: "compare-properties-dialog",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
@@ -428,7 +433,8 @@ export class StudioProClient {
             scope: options.scope || "editor",
             dialog: dialogName,
             openResult,
-            comparison
+            comparison,
+            finalizeResult
         };
     }
 
@@ -466,9 +472,10 @@ export class StudioProClient {
             ...options,
             dialog: dialogName
         });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, listResult?.ok);
 
         return {
-            ok: Boolean(openResult?.ok) && Boolean(listResult?.ok),
+            ok: Boolean(openResult?.ok) && Boolean(listResult?.ok) && finalizeSucceeded(finalizeResult),
             action: "list-properties-dialog-fields",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
@@ -476,7 +483,8 @@ export class StudioProClient {
             scope: options.scope || "editor",
             dialog: dialogName,
             openResult,
-            listResult
+            listResult,
+            finalizeResult
         };
     }
 
@@ -514,9 +522,10 @@ export class StudioProClient {
             ...options,
             dialog: dialogName
         });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, fieldResult?.ok);
 
         return {
-            ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok),
+            ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok) && finalizeSucceeded(finalizeResult),
             action: "get-properties-dialog-field",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
@@ -524,7 +533,8 @@ export class StudioProClient {
             scope: options.scope || "editor",
             dialog: dialogName,
             openResult,
-            fieldResult
+            fieldResult,
+            finalizeResult
         };
     }
 
@@ -562,9 +572,10 @@ export class StudioProClient {
             ...options,
             dialog: dialogName
         });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, fieldResult?.ok);
 
         return {
-            ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok),
+            ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok) && finalizeSucceeded(finalizeResult),
             action: "set-properties-dialog-field",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
@@ -572,7 +583,8 @@ export class StudioProClient {
             scope: options.scope || "editor",
             dialog: dialogName,
             openResult,
-            fieldResult
+            fieldResult,
+            finalizeResult
         };
     }
 
@@ -610,9 +622,10 @@ export class StudioProClient {
             ...options,
             dialog: dialogName
         });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, fieldResult?.ok);
 
         return {
-            ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok),
+            ok: Boolean(openResult?.ok) && Boolean(fieldResult?.ok) && finalizeSucceeded(finalizeResult),
             action: "set-properties-dialog-fields",
             page: options.page ?? null,
             microflow: options.microflow ?? null,
@@ -620,7 +633,8 @@ export class StudioProClient {
             scope: options.scope || "editor",
             dialog: dialogName,
             openResult,
-            fieldResult
+            fieldResult,
+            finalizeResult
         };
     }
 
@@ -5111,6 +5125,38 @@ function normalizeDialogFieldExportFormat(raw) {
 function extractDialogWindowName(result) {
     const name = result?.dialog?.window?.name ?? result?.dialog?.name ?? null;
     return typeof name === "string" && name.trim().length > 0 ? name.trim() : null;
+}
+
+function finalizeSucceeded(result) {
+    return result == null || Boolean(result.ok);
+}
+
+async function finalizePropertiesDialogAction(client, dialogName, options = {}, shouldFinalize = true) {
+    if (!shouldFinalize) {
+        return null;
+    }
+
+    const control = options.finalizeDialog ?? options.dialogAction ?? null;
+    if (control === undefined || control === null || String(control).trim() === "") {
+        return null;
+    }
+
+    try {
+        return await client.invokeDialogControl({
+            ...options,
+            dialog: dialogName,
+            control: String(control).trim(),
+            controlType: options.finalizeControlType ?? "Button"
+        });
+    } catch (error) {
+        return {
+            ok: false,
+            action: "finalize-properties-dialog",
+            dialog: dialogName,
+            control: String(control).trim(),
+            error: error instanceof Error ? error.message : String(error)
+        };
+    }
 }
 
 function buildDialogFieldExportPayload(fields, format = "object") {

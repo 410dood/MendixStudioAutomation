@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.53
+
+Properties dialog finalization support.
+
+- Added `finalizeDialog` / `--finalize-dialog` support to target-first properties commands so they can click `OK`, `Apply`, `Cancel`, or `Close` after read, compare, export, set, or sync operations.
+- This closes an important gap for property editing because set and sync flows can now explicitly persist dialog changes with `OK`.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.52
 
 Dry-run planning for dialog sync commands.
