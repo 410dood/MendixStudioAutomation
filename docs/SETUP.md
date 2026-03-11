@@ -11,7 +11,7 @@ Optional but available on this machine:
 
 - `.NET SDK 10.0.200`
 
-The current implementation does not require a compiled .NET helper, but the SDK is useful for future hardening.
+The current implementation now includes a real Mendix Studio Pro extension project, so the .NET SDK is useful immediately.
 
 ## Repository Setup
 
@@ -22,6 +22,38 @@ cd C:\Users\willi\Mendix\MyPluggableWidgets\MendixStudioAutomation
 ```
 
 There are no npm dependencies yet, so no install step is required.
+
+## Hybrid Extension Setup
+
+The repo includes a C# Studio Pro extension in:
+
+```text
+extensions\MendixStudioAutomation.Extension
+```
+
+Build it with:
+
+```powershell
+dotnet build .\extensions\MendixStudioAutomation.Extension\MendixStudioAutomation.Extension.csproj
+```
+
+Install it into the Mendix app folder with:
+
+```powershell
+pwsh .\scripts\Install-MendixStudioAutomationExtension.ps1 -AppDirectory C:\Users\willi\Mendix\Olari-main -Build
+```
+
+This copies the extension into the Mendix-supported app-local location:
+
+```text
+C:\Users\willi\Mendix\Olari-main\extensions\MendixStudioAutomation.Extension
+```
+
+The extension root contains:
+
+- `manifest.json`
+- `dist\`
+- `runtime\endpoint.json` once Studio Pro loads the extension
 
 ## Studio Pro Setup
 
@@ -58,6 +90,8 @@ npm run list-open-tabs -- --kind microflow
 npm run list-open-tabs -- --module Az_ClientManagement
 npm run active-tab
 npm run active-context
+npm run extension-status
+npm run hybrid-context
 npm run close-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]" --dry-run
 npm run close-tab -- --dry-run
 ```
@@ -66,6 +100,7 @@ If a page or microflow is already open, `open-item` will now reuse that tab befo
 If a page or microflow command cannot confirm that Studio Pro actually opened the requested document, it now fails explicitly instead of scraping the wrong window state.
 Dialog-oriented commands can be used against native Studio Pro windows like `Select Widget` once they are visible.
 `create-page` is now validated for native page creation when the desired template is already visible in the right-hand panel of the `Create Page` wizard.
+`extension-status` reports whether Studio Pro has loaded the hybrid extension and written its runtime discovery file.
 
 ## Safety Model
 

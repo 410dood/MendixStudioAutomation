@@ -5,3 +5,7 @@ Thumbs.db
 *.tmp
 *.log
 .automation-state/
+extensions/*/bin/
+extensions/*/obj/
+extensions/*/dist/
+extensions/*/runtime/

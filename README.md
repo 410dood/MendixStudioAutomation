@@ -32,6 +32,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - send arbitrary key chords to Studio Pro or the active editor context
 - trigger first-pass local run and responsive web shortcuts from Studio Pro
 - create pages through Studio Pro's native `New Document` and `Create Page` wizards
+- query an in-Studio hybrid extension over a supported local webserver route
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -81,6 +82,9 @@ npm run list-open-tabs -- --kind microflow
 npm run list-open-tabs -- --module Az_ClientManagement
 npm run active-tab
 npm run active-context
+npm run extension-status
+npm run extension-context
+npm run hybrid-context
 npm run list-scope-elements -- --microflow "ClinicalDocument_ShowPage" --scope editor --near-name "DS_AppConfig" --radius 320
 npm run invoke-scope-element-action -- --microflow "ClinicalDocument_ShowPage" --scope editor --runtime-id "42.1050910.4.15.1.1135" --action rightClick
 npm run select-tab -- --tab "Client_ClinicalDocument_V3" --module "Az_ClientManagement"
@@ -119,6 +123,36 @@ node src/cli.mjs snapshot --title "Olari"
 - [Hybrid Architecture](docs/HYBRID_ARCHITECTURE.md)
 - [Release Notes](RELEASE_NOTES.md)
 
+## Hybrid Extension
+
+The repo now includes a supported C# Studio Pro extension project at:
+
+- `extensions/MendixStudioAutomation.Extension`
+
+It targets the exact package version that matches the current Olari Studio Pro build:
+
+- `Mendix.StudioPro.ExtensionsAPI 10.24.14-build.90436`
+
+Build it with:
+
+```powershell
+dotnet build .\extensions\MendixStudioAutomation.Extension\MendixStudioAutomation.Extension.csproj
+```
+
+Install it into a Mendix app with:
+
+```powershell
+pwsh .\scripts\Install-MendixStudioAutomationExtension.ps1 -AppDirectory C:\Users\willi\Mendix\Olari-main -Build
+```
+
+Once Studio Pro loads the extension, the Node layer can query it with:
+
+```powershell
+npm run extension-status
+npm run extension-context
+npm run hybrid-context
+```
+
 ## Roadmap
 
 Phase 1:
@@ -133,6 +167,8 @@ Phase 2:
 - current `create-page` drives the native `New Document` and `Create Page` dialogs and is validated for creating pages like `Clients`, `Clients_Auto2`, and `Clients_Auto3` in `Az_ClientManagement`
 - current `create-page` selects the first visible right-hand page template card by default and is validated against the default `Dashboard Action Center` template flow
 - current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
+- current `extension-status`, `extension-context`, and `hybrid-context` can discover and query the in-Studio hybrid extension when its `runtime/endpoint.json` file exists
+- current hybrid extension project is a real Mendix `WebServerExtension` plus `MenuExtension`, not a placeholder stub
 - current `select-widget` can target both the editor surface and a named alternate surface like `pageExplorer`
 - current `select-widget` is validated against real page-designer labels on `Client_ClinicalDocument_V3`
 - current `select-explorer-item` targets exact visible Page Explorer rows from the Page Explorer dock container and is validated against `container34`

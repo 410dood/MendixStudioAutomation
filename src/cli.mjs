@@ -175,6 +175,21 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "extension-status": {
+            const result = await client.getExtensionStatus(options);
+            formatOutput(result);
+            return;
+        }
+        case "extension-context": {
+            const result = await client.getExtensionContext(options);
+            formatOutput(result);
+            return;
+        }
+        case "hybrid-context": {
+            const result = await client.getHybridContext(options);
+            formatOutput(result);
+            return;
+        }
         case "select-tab": {
             const result = await client.selectTab(options);
             formatOutput(result);
@@ -251,6 +266,9 @@ Commands:
   list-open-tabs              List open page and microflow editor tabs
   active-tab                  Get the currently active open editor tab
   active-context              Parse the active tab into document/module context
+  extension-status            Check whether the in-Studio hybrid extension is available
+  extension-context           Read the context exposed by the in-Studio hybrid extension
+  hybrid-context              Prefer the extension context and fall back to UI automation
   select-tab                  Activate an open Studio Pro editor tab
   close-tab                   Close a specific open Studio Pro editor tab
   insert-widget              Prepare or execute first-pass widget insertion
@@ -298,6 +316,8 @@ Options:
   --tab <name>                Open Studio Pro editor tab name to activate or close
   --kind <name>               Filter open tabs by kind, e.g. microflow or page-or-document
   --module <name>             Filter or disambiguate by Mendix module name, or target module for create-page
+  --endpoint-file <path>      Hybrid extension endpoint discovery file
+  --endpoint-url <url>        Explicit hybrid extension base URL
   --control-type <name>       Optional dialog field type filter such as Edit or ComboBox
 `);
 }

@@ -96,6 +96,21 @@ export const operationCatalog = {
             status: "implemented"
         },
         {
+            id: "extension.getStatus",
+            description: "Read the local Mendix Studio Pro hybrid extension health endpoint.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "extension.getContext",
+            description: "Read active app and document context from the in-Studio Mendix extension.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "hybrid.getContext",
+            description: "Prefer the in-Studio extension context and fall back to UI automation context.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "studio.selectTab",
             description: "Activate an already open page or microflow editor tab.",
             status: "implemented"

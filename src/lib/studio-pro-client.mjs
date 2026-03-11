@@ -1,7 +1,12 @@
 import { runPowerShellScript } from "./powershell.mjs";
 import { clearLastKnownActiveTab, readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
+import { HybridExtensionClient } from "./extension-client.mjs";
 
 export class StudioProClient {
+    constructor() {
+        this.extensionClient = new HybridExtensionClient();
+    }
+
     async snapshot(options = {}) {
         return runPowerShellScript("scripts/automation/Get-StudioProSnapshot.ps1", normalizeSnapshotOptions(options));
     }
@@ -352,6 +357,43 @@ export class StudioProClient {
         return {
             ...result,
             context: tab ? parseStudioProTabContext(tab.name) : null
+        };
+    }
+
+    async getExtensionStatus(options = {}) {
+        return this.extensionClient.getStatus(options);
+    }
+
+    async getExtensionContext(options = {}) {
+        return this.extensionClient.getContext(options);
+    }
+
+    async getHybridContext(options = {}) {
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (extensionStatus?.available) {
+            try {
+                const extension = await this.getExtensionContext(options);
+                return {
+                    ok: true,
+                    source: "extension-webserver",
+                    extension
+                };
+            }
+            catch (error) {
+                return {
+                    ok: true,
+                    source: "uia-fallback",
+                    extensionError: error instanceof Error ? error.message : String(error),
+                    fallback: await this.getActiveContext(options)
+                };
+            }
+        }
+
+        return {
+            ok: true,
+            source: "uia-fallback",
+            extension: extensionStatus,
+            fallback: await this.getActiveContext(options)
         };
     }
 

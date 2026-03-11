@@ -7,6 +7,7 @@
 It is designed to help with:
 
 - opening assets
+- reading hybrid in-Studio context through a supported extension route
 - selecting visible page and microflow elements
 - navigating common Studio Pro panes
 - executing real insertion flows for validated widget and microflow targets
@@ -41,6 +42,28 @@ npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure
 ```
 
 Use these first when Studio Pro behaves unexpectedly or a command seems blocked by a popup.
+
+### Hybrid extension context
+
+Check whether the Mendix extension is loaded:
+
+```powershell
+npm run extension-status
+```
+
+Read the context directly from the in-Studio extension:
+
+```powershell
+npm run extension-context
+```
+
+Prefer the extension context and fall back to UI automation if the extension is not active:
+
+```powershell
+npm run hybrid-context
+```
+
+The extension project lives in `extensions\MendixStudioAutomation.Extension` and is installed into the Mendix app with `scripts\Install-MendixStudioAutomationExtension.ps1`.
 
 ### Generic discovery
 
@@ -220,6 +243,8 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `create-page` is now validated for native page creation in `Az_ClientManagement`, including pages like `Clients`, `Clients_Auto2`, and `Clients_Auto3`.
 - Native dialog commands are now reliable enough to inspect and drive WPF dialogs like `Select Widget`.
 - `insert-widget` now performs real native widget insertion on validated visible page-explorer targets, not just dry-run resolution.
+- the repo now includes a real Mendix Studio Pro hybrid extension project using `WebServerExtension` and `MenuExtension`
+- `extension-status`, `extension-context`, and `hybrid-context` are now available for in-process context discovery
 - `invoke-dialog-control` now reports whether the target dialog actually closed after the control click.
 - Editor-surface property opening is validated on `Client_ClinicalDocument_V3` for targets like `Structure mode` and `Parameters (8)`.
 - Nested editor context-menu traversal now works, including `Add > Activity` on `ClinicalDocument_ShowPage`.
@@ -237,6 +262,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.
 - `run-local`, `stop-local`, and `show-responsive-web` now expose blocking Studio Pro dialogs cleanly, but they still do not verify runtime readiness or browser content.
+- the hybrid extension currently reports active app and document context, but not selected-element identity or Mendix error count yet.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 
 ## Non-Goal

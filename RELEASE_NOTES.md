@@ -1,5 +1,35 @@
 # Release Notes
 
+## 0.2.0
+
+Hybrid extension foundation release.
+
+Included in this release:
+
+- real Mendix C# extension project at `extensions/MendixStudioAutomation.Extension`
+- exact package pin to `Mendix.StudioPro.ExtensionsAPI 10.24.14-build.90436`
+- supported `WebServerExtension` with:
+  - `/mendix-studio-automation/health`
+  - `/mendix-studio-automation/context`
+  - `/mendix-studio-automation/capabilities`
+- supported `MenuExtension` for manual verification inside Studio Pro
+- extension runtime discovery file written to `runtime/endpoint.json`
+- Node hybrid client for extension discovery and HTTP calls
+- new commands:
+  - `extension-status`
+  - `extension-context`
+  - `hybrid-context`
+- app-local install helper script:
+  - `scripts/Install-MendixStudioAutomationExtension.ps1`
+- `hybrid-context` now falls back cleanly to UI Automation when the extension is not active
+
+Not included in this release:
+
+- automatic Studio Pro extension installation through the Node CLI
+- selected widget or microflow node identity from the extension
+- extension-backed Mendix error count or consistency-check reporting
+- extension-backed write operations
+
 ## 0.1.0
 
 Initial public checkpoint for the Mendix Studio Pro automation repo.

@@ -1,0 +1,7 @@
+{
+  "mx_extensions": [
+    {
+      "path": "dist/MendixStudioAutomation.Extension.dll"
+    }
+  ]
+}

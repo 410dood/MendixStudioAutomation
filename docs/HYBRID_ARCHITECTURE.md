@@ -68,16 +68,17 @@ Primary responsibilities:
   - inspect microflow graph
   - create/update page elements where supported by the model/service layer
 
-Suggested transport:
+Current transport choice:
 
-- local named pipe first
-- localhost HTTP only if named pipes become impractical
+- supported in-Studio `WebServerExtension` route first
+- local named pipe only if a later use case needs a non-HTTP side channel
 
-Suggested shape:
+Current shape:
 
 - extension DLL loaded by Studio Pro
-- small command host inside the extension
-- command schema with request/response JSON
+- `WebServerExtension` exposing JSON routes
+- local runtime discovery file at `runtime/endpoint.json`
+- optional `MenuExtension` for manual verification from inside Studio Pro
 
 ### Layer 2: UI automation fallback
 
@@ -186,11 +187,21 @@ Add orchestrator routing in this repo:
 
 ## What I would build next
 
-The next highest-value step is:
+The first hybrid slice is now implemented in this repo as:
 
-1. create a `StudioProExtensionHost` C# project
-2. implement `get-context`
-3. expose it over a local pipe
-4. call it from this repo before any page/microflow mutation
+- `extensions/MendixStudioAutomation.Extension`
 
-That gives us a real hybrid foundation without abandoning the automation work already proven.
+Current status:
+
+1. real C# Mendix extension project created
+2. exact `Mendix.StudioPro.ExtensionsAPI 10.24.14-build.90436` package pinned
+3. `context`, `health`, and `capabilities` routes exposed through `WebServerExtension`
+4. runtime discovery file written to `runtime/endpoint.json`
+5. Node CLI commands `extension-status`, `extension-context`, and `hybrid-context` added
+
+The next highest-value step is now:
+
+1. install and load the extension inside the live Olari app
+2. validate `/context` against the running Studio Pro session
+3. enrich extension context with selected element and consistency-check/error data
+4. begin routing page and microflow inspection through the extension before falling back to UI automation

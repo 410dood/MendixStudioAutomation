@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>MendixStudioAutomation.Extension</RootNamespace>
+    <AssemblyName>MendixStudioAutomation.Extension</AssemblyName>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mendix.StudioPro.ExtensionsAPI" Version="10.24.14-build.90436" />
+  </ItemGroup>
+
+  <Target Name="CopyExtensionArtifacts" AfterTargets="Build">
+    <PropertyGroup>
+      <ExtensionDistDir>$(MSBuildProjectDirectory)\dist\</ExtensionDistDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(ExtensionDistDir)" />
+    <ItemGroup>
+      <ExtensionArtifacts Include="$(TargetDir)**\*.*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(ExtensionArtifacts)"
+      DestinationFiles="@(ExtensionArtifacts->'$(ExtensionDistDir)%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+</Project>
