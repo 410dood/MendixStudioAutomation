@@ -1,5 +1,29 @@
 # Release Notes
 
+## 0.2.32
+
+Insert-before targeting for list head/tail/contains microflow operations.
+
+- Enhanced extension routes:
+  - `/mendix-studio-automation/microflows/list-head`
+  - `/mendix-studio-automation/microflows/list-tail`
+  - `/mendix-studio-automation/microflows/list-contains`
+- Added optional query argument support:
+  - `insertBeforeActivity` (aliases: `insertBefore`, `beforeActivity`, `beforeCaption`)
+  - `insertBeforeIndex` (alias: `beforeIndex`)
+- Added Node/CLI propagation for:
+  - `add-microflow-list-head`
+  - `add-microflow-list-tail`
+  - `add-microflow-list-contains`
+- Insertion behavior:
+  - default remains insert after microflow start
+  - when `insertBeforeActivity` is supplied, insertion matches by caption/action type
+  - when `insertBeforeIndex` is supplied, insertion is index-based from `list-microflow-activities`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.31
 
 Insert-before targeting for binary list microflow operations.

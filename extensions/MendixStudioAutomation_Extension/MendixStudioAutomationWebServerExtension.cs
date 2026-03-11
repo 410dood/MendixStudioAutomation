@@ -2361,6 +2361,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var moduleName = request.QueryString["module"];
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
         var findExpressionText = request.QueryString["findExpression"] ?? request.QueryString["expression"] ?? request.QueryString["value"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
@@ -3422,6 +3427,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var moduleName = request.QueryString["module"];
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -3498,15 +3508,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 operation);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a List head activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a List head activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3519,6 +3539,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowModule = targetMicroflowModule,
                 listVariable = sourceList,
                 outputVariableName = output,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/list-head",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -3549,6 +3574,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var moduleName = request.QueryString["module"];
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -3625,15 +3655,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 operation);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a List tail activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a List tail activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3646,6 +3686,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowModule = targetMicroflowModule,
                 listVariable = sourceList,
                 outputVariableName = output,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/list-tail",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -3677,6 +3722,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var objectVariableName = request.QueryString["objectVariable"] ?? request.QueryString["value"] ?? request.QueryString["itemVariable"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -3765,15 +3815,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 operation);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a List contains activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a List contains activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3787,6 +3847,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 listVariable = sourceList,
                 objectVariable,
                 outputVariableName = output,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/list-contains",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);

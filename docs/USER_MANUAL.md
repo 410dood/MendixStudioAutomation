@@ -400,16 +400,34 @@ Insert a list-head activity in a microflow through the extension API:
 npm run add-microflow-list-head -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstClientDocument"
 ```
 
+Insert the list-head activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-list-head -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstClientDocument" --insert-before-activity "Retrieve"
+```
+
 Insert a list-tail activity in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-list-tail -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentListTail"
 ```
 
+Insert the list-tail activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-list-tail -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentListTail" --insert-before-index 13
+```
+
 Insert a list-contains activity in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-list-contains -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --object-variable "ClientDocumentObj" --output-variable-name "HasClientDocument"
+```
+
+Insert the list-contains activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-list-contains -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --object-variable "ClientDocumentObj" --output-variable-name "HasClientDocument" --insert-before-activity "Create object"
 ```
 
 Insert a list-union activity in a microflow through the extension API:
@@ -600,9 +618,9 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - `add-microflow-change-list` inserts `Change list` activities only at the start of the selected microflow.
 - `add-microflow-sort-list` inserts `Sort list` activities only at the start of the selected microflow.
 - `add-microflow-reduce-aggregate` inserts `Reduce aggregate` activities only at the start of the selected microflow.
-- `add-microflow-list-head` inserts `List head` activities only at the start of the selected microflow.
-- `add-microflow-list-tail` inserts `List tail` activities only at the start of the selected microflow.
-- `add-microflow-list-contains` inserts `List contains` activities only at the start of the selected microflow.
+- `add-microflow-list-head` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-list-tail` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-list-contains` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-list-union` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-list-intersect` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-list-subtract` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.

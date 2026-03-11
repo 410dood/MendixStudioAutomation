@@ -155,6 +155,9 @@ npm run add-microflow-reduce-aggregate -- --microflow "ClinicalDocument_ShowPage
 npm run add-microflow-list-head -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstClientDocument"
 npm run add-microflow-list-tail -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentListTail"
 npm run add-microflow-list-contains -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --object-variable "ClientDocumentObj" --output-variable-name "HasClientDocument"
+npm run add-microflow-list-head -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstClientDocument" --insert-before-activity "Retrieve"
+npm run add-microflow-list-tail -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentListTail" --insert-before-index 13
+npm run add-microflow-list-contains -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --object-variable "ClientDocumentObj" --output-variable-name "HasClientDocument" --insert-before-activity "Create object"
 npm run add-microflow-list-union -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "CombinedClientDocumentList"
 npm run add-microflow-list-intersect -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "SharedClientDocumentList"
 npm run add-microflow-list-subtract -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "RemainingClientDocumentList"
@@ -292,6 +295,7 @@ Phase 2:
 - current `add-microflow-list-head` now inserts SDK-backed `List head` activities through the hybrid extension route
 - current `add-microflow-list-tail` now inserts SDK-backed `List tail` activities through the hybrid extension route
 - current `add-microflow-list-contains` now inserts SDK-backed `List contains` activities through the hybrid extension route
+- current list unary/binary actions (`list-head`, `list-tail`, `list-contains`) now also support optional `--insert-before-activity` and `--insert-before-index`
 - current `add-microflow-list-union` now inserts SDK-backed `List union` activities through the hybrid extension route
 - current `add-microflow-list-intersect` now inserts SDK-backed `List intersect` activities through the hybrid extension route
 - current `add-microflow-list-subtract` now inserts SDK-backed `List subtract` activities through the hybrid extension route

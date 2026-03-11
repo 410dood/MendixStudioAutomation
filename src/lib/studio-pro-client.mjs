@@ -1877,7 +1877,9 @@ export class StudioProClient {
             microflow: normalized.microflow,
             module: normalized.module,
             listVariable: normalized.listVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1886,7 +1888,9 @@ export class StudioProClient {
             microflow: normalized.microflow,
             module: normalized.module,
             listVariable: normalized.listVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1930,7 +1934,9 @@ export class StudioProClient {
             microflow: normalized.microflow,
             module: normalized.module,
             listVariable: normalized.listVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1939,7 +1945,9 @@ export class StudioProClient {
             microflow: normalized.microflow,
             module: normalized.module,
             listVariable: normalized.listVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1992,7 +2000,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             objectVariable: normalized.objectVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2002,7 +2012,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             objectVariable: normalized.objectVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -3492,7 +3504,9 @@ function normalizeMicroflowListOperationOptions(options, defaultOutputVariableNa
         microflow: options.microflow ?? options.item,
         module: options.module,
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
-        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
