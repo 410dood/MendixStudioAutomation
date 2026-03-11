@@ -90,6 +90,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "sync-properties-dialog-items": {
+            const result = await client.syncPropertiesDialogItems(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-properties-dialog-control": {
             const result = await client.invokePropertiesDialogControl(options);
             formatOutput(result);
@@ -177,6 +182,11 @@ async function main() {
         }
         case "compare-dialog-items": {
             const result = await client.compareDialogItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "sync-dialog-items": {
+            const result = await client.syncDialogItems(options);
             formatOutput(result);
             return;
         }
@@ -549,6 +559,7 @@ Commands:
   list-properties-dialog-items Open a properties dialog and list raw visible controls
   export-properties-dialog-items Open a properties dialog and export raw visible controls to JSON
   compare-properties-dialog-items Open a properties dialog and compare raw visible controls to JSON
+  sync-properties-dialog-items Open a properties dialog and build a raw-control sync plan
   invoke-properties-dialog-control Open a properties dialog and invoke a named control inside it
   get-properties-dialog-field Open a properties dialog and read one labeled field
   set-properties-dialog-fields Open a properties dialog and apply batch field edits
@@ -567,6 +578,7 @@ Commands:
   list-dialog-items           List visible named controls inside a Studio Pro dialog
   export-dialog-items         Export raw visible dialog controls to JSON
   compare-dialog-items        Compare raw visible dialog controls to JSON
+  sync-dialog-items           Build a raw-control sync plan from dialog comparison
   list-dialog-fields          List visible dialog labels that resolve to field/value pairs
   export-dialog-fields        Export dialog field/value pairs to a JSON file for reuse
   compare-dialog-fields       Compare a live dialog against a JSON field plan

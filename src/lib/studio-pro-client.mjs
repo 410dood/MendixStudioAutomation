@@ -638,6 +638,56 @@ export class StudioProClient {
         };
     }
 
+    async syncPropertiesDialogItems(options = {}) {
+        let openResult;
+        try {
+            openResult = await this.openProperties(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "sync-properties-dialog-items",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        const dialogName = extractDialogWindowName(openResult);
+        if (!openResult?.ok || !dialogName) {
+            return {
+                ok: false,
+                action: "sync-properties-dialog-items",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: openResult?.error ?? "Properties dialog did not open or did not report a dialog window name.",
+                openResult
+            };
+        }
+
+        const syncResult = await this.syncDialogItems({
+            ...options,
+            dialog: dialogName
+        });
+        const finalizeResult = await finalizePropertiesDialogAction(this, dialogName, options, syncResult?.ok);
+
+        return {
+            ok: Boolean(openResult?.ok) && Boolean(syncResult?.ok) && finalizeSucceeded(finalizeResult),
+            action: "sync-properties-dialog-items",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            dialog: dialogName,
+            openResult,
+            syncResult,
+            finalizeResult
+        };
+    }
+
     async invokePropertiesDialogControl(options = {}) {
         let openResult;
         try {
@@ -1043,6 +1093,37 @@ export class StudioProClient {
             expectedCount: expectedItems.length,
             liveCount: Array.isArray(liveResult.items) ? liveResult.items.length : 0,
             diff
+        };
+    }
+
+    async syncDialogItems(options = {}) {
+        const comparison = await this.compareDialogItems(options);
+        if (!comparison?.ok && !comparison?.diff) {
+            return {
+                ...comparison,
+                action: "sync-dialog-items"
+            };
+        }
+
+        const changed = Array.isArray(comparison?.diff?.changed) ? comparison.diff.changed : [];
+        const missing = Array.isArray(comparison?.diff?.missing) ? comparison.diff.missing : [];
+        const extra = Array.isArray(comparison?.diff?.extra) ? comparison.diff.extra : [];
+
+        return {
+            ok: changed.length === 0 && missing.length === 0,
+            action: "sync-dialog-items",
+            dialog: options.dialog,
+            batchSource: comparison.batchSource ?? null,
+            itemsFile: comparison.itemsFile ?? null,
+            changedCount: changed.length,
+            missingCount: missing.length,
+            extraCount: extra.length,
+            plannedChanges: {
+                changed,
+                missing,
+                extra
+            },
+            comparison
         };
     }
 

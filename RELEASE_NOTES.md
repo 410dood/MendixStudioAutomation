@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.58
+
+Raw dialog sync planning for generic and target-first workflows.
+
+- Added `sync-dialog-items` to turn raw dialog comparison into a structured sync plan with changed, missing, and extra controls.
+- Added `sync-properties-dialog-items` to emit the same sync plan from a real page or microflow properties target.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.57
 
 Raw dialog comparison for generic and target-first workflows.

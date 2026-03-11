@@ -52,6 +52,7 @@ npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --i
 npm run list-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --limit 50
 npm run export-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-items.json"
 npm run compare-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --items-file ".automation-state/structure-mode-items.json"
+npm run sync-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --items-file ".automation-state/structure-mode-items.json" --finalize-dialog "Cancel"
 npm run invoke-properties-dialog-control -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control "Apply" --control-type Button
 npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --control-type Edit
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
@@ -129,6 +130,7 @@ npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run export-dialog-items -- --dialog "Select Widget" --output-file ".automation-state/select-widget-items.json"
 npm run compare-dialog-items -- --dialog "Select Widget" --items-file ".automation-state/select-widget-items.json"
+npm run sync-dialog-items -- --dialog "Select Widget" --items-file ".automation-state/select-widget-items.json"
 npm run list-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --control-type CheckBox
 npm run export-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --output-file ".automation-state/dialog-fields.json"
 npm run compare-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json"
@@ -151,6 +153,7 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `list-dialog-fields` is the higher-level inspection command when you want label/value pairs instead of a raw control inventory.
 `export-dialog-items` writes the raw visible control inventory to JSON when you need to inspect or diff a dialog outside the live Studio Pro session.
 `compare-dialog-items` compares a saved raw control inventory against the live dialog and reports missing, extra, and changed controls by stable signature.
+`sync-dialog-items` turns that raw-control diff into a structured sync plan so you can review the exact drift before building more targeted automation.
 `export-dialog-fields` writes those label/value pairs to JSON so they can be edited and fed back into `set-dialog-fields --fields-file ...`.
 `compare-dialog-fields` compares a saved JSON field plan with the live dialog and reports changed, missing, and extra fields before you mutate anything.
 `sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan. Use `--dry-run true` to emit the planned edits without mutating Studio Pro.
@@ -160,6 +163,7 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `list-properties-dialog-items` composes `open-properties` with `list-dialog-items`, so you can inspect the raw dialog controls when field heuristics are not enough.
 `export-properties-dialog-items` composes `open-properties` with `export-dialog-items`, so raw properties dialog controls can be captured to JSON from a real Studio Pro target.
 `compare-properties-dialog-items` composes `open-properties` with `compare-dialog-items`, so a properties target can be checked against a saved raw-control inventory without manually naming the dialog.
+`sync-properties-dialog-items` composes `open-properties` with `sync-dialog-items`, so a properties target can emit the same raw-control sync plan without manually naming the dialog. This is a review command, not a mutating one.
 `invoke-properties-dialog-control` composes `open-properties` with `invoke-dialog-control`, so nonstandard dialog buttons can be triggered from the same target-first workflow.
 `get-properties-dialog-field` composes `open-properties` with `get-dialog-field`, so single-field reads can target a page/widget/explorer surface directly.
 `set-properties-dialog-fields` composes `open-properties` with `set-dialog-fields`, so batch property edits can also avoid hard-coded dialog captions.
