@@ -926,6 +926,126 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowListUnion(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/list-union", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowListIntersect(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/list-intersect", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowListSubtract(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/list-subtract", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowListEquals(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/list-equals", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowChangeAssociation(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {

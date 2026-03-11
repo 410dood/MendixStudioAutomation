@@ -310,6 +310,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-list-union": {
+            const result = await client.addMicroflowListUnion(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-list-intersect": {
+            const result = await client.addMicroflowListIntersect(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-list-subtract": {
+            const result = await client.addMicroflowListSubtract(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-list-equals": {
+            const result = await client.addMicroflowListEquals(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -463,6 +483,10 @@ Commands:
   add-microflow-list-head     Add a microflow List head activity through the extension
   add-microflow-list-tail     Add a microflow List tail activity through the extension
   add-microflow-list-contains Add a microflow List contains activity through the extension
+  add-microflow-list-union    Add a microflow List union activity through the extension
+  add-microflow-list-intersect Add a microflow List intersect activity through the extension
+  add-microflow-list-subtract Add a microflow List subtract activity through the extension
+  add-microflow-list-equals   Add a microflow List equals activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-rollback-object Add a microflow Rollback object activity through the extension
@@ -560,6 +584,8 @@ Options:
   --initial-expression <text> Initial expression for reduce-aggregate actions
   --reduce-type <name>      Result type for reduce-aggregate: String|Integer|Decimal|Float|Boolean|DateTime
   --object-variable <name>  Object/list variable for list-contains actions
+  --other-list-variable <name> Second list variable for list-union/intersect/subtract/equals actions
+  --second-list-variable <name> Alias for --other-list-variable
   --sort-descending <true|false> Sort descending for sort-list actions (default: false)
   --x-path-constraint <text>  Optional XPath constraint for retrieve-database action
   --retrieve-first <true|false> Retrieve first object instead of a list

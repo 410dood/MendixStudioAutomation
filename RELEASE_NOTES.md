@@ -1,5 +1,46 @@
 # Release Notes
 
+## 0.2.22
+
+Hybrid write-path expansion for binary list microflow operations.
+
+- Added new extension routes:
+  - `/mendix-studio-automation/microflows/list-union`
+  - `/mendix-studio-automation/microflows/list-intersect`
+  - `/mendix-studio-automation/microflows/list-subtract`
+  - `/mendix-studio-automation/microflows/list-equals`
+- Added extension capabilities:
+  - `microflow.listUnion`
+  - `microflow.listIntersect`
+  - `microflow.listSubtract`
+  - `microflow.listEquals`
+- Added Studio Pro client support for:
+  - inserting a `List union` action into a selected microflow via extension service APIs
+  - inserting a `List intersect` action into a selected microflow via extension service APIs
+  - inserting a `List subtract` action into a selected microflow via extension service APIs
+  - inserting a `List equals` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm scripts:
+  - `add-microflow-list-union`
+  - `add-microflow-list-intersect`
+  - `add-microflow-list-subtract`
+  - `add-microflow-list-equals`
+  - `npm run add-microflow-list-union`
+  - `npm run add-microflow-list-intersect`
+  - `npm run add-microflow-list-subtract`
+  - `npm run add-microflow-list-equals`
+- Added CLI options:
+  - `--other-list-variable`
+  - `--second-list-variable`
+- Updated operation catalog with:
+  - `microflow.listUnion`
+  - `microflow.listIntersect`
+  - `microflow.listSubtract`
+  - `microflow.listEquals`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.21
 
 Hybrid write-path expansion for microflow list-operation endpoints.

@@ -1832,6 +1832,258 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowListUnion(options = {}) {
+        const normalized = normalizeMicroflowBinaryListOperationOptions(options, "ListUnionResult");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-list-union",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-union",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (!normalized.otherListVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-union",
+                error: "An --other-list-variable (or --second-list-variable) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-list-union",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listUnion"))) {
+            return {
+                ok: false,
+                action: "add-microflow-list-union",
+                error: "Extension capabilities do not include microflow.listUnion."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowListUnion({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-list-union",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
+    async addMicroflowListIntersect(options = {}) {
+        const normalized = normalizeMicroflowBinaryListOperationOptions(options, "ListIntersectResult");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-list-intersect",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-intersect",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (!normalized.otherListVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-intersect",
+                error: "An --other-list-variable (or --second-list-variable) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-list-intersect",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listIntersect"))) {
+            return {
+                ok: false,
+                action: "add-microflow-list-intersect",
+                error: "Extension capabilities do not include microflow.listIntersect."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowListIntersect({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-list-intersect",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
+    async addMicroflowListSubtract(options = {}) {
+        const normalized = normalizeMicroflowBinaryListOperationOptions(options, "ListSubtractResult");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-list-subtract",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-subtract",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (!normalized.otherListVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-subtract",
+                error: "An --other-list-variable (or --second-list-variable) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-list-subtract",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listSubtract"))) {
+            return {
+                ok: false,
+                action: "add-microflow-list-subtract",
+                error: "Extension capabilities do not include microflow.listSubtract."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowListSubtract({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-list-subtract",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
+    async addMicroflowListEquals(options = {}) {
+        const normalized = normalizeMicroflowBinaryListOperationOptions(options, "ListEqualsResult");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-list-equals",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-equals",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (!normalized.otherListVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-list-equals",
+                error: "An --other-list-variable (or --second-list-variable) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-list-equals",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listEquals"))) {
+            return {
+                ok: false,
+                action: "add-microflow-list-equals",
+                error: "Extension capabilities do not include microflow.listEquals."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowListEquals({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-list-equals",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            otherListVariable: normalized.otherListVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -2985,6 +3237,19 @@ function normalizeMicroflowListContainsOptions(options) {
     return {
         ...normalizeMicroflowListOperationOptions(options, "ListContainsResult"),
         objectVariable: options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable
+    };
+}
+
+function normalizeMicroflowBinaryListOperationOptions(options, defaultOutputVariableName = "ListBinaryResult") {
+    return {
+        ...normalizeMicroflowListOperationOptions(options, defaultOutputVariableName),
+        otherListVariable: options.otherListVariable
+            ?? options.secondListVariable
+            ?? options.secondVariable
+            ?? options.objectVariable
+            ?? options.value
+            ?? options.itemVariable
+            ?? options.variable
     };
 }
 

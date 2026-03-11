@@ -99,6 +99,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/microflows/list-head", HandleListHeadMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/list-tail", HandleListTailMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/list-contains", HandleListContainsMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/list-union", HandleListUnionMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/list-intersect", HandleListIntersectMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/list-subtract", HandleListSubtractMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/list-equals", HandleListEqualsMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/delete-object", HandleDeleteMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/commit-object", HandleCommitMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/rollback-object", HandleRollbackMicroflowObjectAsync);
@@ -252,6 +256,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "microflow.listHead",
             "microflow.listTail",
             "microflow.listContains",
+            "microflow.listUnion",
+            "microflow.listIntersect",
+            "microflow.listSubtract",
+            "microflow.listEquals",
             "microflow.deleteObject",
             "microflow.commitObject",
             "microflow.rollbackObject",
@@ -3530,6 +3538,196 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleListUnionMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+        => HandleBinaryListOperationMicroflowAsync(request, response, cancellationToken, "union");
+
+    private Task HandleListIntersectMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+        => HandleBinaryListOperationMicroflowAsync(request, response, cancellationToken, "intersect");
+
+    private Task HandleListSubtractMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+        => HandleBinaryListOperationMicroflowAsync(request, response, cancellationToken, "subtract");
+
+    private Task HandleListEqualsMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+        => HandleBinaryListOperationMicroflowAsync(request, response, cancellationToken, "equals");
+
+    private Task HandleBinaryListOperationMicroflowAsync(
+        HttpListenerRequest request,
+        HttpListenerResponse response,
+        CancellationToken cancellationToken,
+        string operationKind)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
+        var secondVariableName = request.QueryString["otherListVariable"]
+            ?? request.QueryString["secondListVariable"]
+            ?? request.QueryString["secondVariable"]
+            ?? request.QueryString["objectVariable"]
+            ?? request.QueryString["value"]
+            ?? request.QueryString["itemVariable"];
+        var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+
+        var routeSuffix = operationKind switch
+        {
+            "union" => "list-union",
+            "intersect" => "list-intersect",
+            "subtract" => "list-subtract",
+            "equals" => "list-equals",
+            _ => null
+        };
+
+        if (routeSuffix is null)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"Unsupported binary list operation kind '{operationKind}'."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(listVariableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'listVariable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(secondVariableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "A second variable is required (otherListVariable / secondListVariable / objectVariable)."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var sourceList = listVariableName.Trim();
+            var secondVariable = secondVariableName.Trim();
+            var defaultOutput = operationKind == "equals" ? "ListEqualsResult" : "ListBinaryResult";
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? defaultOutput : outputVariableName.Trim();
+
+            var operation = operationKind switch
+            {
+                "union" => (IListOperation)CurrentApp.Create<IUnion>(),
+                "intersect" => CurrentApp.Create<IIntersect>(),
+                "subtract" => CurrentApp.Create<ISubtract>(),
+                "equals" => CurrentApp.Create<IListEquals>(),
+                _ => throw new InvalidOperationException($"Unsupported binary list operation kind '{operationKind}'.")
+            };
+
+            var binaryOperation = (IBinaryListOperation)operation;
+            binaryOperation.SecondListOrObjectVariableName = secondVariable;
+
+            using var tx = CurrentApp.StartTransaction($"Add {routeSuffix} activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateListOperationActivity(
+                CurrentApp,
+                sourceList,
+                output,
+                operation);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"The API could not insert a {routeSuffix} activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                listVariable = sourceList,
+                secondVariable,
+                outputVariableName = output,
+                route = $"microflows/{routeSuffix}",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error($"Failed to create microflow {routeSuffix} activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private Task HandleDeleteMicroflowObjectAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
         if (CurrentApp?.Root is not IProject project)
@@ -4396,6 +4594,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowListHeadUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-head"),
                 microflowListTailUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-tail"),
                 microflowListContainsUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-contains"),
+                microflowListUnionUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-union"),
+                microflowListIntersectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-intersect"),
+                microflowListSubtractUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-subtract"),
+                microflowListEqualsUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-equals"),
                 microflowDeleteObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/delete-object"),
                 microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object"),
                 microflowRollbackObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/rollback-object"),

@@ -37,6 +37,10 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/microflows/list-head`
   - `/mendix-studio-automation/microflows/list-tail`
   - `/mendix-studio-automation/microflows/list-contains`
+  - `/mendix-studio-automation/microflows/list-union`
+  - `/mendix-studio-automation/microflows/list-intersect`
+  - `/mendix-studio-automation/microflows/list-subtract`
+  - `/mendix-studio-automation/microflows/list-equals`
   - `/mendix-studio-automation/microflows/delete-object`
   - `/mendix-studio-automation/microflows/commit-object`
   - `/mendix-studio-automation/microflows/rollback-object`
@@ -107,6 +111,10 @@ That keeps the extension root in the Mendix-documented shape:
   - add a `List head` activity in a target microflow
   - add a `List tail` activity in a target microflow
   - add a `List contains` activity in a target microflow
+  - add a `List union` activity in a target microflow
+  - add a `List intersect` activity in a target microflow
+  - add a `List subtract` activity in a target microflow
+  - add a `List equals` activity in a target microflow
   - add a `Delete object` activity in a target microflow
   - add a `Commit object` activity in a target microflow
   - add a `Rollback object` activity in a target microflow

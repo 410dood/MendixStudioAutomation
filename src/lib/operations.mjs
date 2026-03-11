@@ -291,6 +291,26 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.listUnion",
+            description: "Insert a List union activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.listIntersect",
+            description: "Insert a List intersect activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.listSubtract",
+            description: "Insert a List subtract activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.listEquals",
+            description: "Insert a List equals activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.deleteObject",
             description: "Insert a Delete object activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"

@@ -36,7 +36,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - open an in-Studio quick create-object modal dialog (menu, context menu, or CLI trigger)
 - track and summarize automation knowledge gaps locally for prioritization
 - add opened pages to the web navigation profile via the hybrid extension route
-- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Call microflow`, `Retrieve from database`, `Retrieve by association`, `Filter by association`, `Find by association`, `Filter by attribute`, `Find by attribute`, `Find by expression`, `Aggregate list`, `Aggregate by attribute`, `Aggregate by expression`, `Change list`, `Sort list`, `Reduce aggregate`, `List head`, `List tail`, `List contains`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
+- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Call microflow`, `Retrieve from database`, `Retrieve by association`, `Filter by association`, `Find by association`, `Filter by attribute`, `Find by attribute`, `Find by expression`, `Aggregate list`, `Aggregate by attribute`, `Aggregate by expression`, `Change list`, `Sort list`, `Reduce aggregate`, `List head`, `List tail`, `List contains`, `List union`, `List intersect`, `List subtract`, `List equals`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -142,6 +142,10 @@ npm run add-microflow-reduce-aggregate -- --microflow "ClinicalDocument_ShowPage
 npm run add-microflow-list-head -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstClientDocument"
 npm run add-microflow-list-tail -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentListTail"
 npm run add-microflow-list-contains -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --object-variable "ClientDocumentObj" --output-variable-name "HasClientDocument"
+npm run add-microflow-list-union -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "CombinedClientDocumentList"
+npm run add-microflow-list-intersect -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "SharedClientDocumentList"
+npm run add-microflow-list-subtract -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "RemainingClientDocumentList"
+npm run add-microflow-list-equals -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "ClientDocumentListsMatch"
 npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
 npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --refresh-in-client false
@@ -260,6 +264,10 @@ Phase 2:
 - current `add-microflow-list-head` now inserts SDK-backed `List head` activities through the hybrid extension route
 - current `add-microflow-list-tail` now inserts SDK-backed `List tail` activities through the hybrid extension route
 - current `add-microflow-list-contains` now inserts SDK-backed `List contains` activities through the hybrid extension route
+- current `add-microflow-list-union` now inserts SDK-backed `List union` activities through the hybrid extension route
+- current `add-microflow-list-intersect` now inserts SDK-backed `List intersect` activities through the hybrid extension route
+- current `add-microflow-list-subtract` now inserts SDK-backed `List subtract` activities through the hybrid extension route
+- current `add-microflow-list-equals` now inserts SDK-backed `List equals` activities through the hybrid extension route
 - current `add-microflow-delete-object` now inserts SDK-backed `Delete object` activities through the hybrid extension route
 - current `add-microflow-commit-object` now inserts SDK-backed `Commit object` activities through the hybrid extension route
 - current `add-microflow-rollback-object` now inserts SDK-backed `Rollback object` activities through the hybrid extension route
