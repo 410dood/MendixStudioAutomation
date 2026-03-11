@@ -12,6 +12,7 @@ Included in this release:
 - popup inspection and wait-until-ready commands
 - generic Studio Pro key-chord sending
 - first-pass shortcuts for local run, stop, and responsive web
+- first-pass native properties-dialog opening from selected editor targets
 - document opening through Studio Pro `Go to`
 - open-editor tab listing and direct tab activation
 - best-known active editor tab reporting with last-known fallback
@@ -33,6 +34,7 @@ Included in this release:
 - first-pass `insert-widget` flow with `--dry-run`
 - `insert-widget` now reaches the native `Select Widget` dialog from Page Explorer targets
 - `insert-widget` now disambiguates duplicate widget names in the `Select Widget` dialog by testing whether the `Select` button becomes enabled
+- `open-properties` is now validated against editor-surface targets that open `Edit Template Grid 'templateGrid1'`
 - page-side widget selection is now validated against live page-designer controls and page-explorer rows
 - first-pass microflow commands:
   - `select-microflow-node`
@@ -56,4 +58,5 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` can now open the native widget picker dialog, but the final page-model mutation is not yet reliable enough to treat as complete authoring.
 - run and responsive-browser commands currently verify shortcut delivery, not full runtime/browser readiness.
+- `open-properties` is strongest on editor-surface targets right now; `pageExplorer` property opening still needs more hardening.
 - unopened documents that Studio Pro does not resolve through `Go to` now fail explicitly instead of returning misleading editor results.

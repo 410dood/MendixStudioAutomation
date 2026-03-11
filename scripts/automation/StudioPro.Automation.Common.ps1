@@ -1895,6 +1895,63 @@ function Invoke-WidgetDialogButton {
     return Select-AutomationMatch -Root $Dialog -Match $match -DelayMs $DelayMs
 }
 
+function Get-StudioProDialogSnapshot {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Name = "",
+        [int]$Limit = 40
+    )
+
+    $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+    $windows = @(Get-StudioProWindowMatches -Root $attached.Element -Name $Name -Depth 15 -MaxResults 20 | Where-Object {
+        $_.name -and $_.name -ne $attached.Process.MainWindowTitle
+    } | Sort-Object `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } })
+
+    if ($windows.Length -eq 0) {
+        return $null
+    }
+
+    $window = $windows[0]
+    $nativeDialog = Resolve-NativeWindowByName -Root $attached.Element -Name $window.name -Depth 15
+    if (-not $nativeDialog) {
+        return @{
+            window = $window
+            items = @()
+        }
+    }
+
+    return @{
+        window = $window
+        items = @(Find-DialogNamedElements -Dialog $nativeDialog -Limit $Limit)
+    }
+}
+
+function Wait-ForStudioProDialogSnapshot {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Name = "",
+        [int]$TimeoutMs = 1500,
+        [int]$PollMs = 150,
+        [int]$Limit = 40
+    )
+
+    $deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMs)
+    do {
+        $snapshot = Get-StudioProDialogSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Name $Name -Limit $Limit
+        if ($snapshot) {
+            return $snapshot
+        }
+
+        Start-Sleep -Milliseconds $PollMs
+    } while ([DateTime]::UtcNow -lt $deadline)
+
+    return $null
+}
+
 function Get-VisibleTextMatches {
     param(
         [System.Windows.Automation.AutomationElement]$Root,

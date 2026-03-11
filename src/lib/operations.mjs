@@ -26,6 +26,11 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "studio.openProperties",
+            description: "Open the native Studio Pro properties dialog for a selected item.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "explorer.openItem",
             description: "Open an App Explorer item such as a module, page, or microflow.",
             status: "implemented-via-go-to"

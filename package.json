@@ -13,6 +13,7 @@
     "run-local": "node src/cli.mjs run-local",
     "stop-local": "node src/cli.mjs stop-local",
     "show-responsive-web": "node src/cli.mjs show-responsive-web",
+    "open-properties": "node src/cli.mjs open-properties",
     "open-item": "node src/cli.mjs open-item",
     "select-widget": "node src/cli.mjs select-widget",
     "popup-status": "node src/cli.mjs popup-status",

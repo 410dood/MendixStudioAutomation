@@ -36,6 +36,7 @@ npm run send-keys -- --keys "{ESC}"
 npm run run-local
 npm run stop-local
 npm run show-responsive-web
+npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 ```
 
 Use these first when Studio Pro behaves unexpectedly or a command seems blocked by a popup.
@@ -60,6 +61,15 @@ npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --c
 ```
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
+
+### Properties dialogs
+
+```powershell
+npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
+npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Parameters (8)" --scope editor
+```
+
+This currently works best for editor-surface targets that already respond to Studio Pro's `Ctrl+,` properties shortcut.
 
 ### Open assets
 
@@ -169,6 +179,7 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - The Toolbox pane is now discovered from its own dock container, which is substantially more reliable than the earlier whole-window scan.
 - The page-designer path is now validated on `Client_ClinicalDocument_V3`, including `Structure mode`, `Olari_Popup_Default`, and real Page Explorer rows like `container34`.
 - Native dialog commands are now reliable enough to inspect and drive WPF dialogs like `Select Widget`.
+- Editor-surface property opening is validated on `Client_ClinicalDocument_V3` for targets like `Structure mode` and `Parameters (8)`.
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.
@@ -179,6 +190,7 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `run-local`, `stop-local`, and `show-responsive-web` currently verify that the correct Studio Pro shortcuts were sent, but they do not yet verify runtime readiness or browser content.
+- `open-properties` currently works better from the editor surface than from `pageExplorer`.
 
 ## Non-Goal
 

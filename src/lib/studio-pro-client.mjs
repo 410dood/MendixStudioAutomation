@@ -46,6 +46,24 @@ export class StudioProClient {
         });
     }
 
+    async openProperties(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/Open-StudioProProperties.ps1", {
+            ProcessId: options.processId,
+            WindowTitlePattern: options.title,
+            Page: resolvedOptions.page,
+            Microflow: resolvedOptions.microflow,
+            Item: options.item ?? options.widget ?? options.node,
+            Scope: options.scope || "editor",
+            DelayMs: numberOrDefault(options.delayMs, 250)
+        });
+        await rememberActiveTabFromPayload(result?.openMethod);
+        if (result?.openMethod?.method === "goTo") {
+            await rememberActiveTabByItemName(this, resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item, options);
+        }
+        return result;
+    }
+
     async openItem(options = {}) {
         const normalizedOptions = normalizeOpenItemOptions(options);
         let result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizedOptions);

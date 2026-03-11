@@ -31,6 +31,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - select a visible named widget or page element on the active designer surface
 - send arbitrary key chords to Studio Pro or the active editor context
 - trigger first-pass local run and responsive web shortcuts from Studio Pro
+- open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
 - list open page and microflow editor tabs
@@ -62,6 +63,7 @@ npm run click -- --runtime-id "42.333896.3.1"
 npm run send-keys -- --page "Client_ClinicalDocument_V3" --scope editor --keys "^,"
 npm run run-local
 npm run show-responsive-web
+npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Structure mode"
@@ -124,6 +126,7 @@ Phase 2:
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - current dialog commands are validated against native Studio Pro dialogs such as `Select Widget` and `Edit Template Grid 'templateGrid1'`
 - current run/browser commands drive Studio Pro shortcuts for `F5`, `Shift+F5`, and `F9`
+- current `open-properties` is validated from editor-surface targets like `Structure mode` and `Parameters (8)` on `Client_ClinicalDocument_V3`
 - operation recorder and selector stabilization
 
 ## Explicit Non-Goal

@@ -45,6 +45,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "open-properties": {
+            const result = await client.openProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "open-item": {
             const result = await client.openItem(options);
             formatOutput(result);
@@ -180,6 +185,7 @@ Commands:
   run-local                   Run the current app locally in Studio Pro
   stop-local                  Stop a locally running app in Studio Pro
   show-responsive-web         Open the app in Studio Pro's responsive browser view
+  open-properties             Open the properties dialog for a selected Studio Pro item
   open-item                   Open a Studio Pro document by name with Ctrl+G
   select-widget               Select a visible named widget or page element
   popup-status                Inspect current Studio Pro popup windows
@@ -216,11 +222,11 @@ Options:
   --runtime-id <a.b.c>        Runtime id returned by find/snapshot
   --max-results <n>           Max matches returned by find
   --keys <value>              Studio Pro key chord for send-keys, e.g. "{F5}" or "^,"
+  --scope <name>              editor, pageExplorer, toolbox, or another named scope
   --item <name>               Document, page, snippet, microflow, or entity name to open
   --page <name>               Page to open before selecting a widget
   --widget <name>             Visible widget or element name to select
   --surface <name>            editor or any (default: editor)
-  --item <name>               Explorer row name or document name, depending on command
   --timeout-ms <n>            Wait timeout in milliseconds
   --poll-ms <n>               Wait poll interval in milliseconds
   --dialog <name>             Open Studio Pro dialog window name

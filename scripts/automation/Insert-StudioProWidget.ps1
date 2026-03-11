@@ -42,6 +42,7 @@ $method = "dryRun"
 $dragDetails = $null
 $dialogStrategy = $null
 $dialogError = $null
+$postDialog = $null
 if (-not $DryRun) {
     try {
         $dialogContext = Open-AddWidgetDialogForPageExplorerItem `
@@ -79,7 +80,7 @@ if (-not $DryRun) {
         }
 
         $method = "contextMenuDialog"
-        Start-Sleep -Milliseconds ($DelayMs + 350)
+        $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(1200, ($DelayMs * 4))) -PollMs 150 -Limit 30
     } catch {
         $dialogError = $_.Exception.Message
 
@@ -95,7 +96,7 @@ if (-not $DryRun) {
             -FinalHoldMs 180
 
         $method = $dragDetails.method
-        Start-Sleep -Milliseconds ($DelayMs + 300)
+        $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(1200, ($DelayMs * 4))) -PollMs 150 -Limit 30
     }
 }
 
@@ -115,6 +116,7 @@ $payload = @{
     drag = $dragDetails
     dialogStrategy = $dialogStrategy
     dialogError = $dialogError
+    postDialog = $postDialog
 }
 
 $payload | ConvertTo-Json -Depth 20
