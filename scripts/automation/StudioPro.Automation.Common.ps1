@@ -20,6 +20,8 @@ public static class NativeMouse
 
     public const uint LEFTDOWN = 0x0002;
     public const uint LEFTUP = 0x0004;
+    public const uint RIGHTDOWN = 0x0008;
+    public const uint RIGHTUP = 0x0010;
 }
 "@
 }
@@ -367,6 +369,144 @@ function Invoke-BoundsDoubleClick {
     Start-Sleep -Milliseconds 100
     $second = Invoke-BoundsClick -Bounds $Bounds
     return "nativeBoundsDoubleClick"
+}
+
+function Invoke-BoundsRightClick {
+    param(
+        [hashtable]$Bounds,
+        [ValidateSet("left", "center", "right")]
+        [string]$Horizontal = "center",
+        [ValidateSet("top", "center", "bottom")]
+        [string]$Vertical = "center",
+        [int]$Inset = 12
+    )
+
+    if ($null -eq $Bounds -or $null -eq $Bounds.left -or $null -eq $Bounds.top -or $null -eq $Bounds.width -or $null -eq $Bounds.height) {
+        throw "Cannot right-click because the target bounds are incomplete."
+    }
+
+    if ($Bounds.width -le 1 -or $Bounds.height -le 1) {
+        throw "Cannot right-click because the target bounds are too small."
+    }
+
+    $point = Get-BoundsPoint -Bounds $Bounds -Horizontal $Horizontal -Vertical $Vertical -Inset $Inset
+    [NativeMouse]::SetCursorPos([int]$point.x, [int]$point.y) | Out-Null
+    Start-Sleep -Milliseconds 50
+    [NativeMouse]::mouse_event([NativeMouse]::RIGHTDOWN, 0, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 50
+    [NativeMouse]::mouse_event([NativeMouse]::RIGHTUP, 0, 0, 0, [UIntPtr]::Zero)
+    return "nativeBoundsRightClick"
+}
+
+function Get-BoundsPoint {
+    param(
+        [hashtable]$Bounds,
+        [ValidateSet("left", "center", "right")]
+        [string]$Horizontal = "center",
+        [ValidateSet("top", "center", "bottom")]
+        [string]$Vertical = "center",
+        [int]$Inset = 12
+    )
+
+    if ($null -eq $Bounds -or $null -eq $Bounds.left -or $null -eq $Bounds.top -or $null -eq $Bounds.width -or $null -eq $Bounds.height) {
+        throw "Cannot derive a point because the target bounds are incomplete."
+    }
+
+    if ($Bounds.width -le 1 -or $Bounds.height -le 1) {
+        throw "Cannot derive a point because the target bounds are too small."
+    }
+
+    $left = [double]$Bounds.left
+    $top = [double]$Bounds.top
+    $right = $left + [double]$Bounds.width
+    $bottom = $top + [double]$Bounds.height
+    $safeInsetX = [math]::Min([math]::Max($Inset, 0), [math]::Max([int]($Bounds.width / 2), 0))
+    $safeInsetY = [math]::Min([math]::Max($Inset, 0), [math]::Max([int]($Bounds.height / 2), 0))
+
+    $x = switch ($Horizontal) {
+        "left" { $left + $safeInsetX }
+        "right" { $right - $safeInsetX }
+        default { $left + ([double]$Bounds.width / 2) }
+    }
+
+    $y = switch ($Vertical) {
+        "top" { $top + $safeInsetY }
+        "bottom" { $bottom - $safeInsetY }
+        default { $top + ([double]$Bounds.height / 2) }
+    }
+
+    return @{
+        x = [int][math]::Round($x)
+        y = [int][math]::Round($y)
+    }
+}
+
+function Invoke-PointDrag {
+    param(
+        [hashtable]$StartPoint,
+        [hashtable]$EndPoint,
+        [int]$Steps = 18,
+        [int]$InitialHoldMs = 120,
+        [int]$StepDelayMs = 18,
+        [int]$FinalHoldMs = 120
+    )
+
+    if ($null -eq $StartPoint -or $null -eq $StartPoint.x -or $null -eq $StartPoint.y) {
+        throw "Cannot drag because the start point is incomplete."
+    }
+
+    if ($null -eq $EndPoint -or $null -eq $EndPoint.x -or $null -eq $EndPoint.y) {
+        throw "Cannot drag because the end point is incomplete."
+    }
+
+    $stepCount = [math]::Max($Steps, 2)
+    [NativeMouse]::SetCursorPos([int]$StartPoint.x, [int]$StartPoint.y) | Out-Null
+    Start-Sleep -Milliseconds 60
+    [NativeMouse]::mouse_event([NativeMouse]::LEFTDOWN, 0, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds $InitialHoldMs
+
+    for ($step = 1; $step -le $stepCount; $step++) {
+        $progress = [double]$step / [double]$stepCount
+        $x = [int][math]::Round($StartPoint.x + (($EndPoint.x - $StartPoint.x) * $progress))
+        $y = [int][math]::Round($StartPoint.y + (($EndPoint.y - $StartPoint.y) * $progress))
+        [NativeMouse]::SetCursorPos($x, $y) | Out-Null
+        Start-Sleep -Milliseconds $StepDelayMs
+    }
+
+    Start-Sleep -Milliseconds $FinalHoldMs
+    [NativeMouse]::mouse_event([NativeMouse]::LEFTUP, 0, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 80
+    return "nativePointDrag"
+}
+
+function Invoke-BoundsDrag {
+    param(
+        [hashtable]$SourceBounds,
+        [hashtable]$TargetBounds,
+        [ValidateSet("left", "center", "right")]
+        [string]$SourceHorizontal = "center",
+        [ValidateSet("top", "center", "bottom")]
+        [string]$SourceVertical = "center",
+        [ValidateSet("left", "center", "right")]
+        [string]$TargetHorizontal = "center",
+        [ValidateSet("top", "center", "bottom")]
+        [string]$TargetVertical = "center",
+        [int]$Inset = 12,
+        [int]$Steps = 18,
+        [int]$InitialHoldMs = 120,
+        [int]$StepDelayMs = 18,
+        [int]$FinalHoldMs = 120
+    )
+
+    $startPoint = Get-BoundsPoint -Bounds $SourceBounds -Horizontal $SourceHorizontal -Vertical $SourceVertical -Inset $Inset
+    $endPoint = Get-BoundsPoint -Bounds $TargetBounds -Horizontal $TargetHorizontal -Vertical $TargetVertical -Inset $Inset
+    $method = Invoke-PointDrag -StartPoint $startPoint -EndPoint $endPoint -Steps $Steps -InitialHoldMs $InitialHoldMs -StepDelayMs $StepDelayMs -FinalHoldMs $FinalHoldMs
+    return @{
+        method = "nativeBoundsDrag"
+        innerMethod = $method
+        startPoint = $startPoint
+        endPoint = $endPoint
+    }
 }
 
 function Test-RectangleWithinBounds {
@@ -1145,6 +1285,89 @@ function Get-StudioProPopupWindows {
     return @($popups)
 }
 
+function Get-StudioProWindowMatches {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Name = "",
+        [int]$Depth = 10,
+        [int]$MaxResults = 40
+    )
+
+    $windows = @(Find-MatchingElements -Root $Root -Depth $Depth -MaxResults $MaxResults -ControlType "Window")
+    $visible = @($windows | Where-Object {
+        $_ -and
+        -not $_.isOffscreen -and
+        ($Name -eq "" -or $_.name -eq $Name)
+    })
+
+    return @($visible)
+}
+
+function Get-StudioProWindowMatchByName {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Name
+    )
+
+    if (-not $Name) {
+        return $null
+    }
+
+    $windows = @(Get-StudioProWindowMatches -Root $Root -Name $Name)
+    if ($windows.Length -eq 0) {
+        return $null
+    }
+
+    return ($windows | Sort-Object `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1)
+}
+
+function Wait-ForStudioProWindowByName {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Name,
+        [int]$TimeoutMs = 4000,
+        [int]$PollMs = 250
+    )
+
+    if (-not $Name) {
+        return $null
+    }
+
+    $deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMs)
+    do {
+        $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+        $window = Get-StudioProWindowMatchByName -Root $attached.Element -Name $Name
+        if ($window) {
+            return @{
+                Attached = $attached
+                Window = $window
+            }
+        }
+
+        Start-Sleep -Milliseconds $PollMs
+    } while ([DateTime]::UtcNow -lt $deadline)
+
+    return $null
+}
+
+function Resolve-NativeWindowByName {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Name,
+        [int]$Depth = 15
+    )
+
+    $match = Get-StudioProWindowMatchByName -Root $Root -Name $Name
+    if (-not $match) {
+        return $null
+    }
+
+    return Resolve-NativeElementByRuntimeId -Root $Root -ExpectedRuntimeId $match.runtimeId -Depth $Depth
+}
+
 function Get-StudioProPopupSummary {
     param(
         [System.Windows.Automation.AutomationElement]$Root
@@ -1266,6 +1489,276 @@ function Select-ToolboxItemByName {
     return Find-VisibleNamedElementInScope -Root $Root -Scope "toolbox" -Name $Item
 }
 
+function Find-DialogNamedElements {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [string]$Name = "",
+        [int]$Limit = 200
+    )
+
+    $controlTypes = @("DataItem", "ListItem", "TreeItem", "Button", "Text", "Edit", "MenuItem")
+    $matches = @()
+    foreach ($controlType in $controlTypes) {
+        $matches += @(Find-MatchingElements -Root $Dialog -Depth 15 -MaxResults 500 -Name $Name -ControlType $controlType)
+    }
+
+    $results = @()
+    $seen = @{}
+    foreach ($match in ($matches | Where-Object {
+        $_ -and
+        -not $_.isOffscreen -and
+        $_.boundingRectangle.top -ne $null -and
+        $_.boundingRectangle.left -ne $null
+    } | Sort-Object `
+        @{ Expression = { Get-ControlTypePriority -ControlType $_.controlType } }, `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } })) {
+        $key = "{0}|{1}|{2}|{3}" -f $match.name, $match.controlType, $match.boundingRectangle.left, $match.boundingRectangle.top
+        if ($seen.ContainsKey($key)) {
+            continue
+        }
+
+        $seen[$key] = $true
+        $results += $match
+        if ($results.Length -ge $Limit) {
+            break
+        }
+    }
+
+    return @($results)
+}
+
+function Open-PageExplorerContextMenu {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [System.Diagnostics.Process]$Process,
+        [System.Windows.Automation.AutomationElement]$Root,
+        [hashtable]$TargetMatch,
+        [string]$MenuItemName = "",
+        [int]$DelayMs = 250,
+        [int]$Attempts = 6
+    )
+
+    if (-not $Process) {
+        throw "A Studio Pro process is required."
+    }
+
+    if (-not $Root) {
+        throw "A Studio Pro root automation element is required."
+    }
+
+    if (-not $TargetMatch) {
+        throw "A Page Explorer target match is required."
+    }
+
+    for ($attempt = 0; $attempt -lt $Attempts; $attempt++) {
+        $currentRoot = (Get-StudioProWindowElement -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern).Element
+        $namedCandidates = @(Get-VisibleNamedElementsInScope -Root $currentRoot -Scope "pageExplorer" -Name $TargetMatch.name -Limit 20 | Where-Object {
+            $_.name -eq $TargetMatch.name -and $_.controlType -in @("Text", "DataItem", "ListItem", "TreeItem")
+        })
+
+        if ($namedCandidates.Length -eq 0) {
+            $namedCandidates = @($TargetMatch)
+        }
+
+        if ($TargetMatch.runtimeId) {
+            $resolvedTarget = Resolve-NativeElementByRuntimeId -Root $currentRoot -ExpectedRuntimeId $TargetMatch.runtimeId -Depth 25
+            if ($resolvedTarget) {
+                $namedCandidates += @(Convert-AutomationElement -Element $resolvedTarget)
+            }
+        }
+
+        $candidateOrder = @($namedCandidates | Sort-Object `
+            @{ Expression = { if ($_.controlType -eq "Text") { 0 } else { 1 } } }, `
+            @{ Expression = { $_.boundingRectangle.left } }, `
+            @{ Expression = { $_.boundingRectangle.top } })
+
+        foreach ($candidate in $candidateOrder) {
+            $points = if ($candidate.controlType -eq "Text") {
+                @(
+                    @{ Horizontal = "center"; Vertical = "center"; Inset = 6 },
+                    @{ Horizontal = "left"; Vertical = "center"; Inset = 6 }
+                )
+            } else {
+                @(
+                    @{ Horizontal = "left"; Vertical = "center"; Inset = 48 },
+                    @{ Horizontal = "left"; Vertical = "center"; Inset = 96 },
+                    @{ Horizontal = "center"; Vertical = "center"; Inset = 12 }
+                )
+            }
+
+            foreach ($point in $points) {
+                Set-StudioProForegroundWindow -Process $Process
+                Invoke-BoundsRightClick -Bounds $candidate.boundingRectangle -Horizontal $point.Horizontal -Vertical $point.Vertical -Inset $point.Inset | Out-Null
+                Start-Sleep -Milliseconds ($DelayMs + 100)
+
+                $attached = Get-StudioProWindowElement -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern
+                $menuItems = @(Find-MatchingElements -Root $attached.Element -Depth 15 -MaxResults 150 -ControlType "MenuItem" | Where-Object {
+                    $_ -and
+                    -not $_.isOffscreen -and
+                    $_.name -and
+                    $_.name -notin @("File", "Edit", "View", "App", "Run", "Version Control", "Language", "Help")
+                })
+
+                if (-not $MenuItemName -and $menuItems.Length -gt 0) {
+                    return @{
+                        Attached = $attached
+                        MenuItems = $menuItems
+                        Trigger = @{
+                            attempt = $attempt + 1
+                            candidate = $candidate
+                            point = $point
+                        }
+                    }
+                }
+
+                if ($MenuItemName) {
+                    $match = @($menuItems | Where-Object { $_.name -eq $MenuItemName } | Select-Object -First 1)
+                    if ($match.Length -gt 0) {
+                        return @{
+                            Attached = $attached
+                            MenuItem = $match[0]
+                            MenuItems = $menuItems
+                            Trigger = @{
+                                attempt = $attempt + 1
+                                candidate = $candidate
+                                point = $point
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return $null
+}
+
+function Open-AddWidgetDialogForPageExplorerItem {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Page,
+        [string]$Target,
+        [int]$DelayMs = 250,
+        [int]$ContextMenuAttempts = 6,
+        [int]$DialogTimeoutMs = 4000
+    )
+
+    if (-not $Page) {
+        throw "A page name is required."
+    }
+
+    if (-not $Target) {
+        throw "A Page Explorer target item is required."
+    }
+
+    $pageContext = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Item $Page -Scope "pageExplorer" -DelayMs $DelayMs
+    $attached = $pageContext.Attached
+    $targetMatch = Select-PageExplorerItemByName -Root $attached.Element -Item $Target
+    if (-not $targetMatch) {
+        throw "Could not find a visible Page Explorer item named '$Target'."
+    }
+
+    $targetSelection = Select-AutomationMatch -Root $attached.Element -Match $targetMatch -DelayMs $DelayMs
+    $contextMenu = Open-PageExplorerContextMenu `
+        -ProcessId $attached.Process.Id `
+        -WindowTitlePattern $WindowTitlePattern `
+        -Process $attached.Process `
+        -Root $attached.Element `
+        -TargetMatch $targetSelection.target `
+        -MenuItemName "Add widget…" `
+        -DelayMs $DelayMs `
+        -Attempts $ContextMenuAttempts
+
+    if (-not $contextMenu -or -not $contextMenu.MenuItem) {
+        throw "Could not open the Page Explorer context menu for '$Target'."
+    }
+
+    $menuSelection = Select-AutomationMatch -Root $contextMenu.Attached.Element -Match $contextMenu.MenuItem -DelayMs ($DelayMs + 100)
+    $dialogWait = Wait-ForStudioProWindowByName -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -Name "Select Widget" -TimeoutMs $DialogTimeoutMs -PollMs 250
+    if (-not $dialogWait -or -not $dialogWait.Window) {
+        throw "Studio Pro did not open the 'Select Widget' dialog."
+    }
+
+    $nativeDialog = Resolve-NativeWindowByName -Root $dialogWait.Attached.Element -Name "Select Widget" -Depth 15
+    if (-not $nativeDialog) {
+        throw "Could not attach to the native 'Select Widget' dialog."
+    }
+
+    return @{
+        PageContext = $pageContext
+        TargetSelection = $targetSelection
+        ContextMenu = $contextMenu
+        MenuSelection = $menuSelection
+        DialogAttached = $dialogWait.Attached
+        DialogWindow = $dialogWait.Window
+        NativeDialog = $nativeDialog
+    }
+}
+
+function Select-WidgetDialogItemByName {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [string]$Widget,
+        [int]$DelayMs = 250
+    )
+
+    if (-not $Dialog) {
+        throw "A native Select Widget dialog is required."
+    }
+
+    if (-not $Widget) {
+        throw "A widget name is required."
+    }
+
+    $items = @(Find-DialogNamedElements -Dialog $Dialog -Name $Widget -Limit 200 | Where-Object {
+        $_.name -eq $Widget -and
+        $_.controlType -in @("DataItem", "ListItem", "TreeItem")
+    })
+
+    if ($items.Length -eq 0) {
+        return $null
+    }
+
+    $match = $items | Sort-Object `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1
+
+    return Select-AutomationMatch -Root $Dialog -Match $match -DelayMs $DelayMs
+}
+
+function Invoke-WidgetDialogButton {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [string]$ButtonName,
+        [int]$DelayMs = 250
+    )
+
+    if (-not $Dialog) {
+        throw "A native Select Widget dialog is required."
+    }
+
+    if (-not $ButtonName) {
+        throw "A dialog button name is required."
+    }
+
+    $buttons = @(Find-DialogNamedElements -Dialog $Dialog -Name $ButtonName -Limit 50 | Where-Object {
+        $_.name -eq $ButtonName -and $_.controlType -eq "Button"
+    })
+
+    if ($buttons.Length -eq 0) {
+        return $null
+    }
+
+    $match = $buttons | Sort-Object `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1
+
+    return Select-AutomationMatch -Root $Dialog -Match $match -DelayMs $DelayMs
+}
+
 function Get-VisibleTextMatches {
     param(
         [System.Windows.Automation.AutomationElement]$Root,
@@ -1302,4 +1795,66 @@ function Resolve-NativeElementByRuntimeId {
     }
 
     return $null
+}
+
+function Select-AutomationMatch {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [hashtable]$Match,
+        [int]$DelayMs = 250
+    )
+
+    if ($null -eq $Match) {
+        throw "Cannot select a null automation match."
+    }
+
+    $native = $null
+    if ($Match.ContainsKey("runtimeId") -and $Match.runtimeId) {
+        $native = Resolve-NativeElementByRuntimeId -Root $Root -ExpectedRuntimeId $Match.runtimeId -Depth 25
+    }
+
+    $method = $null
+    $supportsSelectionItem = $false
+    $supportsInvoke = $false
+    $isSelected = $null
+
+    if ($native) {
+        $selectionPattern = $null
+        if ($native.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$selectionPattern)) {
+            $supportsSelectionItem = $true
+            $selectionPattern.Select()
+            $method = "selectionItemPattern"
+            Start-Sleep -Milliseconds $DelayMs
+            $isSelected = [bool]$selectionPattern.Current.IsSelected
+        } else {
+            $invokePattern = $null
+            if ($native.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$invokePattern)) {
+                $supportsInvoke = $true
+                $invokePattern.Invoke()
+                $method = "invokePattern"
+                Start-Sleep -Milliseconds $DelayMs
+            }
+        }
+    }
+
+    if (-not $method) {
+        $method = Invoke-BoundsClick -Bounds $Match.boundingRectangle
+        Start-Sleep -Milliseconds $DelayMs
+
+        if ($native) {
+            $selectionPattern = $null
+            if ($native.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$selectionPattern)) {
+                $supportsSelectionItem = $true
+                $isSelected = [bool]$selectionPattern.Current.IsSelected
+            }
+        }
+    }
+
+    return @{
+        method = $method
+        supportsSelectionItem = $supportsSelectionItem
+        supportsInvoke = $supportsInvoke
+        isSelected = $isSelected
+        target = $Match
+    }
 }

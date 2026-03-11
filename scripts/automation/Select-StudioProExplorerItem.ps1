@@ -19,17 +19,20 @@ if (-not $match) {
     throw "Could not find a visible Page Explorer row named '$Item'."
 }
 
-$method = Invoke-BoundsClick -Bounds $match.boundingRectangle
+$selection = Select-AutomationMatch -Root $attached.Element -Match $match -DelayMs $DelayMs
 
 $payload = @{
     ok = $true
     action = "select-explorer-item"
     page = $Page
     item = $Item
-    method = $method
+    method = $selection.method
     openMethod = $context.OpenMethod
     tab = $context.Tab
-    target = $match
+    target = $selection.target
+    supportsSelectionItem = $selection.supportsSelectionItem
+    supportsInvoke = $selection.supportsInvoke
+    isSelected = $selection.isSelected
 }
 
 $payload | ConvertTo-Json -Depth 20
