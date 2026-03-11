@@ -74,6 +74,12 @@ If the direct name open is ambiguous, `extension-open-document` now returns stru
 
 When a selected extension search result includes a document ID, the follow-up open now uses that stable ID instead of reopening by name.
 
+If you already know the Mendix document id, you can open directly by id:
+
+```powershell
+npm run extension-open-document -- --document-id "00000000-0000-0000-0000-000000000000"
+```
+
 Prefer the extension context and fall back to UI automation if the extension is not active:
 
 ```powershell
@@ -721,6 +727,7 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - `extension-open-document` now waits for a matching editor tab and updates remembered active-tab state when the open succeeds.
 - `extension-open-document` now uses the same extension-backed search fallback and ambiguity reporting rules as `open-item`.
 - Extension search-based opens now prefer stable document IDs when the search result includes one.
+- `extension-open-document` and `open-item` both accept `--document-id` for deterministic extension-backed open when the id is already known.
 - `open-item` now uses extension-backed document search as a fallback when direct extension open by name does not succeed and there is a unique or exact search hit.
 - `open-item` now returns structured search matches when the extension fallback finds multiple candidates, so ambiguous document opens can be disambiguated with `--module` or `--type`.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.

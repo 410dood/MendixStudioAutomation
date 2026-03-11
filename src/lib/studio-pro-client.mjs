@@ -291,6 +291,14 @@ export class StudioProClient {
             return extensionOpenResult;
         }
 
+        if (options.documentId ?? options.id) {
+            return {
+                ok: false,
+                action: "open-item",
+                error: "A document-id open requires the Mendix Studio Automation extension endpoint to be available."
+            };
+        }
+
         const normalizedOptions = normalizeOpenItemOptions(options);
         let result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizedOptions);
         await rememberActiveTabFromPayload(result);
@@ -599,8 +607,15 @@ export class StudioProClient {
 
     async openExtensionDocument(options = {}) {
         const requestedName = options.name ?? options.item ?? options.page ?? options.microflow ?? null;
-        const result = await this.extensionClient.openDocument(options);
-        if (!result?.ok || !requestedName) {
+        const requestedDocumentId = options.documentId ?? options.id ?? null;
+        const result = requestedDocumentId
+            ? await this.extensionClient.openDocumentById({
+                ...options,
+                documentId: requestedDocumentId
+            })
+            : await this.extensionClient.openDocument(options);
+        const verificationName = requestedName ?? result?.payload?.match?.name ?? null;
+        if (!result?.ok || (!verificationName && !requestedDocumentId)) {
             return {
                 ...result,
                 action: "extension-open-document",
@@ -610,30 +625,31 @@ export class StudioProClient {
         }
 
         if (result?.payload?.opened) {
-            return finalizeVerifiedExtensionOpen(this, result, requestedName, options, {
+            return finalizeVerifiedExtensionOpen(this, result, verificationName, options, {
                 action: "extension-open-document",
-                attempts: 1
+                attempts: 1,
+                documentId: requestedDocumentId ?? result?.payload?.match?.id ?? null
             });
         }
 
         const searchResult = await this.searchExtensionDocuments({
             ...options,
-            query: requestedName,
+            query: verificationName,
             module: options.module,
             type: options.type,
             limit: 10
         });
         const rawItems = getExtensionSearchItems(searchResult);
-        const selectedMatch = resolveExtensionSearchMatch(rawItems, requestedName, options.module, options.type);
+        const selectedMatch = resolveExtensionSearchMatch(rawItems, verificationName, options.module, options.type);
 
         if (!selectedMatch?.name) {
             return {
                 ...result,
                 action: "extension-open-document",
                 error: rawItems.length === 0
-                    ? `No extension document search results matched '${requestedName}'.`
-                    : `Multiple extension document search results matched '${requestedName}'. Provide --module or --type to disambiguate.`,
-                requestedName,
+                    ? `No extension document search results matched '${verificationName}'.`
+                    : `Multiple extension document search results matched '${verificationName}'. Provide --module or --type to disambiguate.`,
+                requestedName: verificationName,
                 module: options.module ?? null,
                 type: options.type ?? null,
                 count: rawItems.length,
@@ -669,8 +685,9 @@ export class StudioProClient {
 
         return finalizeVerifiedExtensionOpen(this, fallbackResult, selectedMatch.name, options, {
             action: "extension-open-document",
-            requestedName,
+            requestedName: verificationName,
             attempts: 2,
+            documentId: selectedMatch.id ?? null,
             selectedDocument: selectedMatch
         });
     }
@@ -3220,7 +3237,9 @@ async function safeGetExtensionContext(client, options) {
 }
 
 async function tryOpenItemViaExtension(client, options) {
-    if (!options?.item) {
+    const requestedItem = options?.item ?? null;
+    const requestedDocumentId = options?.documentId ?? options?.id ?? null;
+    if (!requestedItem && !requestedDocumentId) {
         return null;
     }
 
@@ -3230,30 +3249,35 @@ async function tryOpenItemViaExtension(client, options) {
             return null;
         }
 
-        let openResult = await client.extensionClient.openDocument({
-            ...options,
-            name: options.item
-        });
+        let openResult = requestedDocumentId
+            ? await client.extensionClient.openDocumentById({
+                ...options,
+                documentId: requestedDocumentId
+            })
+            : await client.extensionClient.openDocument({
+                ...options,
+                name: requestedItem
+            });
 
         if (!openResult?.payload?.opened) {
             const searchResult = await client.searchExtensionDocuments({
                 ...options,
-                query: options.item,
+                query: requestedItem,
                 module: options.module,
                 type: options.type,
                 limit: 10
             });
             const rawItems = getExtensionSearchItems(searchResult);
-            const selectedMatch = resolveExtensionSearchMatch(rawItems, options.item, options.module, options.type);
+            const selectedMatch = resolveExtensionSearchMatch(rawItems, requestedItem, options.module, options.type);
 
             if (!selectedMatch?.name) {
                 return {
                     ok: false,
                     method: "extensionSearchDocuments",
                     error: rawItems.length === 0
-                        ? `No extension document search results matched '${options.item}'.`
-                        : `Multiple extension document search results matched '${options.item}'. Provide --module or --type to disambiguate.`,
-                    item: options.item,
+                        ? `No extension document search results matched '${requestedItem}'.`
+                        : `Multiple extension document search results matched '${requestedItem}'. Provide --module or --type to disambiguate.`,
+                    item: requestedItem,
                     module: options.module ?? null,
                     type: options.type ?? null,
                     count: rawItems.length,
@@ -3280,7 +3304,7 @@ async function tryOpenItemViaExtension(client, options) {
                     ok: false,
                     method: "extensionSearchThenOpenDocument",
                     error: `The extension found '${selectedMatch.name}' but could not open it.`,
-                    item: options.item,
+                    item: requestedItem,
                     selectedDocument: selectedMatch,
                     extension: openResult?.payload ?? null,
                     verifiedOpen: false,
@@ -3300,9 +3324,10 @@ async function tryOpenItemViaExtension(client, options) {
             return null;
         }
 
-        return finalizeVerifiedExtensionOpen(client, openResult, options.item, options, {
+        return finalizeVerifiedExtensionOpen(client, openResult, requestedItem ?? openResult?.payload?.match?.name ?? null, options, {
             method: "extensionOpenDocument",
             attempts: 1,
+            documentId: requestedDocumentId ?? openResult?.payload?.match?.id ?? null,
             extension: openResult.payload
         });
     }
@@ -3351,7 +3376,9 @@ function resolveExtensionSearchMatch(items, requestedName, moduleName, type) {
 }
 
 async function finalizeVerifiedExtensionOpen(client, result, requestedName, options, extras = {}) {
-    const matchedTab = await waitForOpenTabByItemName(client, requestedName, options);
+    const matchedTab = requestedName
+        ? await waitForOpenTabByItemName(client, requestedName, options)
+        : null;
     if (matchedTab) {
         await writeLastKnownActiveTab(matchedTab);
     }

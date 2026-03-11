@@ -549,6 +549,7 @@ Options:
   --page-name <name>          Page name for create-page
   --scope <name>              UI scope (editor/pageExplorer/toolbox) or comma-separated rag-search sources
   --item <name>               Document, page, snippet, microflow, or entity name to open
+  --document-id <id>          Stable Mendix document id for extension-backed open commands
   --template <name>           Visible template name for create-page
   --page <name>               Page to open before selecting a widget
   --widget <name>             Visible widget or element name to select

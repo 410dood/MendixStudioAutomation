@@ -100,6 +100,7 @@ npm run extension-context
 npm run extension-capabilities
 npm run extension-search-documents -- --query ClinicalDocument --module Az_ClientManagement --limit 10
 npm run extension-open-document -- --name "ClinicalDocument_ShowPage" --module Az_ClientManagement
+npm run extension-open-document -- --document-id "00000000-0000-0000-0000-000000000000"
 npm run list-microflow-activities -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement"
 npm run find-microflow-activities -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --query "retrieve" --action-type "RetrieveByAssociation"
 npm run open-quick-create-object-dialog -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "CreatedObject"
@@ -272,6 +273,7 @@ Phase 2:
 - current `open-item` now falls back to extension-backed document search and opens a unique or exact search match when direct extension open by name fails
 - current `open-item` now returns structured ambiguity details from the extension search path instead of silently dropping to generic UI automation
 - current extension search-based document opens now reopen by stable document ID when available instead of relying on the name a second time
+- current `extension-open-document` and `open-item` both accept a direct document id for deterministic extension-backed open when that id is already known
 - current `active-context` now reports whether extension metadata actually contributed to the resolved context instead of assuming any extension response improved it
 - current `list-microflow-activities` returns activity/action metadata for a target microflow, including available variable names
 - current `find-microflow-activities` filters microflow activity metadata by query text, action type, and variable name

@@ -1,5 +1,18 @@
 # Release Notes
 
+## 0.2.48
+
+Direct document-id support in public open commands.
+
+- `extension-open-document` now accepts:
+  - `documentId` / `id`
+- `open-item` now also accepts:
+  - `documentId` / `id`
+- This exposes the deterministic extension-backed open-by-id path directly to CLI callers instead of requiring a prior search round trip.
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.47
 
 Deterministic ID-based document open after extension search.
