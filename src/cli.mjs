@@ -568,6 +568,7 @@ Options:
   --entity <name>             Module-qualified or local entity to instantiate, e.g. Document.ClientDocument
   --output-variable-name <text> Output variable name for create/call/retrieve/filter/find actions
   --insert-before-activity <text> Optional activity caption/action type to insert before for selected microflow mutation commands
+  --insert-before-index <n>   Optional activity index from list-microflow-activities to insert before
   --commit <name>             Commit mode for create/change actions: Yes|YesWithoutEvents|No
   --refresh-in-client <true|false> Refresh client after create
   --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}

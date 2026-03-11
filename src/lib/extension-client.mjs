@@ -386,7 +386,8 @@ export class HybridExtensionClient {
             commit: options.commit,
             refreshInClient: options.refreshInClient,
             initialValues: options.initialValues,
-            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -416,7 +417,8 @@ export class HybridExtensionClient {
             module: options.module,
             entity: options.entity,
             outputVariableName: options.outputVariableName ?? options.outputVariable,
-            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -448,7 +450,8 @@ export class HybridExtensionClient {
             calledModule: options.calledModule,
             outputVariableName: options.outputVariableName ?? options.outputVariable,
             parameterMappings: options.parameterMappings ?? options.parameters,
-            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -484,7 +487,8 @@ export class HybridExtensionClient {
             sortDescending: options.sortDescending ?? options.descending,
             rangeOffsetExpression: options.rangeOffsetExpression ?? options.rangeStartExpression ?? options.offsetExpression ?? options.startExpression,
             rangeAmountExpression: options.rangeAmountExpression ?? options.rangeLengthExpression ?? options.limitExpression ?? options.amountExpression,
-            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -516,7 +520,8 @@ export class HybridExtensionClient {
             association: options.association,
             entityVariable: options.entityVariable ?? options.entityVar ?? options.fromVariable ?? options.variable,
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
-            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {

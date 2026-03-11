@@ -609,6 +609,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             ?? request.QueryString["insertBefore"]
             ?? request.QueryString["beforeActivity"]
             ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -749,6 +750,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 targetMicroflow,
                 activity,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 out var insertionMode,
                 out var insertedBeforeCaption,
                 out var insertedBeforeActionType,
@@ -761,7 +763,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                     error = insertionError ?? "The API could not insert a Create object activity into the microflow.",
                     microflow = microflowName,
                     module = targetMicroflowModule,
-                    insertBeforeActivity
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -780,6 +783,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 initialValueCount = initialValues.Length,
                 insertionMode,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 insertedBeforeCaption,
                 insertedBeforeActionType,
                 route = "microflows/create-object",
@@ -818,6 +822,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             ?? request.QueryString["insertBefore"]
             ?? request.QueryString["beforeActivity"]
             ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -927,6 +932,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 targetMicroflow,
                 activity,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 out var insertionMode,
                 out var insertedBeforeCaption,
                 out var insertedBeforeActionType,
@@ -939,7 +945,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                     error = insertionError ?? "The API could not insert a Create list activity into the microflow.",
                     microflow = microflowName,
                     module = targetMicroflowModule,
-                    insertBeforeActivity
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -955,6 +962,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 outputVariableName = output,
                 insertionMode,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 insertedBeforeCaption,
                 insertedBeforeActionType,
                 route = "microflows/create-list",
@@ -992,6 +1000,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             ?? request.QueryString["insertBefore"]
             ?? request.QueryString["beforeActivity"]
             ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
         var parameterMappingsRaw = request.QueryString["parameterMappings"] ?? request.QueryString["parameters"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
@@ -1186,6 +1195,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 targetMicroflow,
                 microflowCallActivity,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 out var insertionMode,
                 out var insertedBeforeCaption,
                 out var insertedBeforeActionType,
@@ -1198,7 +1208,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                     error = insertionError ?? "The API could not insert a Call microflow activity into the microflow.",
                     microflow = microflowName,
                     module = targetMicroflowModule,
-                    insertBeforeActivity
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -1216,6 +1227,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 parameterMappingCount = parsedMappings.Length,
                 insertionMode,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 insertedBeforeCaption,
                 insertedBeforeActionType,
                 route = "microflows/call-microflow",
@@ -1254,6 +1266,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             ?? request.QueryString["insertBefore"]
             ?? request.QueryString["beforeActivity"]
             ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
         var xPathConstraint = request.QueryString["xPathConstraint"] ?? request.QueryString["xpath"] ?? request.QueryString["xPath"];
         var retrieveJustFirst = TryParseBool(request.QueryString["retrieveFirst"], false);
         var sortAttributeName = request.QueryString["sortAttribute"] ?? request.QueryString["sortBy"] ?? request.QueryString["orderByAttribute"];
@@ -1435,6 +1448,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 targetMicroflow,
                 activity,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 out var insertionMode,
                 out var insertedBeforeCaption,
                 out var insertedBeforeActionType,
@@ -1447,7 +1461,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                     error = insertionError ?? "The API could not insert a Retrieve activity into the microflow.",
                     microflow = microflowName,
                     module = targetMicroflowModule,
-                    insertBeforeActivity
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -1469,6 +1484,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 rangeAmountExpression = hasRangeAmountExpression ? rangeAmountExpressionRaw : null,
                 insertionMode,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 insertedBeforeCaption,
                 insertedBeforeActionType,
                 route = "microflows/retrieve-database",
@@ -1509,6 +1525,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             ?? request.QueryString["insertBefore"]
             ?? request.QueryString["beforeActivity"]
             ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -1611,6 +1628,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 targetMicroflow,
                 activity,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 out var insertionMode,
                 out var insertedBeforeCaption,
                 out var insertedBeforeActionType,
@@ -1623,7 +1641,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                     error = insertionError ?? "The API could not insert a Retrieve by association activity into the microflow.",
                     microflow = microflowName,
                     module = targetMicroflowModule,
-                    insertBeforeActivity
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -1641,6 +1660,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 outputVariableName = output,
                 insertionMode,
                 insertBeforeActivity,
+                insertBeforeIndex,
                 insertedBeforeCaption,
                 insertedBeforeActionType,
                 route = "microflows/retrieve-association",
@@ -5089,6 +5109,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         IMicroflow microflow,
         IActivity activity,
         string? insertBeforeActivity,
+        string? insertBeforeIndexRaw,
         out string insertionMode,
         out string? insertedBeforeCaption,
         out string? insertedBeforeActionType,
@@ -5097,6 +5118,45 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         insertedBeforeCaption = null;
         insertedBeforeActionType = null;
         error = null;
+        if (!string.IsNullOrWhiteSpace(insertBeforeIndexRaw))
+        {
+            if (!int.TryParse(insertBeforeIndexRaw, out var index) || index < 0)
+            {
+                insertionMode = "before-index";
+                error = $"Invalid insert-before index '{insertBeforeIndexRaw}'.";
+                return false;
+            }
+
+            var activities = _microflowService.GetAllMicroflowActivities(microflow).ToArray();
+            if (index >= activities.Length)
+            {
+                insertionMode = "before-index";
+                error = $"insert-before index '{index}' is out of range for this microflow ({activities.Length} activities).";
+                return false;
+            }
+
+            var targetActivityByIndex = activities[index];
+            if (targetActivityByIndex is IActionActivity targetActionActivityByIndex)
+            {
+                insertedBeforeCaption = targetActionActivityByIndex.Caption;
+                insertedBeforeActionType = targetActionActivityByIndex.Action?.GetType().Name;
+            }
+            else
+            {
+                insertedBeforeCaption = null;
+                insertedBeforeActionType = targetActivityByIndex.GetType().Name;
+            }
+
+            insertionMode = "before-index";
+            var insertedByIndex = _microflowService.TryInsertBeforeActivity(targetActivityByIndex, [activity]);
+            if (!insertedByIndex)
+            {
+                error = "The selected insert-before index does not point to an activity with exactly one incoming sequence flow.";
+            }
+
+            return insertedByIndex;
+        }
+
         if (string.IsNullOrWhiteSpace(insertBeforeActivity))
         {
             insertionMode = "after-start";

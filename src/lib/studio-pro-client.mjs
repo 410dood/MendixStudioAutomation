@@ -687,7 +687,8 @@ export class StudioProClient {
             commit: normalized.commit,
             refreshInClient: normalized.refreshInClient,
             initialValues: normalized.initialValues,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -699,7 +700,8 @@ export class StudioProClient {
             outputVariableName: normalized.outputVariableName,
             commit: normalized.commit,
             refreshInClient: normalized.refreshInClient,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -744,7 +746,8 @@ export class StudioProClient {
             module: normalized.module,
             entity: normalized.entity,
             outputVariableName: normalized.outputVariableName,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -754,7 +757,8 @@ export class StudioProClient {
             entity: normalized.entity,
             module: normalized.module,
             outputVariableName: normalized.outputVariableName,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -809,7 +813,8 @@ export class StudioProClient {
             calledModule: normalized.calledModule,
             outputVariableName: normalized.outputVariableName,
             parameterMappings: normalized.parameterMappingsRaw,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -821,7 +826,8 @@ export class StudioProClient {
             calledModule: normalized.calledModule,
             outputVariableName: normalized.outputVariableName,
             parameterMappings: normalized.parameterMappings,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -888,7 +894,8 @@ export class StudioProClient {
             sortDescending: normalized.sortDescending,
             rangeOffsetExpression: normalized.rangeOffsetExpression,
             rangeAmountExpression: normalized.rangeAmountExpression,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -904,7 +911,8 @@ export class StudioProClient {
             sortDescending: normalized.sortDescending,
             rangeOffsetExpression: normalized.rangeOffsetExpression,
             rangeAmountExpression: normalized.rangeAmountExpression,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -959,7 +967,8 @@ export class StudioProClient {
             association: normalized.association,
             entityVariable: normalized.entityVariable,
             outputVariableName: normalized.outputVariableName,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -971,7 +980,8 @@ export class StudioProClient {
             association: normalized.association,
             entityVariable: normalized.entityVariable,
             outputVariableName: normalized.outputVariableName,
-            insertBeforeActivity: normalized.insertBeforeActivity
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -3082,7 +3092,8 @@ function normalizeAddMicroflowCreateObjectOptions(options) {
         commit: options.commit || "No",
         refreshInClient: options.refreshInClient ?? "false",
         initialValues: options.initialValues,
-        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3114,7 +3125,8 @@ function normalizeAddMicroflowCreateListOptions(options) {
         module: options.module,
         entity: options.entity,
         outputVariableName: options.outputVariableName || "CreatedList",
-        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3149,6 +3161,7 @@ function normalizeAddMicroflowCallMicroflowOptions(options) {
         calledModule: options.calledModule,
         outputVariableName: options.outputVariableName || "CallResult",
         insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex,
         parameterMappings,
         parameterMappingsRaw: typeof parameterMappingsRaw === "string"
             ? parameterMappingsRaw
@@ -3185,6 +3198,7 @@ function normalizeAddMicroflowRetrieveDatabaseOptions(options) {
         rangeOffsetExpression,
         rangeAmountExpression,
         insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex,
         hasRangeOffsetExpression: String(rangeOffsetExpression).trim().length > 0,
         hasRangeAmountExpression: String(rangeAmountExpression).trim().length > 0
     };
@@ -3200,7 +3214,8 @@ function normalizeAddMicroflowRetrieveAssociationOptions(options) {
         association: options.association,
         entityVariable: options.entityVariable ?? options.entityVar ?? options.fromVariable ?? options.variable ?? options.target,
         outputVariableName: options.outputVariableName || "RetrievedByAssociation",
-        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 

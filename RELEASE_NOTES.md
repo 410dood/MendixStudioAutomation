@@ -1,5 +1,27 @@
 # Release Notes
 
+## 0.2.27
+
+Deterministic insert-before index targeting for selected hybrid microflow mutations.
+
+- Enhanced extension routes:
+  - `/mendix-studio-automation/microflows/create-object`
+  - `/mendix-studio-automation/microflows/create-list`
+  - `/mendix-studio-automation/microflows/call-microflow`
+  - `/mendix-studio-automation/microflows/retrieve-database`
+  - `/mendix-studio-automation/microflows/retrieve-association`
+- Added optional query argument support:
+  - `insertBeforeIndex` (alias: `beforeIndex`)
+- Insertion behavior:
+  - if `insertBeforeIndex` is provided, the extension inserts before that activity index from `list-microflow-activities`
+  - if `insertBeforeIndex` is not provided, existing insert-before-caption/type and insert-after-start behavior remains
+- Added Node/CLI support for:
+  - `--insert-before-index`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.26
 
 Targeted insertion expansion for call and retrieve hybrid mutations.

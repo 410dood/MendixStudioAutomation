@@ -250,6 +250,12 @@ Insert a create-object activity before a matching activity caption/type:
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --insert-before-activity "Retrieve"
 ```
 
+Insert a create-object activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --insert-before-index 5
+```
+
 Create a list activity in a microflow through the extension API:
 
 ```powershell
@@ -262,6 +268,12 @@ Insert a create-list activity before a matching activity caption/type:
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --insert-before-activity "Create object"
 ```
 
+Insert a create-list activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --insert-before-index 6
+```
+
 Call another microflow in a microflow through the extension API:
 
 ```powershell
@@ -272,6 +284,12 @@ Insert a call-microflow activity before a matching activity caption/type:
 
 ```powershell
 npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --insert-before-activity "Retrieve"
+```
+
+Insert a call-microflow activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --insert-before-index 7
 ```
 
 Retrieve objects from database in a microflow through the extension API:
@@ -296,6 +314,12 @@ Insert a retrieve-association activity before a matching activity caption/type:
 
 ```powershell
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj" --insert-before-activity "Create object"
+```
+
+Insert a retrieve-association activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj" --insert-before-index 8
 ```
 
 Filter a list by association in a microflow through the extension API:
@@ -497,11 +521,11 @@ npm run summarize-knowledge-gaps
 - `--module` can be used with open-tab commands to disambiguate tabs that share the same document name.
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
-- `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
-- `add-microflow-create-list` inserts `Create list` activities only at the start of the selected microflow.
-- `add-microflow-call` supports insert-after-start by default and optional `--insert-before-activity` targeting.
-- `add-microflow-retrieve-database` supports insert-after-start by default and optional `--insert-before-activity` targeting.
-- `add-microflow-retrieve-association` supports insert-after-start by default and optional `--insert-before-activity` targeting.
+- `add-microflow-create-object` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-create-list` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-call` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-retrieve-database` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-retrieve-association` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.
 - `add-microflow-find-by-association` inserts `Find by association` activities only at the start of the selected microflow.
 - `add-microflow-filter-by-attribute` inserts `Filter by attribute` activities only at the start of the selected microflow.

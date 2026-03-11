@@ -127,14 +127,18 @@ npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node 
 npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Document" --entity "ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Document" --entity "ClientDocument" --commit "No" --insert-before-activity "Retrieve"
+npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Document" --entity "ClientDocument" --insert-before-index 5
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --insert-before-activity "Create object"
+npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --insert-before-index 6
 npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --parameter-mappings "{}"
 npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --insert-before-activity "Retrieve"
+npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --insert-before-index 7
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentWindow" --x-path-constraint "[Status='Draft']" --sort-attribute "Status" --sort-descending false --range-offset-expression "0" --range-amount-expression "25"
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj" --insert-before-activity "Create object"
+npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj" --insert-before-index 8
 npm run add-microflow-filter-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FilteredClientDocumentList" --filter-expression "$ClientObj"
 npm run add-microflow-find-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FoundClientDocument" --find-expression "$ClientObj"
 npm run add-microflow-filter-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "DraftClientDocuments" --filter-expression "Draft"
@@ -261,6 +265,7 @@ Phase 2:
 - current `add-microflow-retrieve-database` now also supports optional sort attributes and ranged retrieval expressions
 - current `add-microflow-retrieve-association` now inserts SDK-backed `Retrieve by association` activities through the hybrid extension route
 - current `add-microflow-call`, `add-microflow-retrieve-database`, and `add-microflow-retrieve-association` now support optional insert-before targeting by activity caption or action type
+- current insert-before targeting also supports deterministic activity index selection via `--insert-before-index` (from `list-microflow-activities`)
 - current `add-microflow-filter-by-association` now inserts SDK-backed `Filter by association` activities through the hybrid extension route
 - current `add-microflow-find-by-association` now inserts SDK-backed `Find by association` activities through the hybrid extension route
 - current `add-microflow-filter-by-attribute` now inserts SDK-backed `Filter by attribute` activities through the hybrid extension route
