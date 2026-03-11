@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.2.3
+
+Top-level navigation shortcut automation milestone.
+
+- Added an in-process extension route to add pages (or other document types) to the app’s Web navigation:
+  - new route: `/mendix-studio-automation/navigation/populate`
+  - persisted as `navigationPopulateUrl` in `runtime/endpoint.json`
+- Added hybrid client support for the new route:
+  - `extensionClient.addNavigationShortcut(...)`
+  - `StudioProClient.addNavigationShortcut(...)`
+  - new CLI command `add-navigation-shortcut`
+- Extended `create-clients-page` to optionally wire the newly created page to Web navigation via:
+  - `--add-navigation`
+  - `--navigation-caption`
+- Updated operation catalog with `studio.addNavigationShortcut`.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+  - `RELEASE_NOTES.md`
+
 ## 0.2.2
 
 Higher-level page scaffolding milestone.
@@ -12,8 +32,6 @@ Higher-level page scaffolding milestone.
 - Added `studio.createClientsPage` operation in the operation catalog.
 - Added README command examples and notes for the new workflow.
 
-Notes:
-- Top-level navigation-item automation is not yet implemented; this remains a manual Studio Pro step after page creation.
 - `create-clients-page` currently defaults to module `Az_ClientManagement`, page `Clients`, and widget `Data Grid 2`.
 
 ## 0.2.1

@@ -127,6 +127,20 @@ npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto4
 
 The current flow is validated for page creation in `Az_ClientManagement`. It is currently strongest on the default visible right-hand template cards in the `Create Page` dialog.
 
+Create-and-wire a Clients page scaffold with one command:
+
+```powershell
+npm run create-clients-page -- --module Az_ClientManagement --page-name Clients --widget "Data Grid 2" --add-navigation --navigation-caption "Clients"
+```
+
+Manually add any page to web navigation when the extension is already loaded:
+
+```powershell
+npm run add-navigation-shortcut -- --page Client_ClinicalDocument_V3 --module Az_ClientManagement --caption "Clinical Documents"
+```
+
+`add-navigation-shortcut` uses the hybrid extension route and writes through the active app's navigation profile.
+
 ### Open tab control
 
 List the currently open page and microflow tabs:
@@ -245,6 +259,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `insert-widget` now performs real native widget insertion on validated visible page-explorer targets, not just dry-run resolution.
 - the repo now includes a real Mendix Studio Pro hybrid extension project using `WebServerExtension` and `MenuExtension`
 - `extension-status`, `extension-context`, and `hybrid-context` are now available for in-process context discovery
+- navigation insertion (`create-clients-page --add-navigation` and `add-navigation-shortcut`) requires the extension endpoint to be available and works against the active app context
 - `invoke-dialog-control` now reports whether the target dialog actually closed after the control click.
 - Editor-surface property opening is validated on `Client_ClinicalDocument_V3` for targets like `Structure mode` and `Parameters (8)`.
 - Nested editor context-menu traversal now works, including `Add > Activity` on `ClinicalDocument_ShowPage`.

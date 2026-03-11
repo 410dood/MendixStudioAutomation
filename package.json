@@ -15,6 +15,7 @@
     "show-responsive-web": "node src/cli.mjs show-responsive-web",
     "build-extension": "dotnet build .\\extensions\\MendixStudioAutomation_Extension\\MendixStudioAutomation_Extension.csproj",
     "create-page": "node src/cli.mjs create-page",
+    "add-navigation-shortcut": "node src/cli.mjs add-navigation-shortcut",
     "open-properties": "node src/cli.mjs open-properties",
     "open-item": "node src/cli.mjs open-item",
     "select-widget": "node src/cli.mjs select-widget",

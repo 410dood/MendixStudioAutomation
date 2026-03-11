@@ -33,6 +33,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - trigger first-pass local run and responsive web shortcuts from Studio Pro
 - create pages through Studio Pro's native `New Document` and `Create Page` wizards
 - query an in-Studio hybrid extension over a supported local webserver route
+- add opened pages to the web navigation profile via the hybrid extension route
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -88,6 +89,7 @@ npm run extension-context
 npm run extension-capabilities
 npm run extension-search-documents -- --query ClinicalDocument --module Az_ClientManagement --limit 10
 npm run extension-open-document -- --name "ClinicalDocument_ShowPage" --module Az_ClientManagement
+npm run add-navigation-shortcut -- --page "Client_ClinicalDocument_V3" --caption "Clinical Document" --module Az_ClientManagement
 npm run hybrid-context
 npm run list-scope-elements -- --microflow "ClinicalDocument_ShowPage" --scope editor --near-name "DS_AppConfig" --radius 320
 npm run invoke-scope-element-action -- --microflow "ClinicalDocument_ShowPage" --scope editor --runtime-id "42.1050910.4.15.1.1135" --action rightClick
@@ -121,10 +123,15 @@ npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Docum
   - create a page (defaults to module `Az_ClientManagement`, name `Clients`)
   - discover a likely insertion target in the new page’s Page Explorer
   - insert a `Data Grid 2` scaffold widget
-
-Notes:
-- This does not yet automate top-level navigation wiring end-to-end; that remains a manual validation step in the Navigation editor after the page is created.
+- automatically wire the new page into Web navigation when extension context is available with `--add-navigation`
 - If the target selector drifts, use `--target` to point to a specific Page Explorer row.
+- If extension route is unavailable, `--add-navigation` reports a warning and still creates the page.
+
+Example:
+
+```powershell
+npm run create-clients-page -- --module Az_ClientManagement --page-name Clients --add-navigation --navigation-caption "Clients"
+```
 
 You can also target the active Studio Pro window by title:
 

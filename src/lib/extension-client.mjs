@@ -160,6 +160,35 @@ export class HybridExtensionClient {
             payload
         };
     }
+
+    async addNavigationShortcut(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "navigation/populate", {
+            page: options.page ?? options.pageName ?? options.name,
+            caption: options.caption,
+            module: options.module,
+            type: options.type ?? "Page"
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
 }
 
 async function resolveEndpointDiscovery(options) {
@@ -213,6 +242,7 @@ async function resolveEndpointDiscovery(options) {
             contextUrl: parsed.contextUrl,
             capabilitiesUrl: parsed.capabilitiesUrl
                 ?? `${(parsed.baseUrl ?? "").replace(/\/$/, "")}/mendix-studio-automation/capabilities`,
+            navigationPopulateUrl: parsed.navigationPopulateUrl,
             baseUrl: parsed.baseUrl,
             routePrefix: parsed.routePrefix
         }

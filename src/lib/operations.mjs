@@ -127,7 +127,12 @@ export const operationCatalog = {
         },
         {
             id: "studio.createClientsPage",
-            description: "Create a Clients scaffold page and insert a DataGrid widget into a candidate container.",
+            description: "Create a Clients scaffold page and optionally add it to Web navigation.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "studio.addNavigationShortcut",
+            description: "Add an open page to the web navigation profile through the in-Studio extension.",
             status: "implemented-first-pass"
         },
         {

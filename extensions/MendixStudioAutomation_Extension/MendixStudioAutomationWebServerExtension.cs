@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Model.Projects;
+using Mendix.StudioPro.ExtensionsAPI.Model.Pages;
 using Mendix.StudioPro.ExtensionsAPI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.Events;
 using Mendix.StudioPro.ExtensionsAPI.UI.Services;
@@ -29,6 +30,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
     private readonly IExtensionFileService _extensionFileService;
     private readonly IDockingWindowService _dockingWindowService;
     private readonly IVersionControlService _versionControlService;
+    private readonly INavigationManagerService _navigationManagerService;
     private IEventSubscription? _activeDocumentSubscription;
 
     [ImportingConstructor]
@@ -36,12 +38,14 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         ILogService logService,
         IExtensionFileService extensionFileService,
         IDockingWindowService dockingWindowService,
-        IVersionControlService versionControlService)
+        IVersionControlService versionControlService,
+        INavigationManagerService navigationManagerService)
     {
         _logService = logService;
         _extensionFileService = extensionFileService;
         _dockingWindowService = dockingWindowService;
         _versionControlService = versionControlService;
+        _navigationManagerService = navigationManagerService;
         _logService.Info("[MendixStudioAutomation] WebServerExtension constructed.");
     }
 
@@ -55,6 +59,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/capabilities", HandleCapabilitiesAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/search", HandleSearchDocumentsAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/open", HandleOpenDocumentAsync);
+        webServer.AddRoute($"{RoutePrefix}/navigation/populate", HandlePopulateNavigationAsync);
 
         PersistRuntimeEndpoint();
         _logService.Info($"Mendix Studio Automation extension routes registered at {WebServerBaseUrl}{RoutePrefix}");
@@ -125,6 +130,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "document.active.read",
             "documents.search",
             "documents.open",
+            "navigation.populate",
             "branch.read",
             "webserver.health",
             "webserver.context"
@@ -229,6 +235,128 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             opened,
             match = matches[0]
         }, opened ? HttpStatusCode.OK : HttpStatusCode.InternalServerError, cancellationToken);
+    }
+
+    private Task HandlePopulateNavigationAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        var pageName = request.QueryString["pageName"] ?? request.QueryString["page"];
+        var navigationCaption = request.QueryString["caption"] ?? pageName;
+        var moduleName = request.QueryString["module"];
+        var type = request.QueryString["type"] ?? "Page";
+
+        if (string.IsNullOrWhiteSpace(pageName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'page' (or 'pageName') query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(navigationCaption))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The navigation caption is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (CurrentApp?.Root is null)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var matches = SearchDocuments(pageName, moduleName, type, limit: 10)
+            .Where(document => string.Equals(document.Name, pageName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (matches.Count == 0)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"No page matched '{pageName}'.",
+                pageName,
+                module = moduleName,
+                type
+            }, HttpStatusCode.NotFound, cancellationToken);
+        }
+
+        if (matches.Count > 1)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"Multiple pages matched '{pageName}'. Provide a module to disambiguate.",
+                pageName,
+                module = moduleName,
+                type,
+                matches
+            }, HttpStatusCode.Conflict, cancellationToken);
+        }
+
+        var match = matches[0];
+        var document = ResolveDocument(match.Id);
+        if (document is null)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"The page '{pageName}' could not be resolved from the project model anymore.",
+                pageName,
+                module = moduleName,
+                type,
+                match
+            }, HttpStatusCode.Gone, cancellationToken);
+        }
+
+        if (document is not IPage page)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"The resolved document '{pageName}' is not a page.",
+                pageName,
+                type = match.Type,
+                match
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var caption = navigationCaption.Trim();
+            using var tx = CurrentApp.StartTransaction($"Add web navigation item '{caption}'");
+            _navigationManagerService.PopulateWebNavigationWith(CurrentApp, [(caption, page)]);
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                caption = caption,
+                pageName = match.Name,
+                module = match.ModuleName,
+                profile = "web",
+                match
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to populate web navigation profile.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message,
+                pageName,
+                module = moduleName,
+                type,
+                match
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
     }
 
     private void OnActiveDocumentChanged(ActiveDocumentChanged change)
@@ -336,7 +464,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 routePrefix = RoutePrefix,
                 contextUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/context"),
                 healthUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/health"),
-                capabilitiesUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/capabilities")
+                capabilitiesUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/capabilities"),
+                navigationPopulateUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/navigation/populate")
             };
 
             File.WriteAllText(endpointFilePath, JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8);

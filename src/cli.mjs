@@ -200,6 +200,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-navigation-shortcut": {
+            const result = await client.addNavigationShortcut(options);
+            formatOutput(result);
+            return;
+        }
         case "create-clients-page": {
             const result = await client.createClientsPage(options);
             formatOutput(result);
@@ -291,6 +296,7 @@ Commands:
   extension-capabilities      Read the feature capabilities exposed by the in-Studio hybrid extension
   extension-search-documents  Search project documents through the in-Studio hybrid extension
   extension-open-document     Open a project document through the in-Studio hybrid extension
+  add-navigation-shortcut     Add a document to the web navigation profile through the extension
   create-clients-page         Create a Clients page and insert a default DataGrid widget
   hybrid-context              Prefer the extension context and fall back to UI automation
   select-tab                  Activate an open Studio Pro editor tab
@@ -350,6 +356,9 @@ Options:
   --template <name>           Optional page template to use for create-clients-page
   --page-explorer-limit <n>   Max Page Explorer rows considered as insert targets
   --timeout-ms <n>            Wait timeout in milliseconds
+  --add-navigation            Attempt to add the created/opened page to web navigation via extension
+  --navigation-caption <text>  Optional caption for the generated navigation item
+  --caption <text>            Optional explicit caption for add-navigation-shortcut
 `);
 }
 

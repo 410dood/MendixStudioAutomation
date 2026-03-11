@@ -112,6 +112,33 @@ export class StudioProClient {
             delayMs: normalized.delayMs
         });
 
+        let navigation = null;
+        let navigationError = null;
+        if (normalized.addNavigation) {
+            try {
+                const status = await this.getExtensionStatus({
+                    processId: normalized.processId,
+                    title: normalized.title
+                });
+                if (!status?.available) {
+                    navigationError = `Navigation update skipped: extension not available (${status?.reason || "not available"}).`;
+                }
+                else {
+                    navigation = await this.addNavigationShortcut({
+                        processId: normalized.processId,
+                        title: normalized.title,
+                        pageName: normalized.pageName,
+                        page: normalized.pageName,
+                        caption: normalized.navigationCaption || normalized.pageName,
+                        module: normalized.module
+                    });
+                }
+            }
+            catch (error) {
+                navigationError = error instanceof Error ? error.message : String(error);
+            }
+        }
+
         let capabilities = null;
         try {
             capabilities = await this.getExtensionCapabilities({
@@ -132,11 +159,36 @@ export class StudioProClient {
             module: normalized.module,
             selectedTarget: targetName,
             insertWidget: normalized.widget,
+            navigation: {
+                requested: normalized.addNavigation,
+                caption: normalized.navigationCaption,
+                result: navigation,
+                warning: navigationError
+            },
             createResult,
             pageExplorer,
             insertResult,
             capabilities
         };
+    }
+
+    async addNavigationShortcut(options = {}) {
+        const normalized = normalizeCreateClientsPageOptions(options);
+        const normalizedOptions = {
+            ...options,
+            page: options.page ?? normalized.pageName,
+            caption: options.caption
+        };
+
+        return this.extensionClient.addNavigationShortcut({
+            ...options,
+            processId: normalized.processId,
+            title: normalized.title,
+            page: normalizedOptions.page,
+            caption: normalizedOptions.caption,
+            module: normalized.module,
+            type: "Page"
+        });
     }
 
     async openProperties(options = {}) {
@@ -1011,6 +1063,8 @@ function normalizeCreateClientsPageOptions(options) {
         template: options.template,
         target: options.target,
         widget: options.widget || "Data Grid 2",
+        addNavigation: options.addNavigation || options.navigation || options.navigationShortcut,
+        navigationCaption: options.navigationCaption || options.navigationItem || options.menuItem,
         delayMs: numberOrDefault(options.delayMs, 250),
         timeoutMs: numberOrDefault(options.timeoutMs, 15000),
         pageExplorerLimit: numberOrDefault(options.pageExplorerLimit, 200),
