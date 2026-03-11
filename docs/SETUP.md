@@ -28,13 +28,13 @@ There are no npm dependencies yet, so no install step is required.
 The repo includes a C# Studio Pro extension in:
 
 ```text
-extensions\MendixStudioAutomation.Extension
+extensions\MendixStudioAutomation_Extension
 ```
 
 Build it with:
 
 ```powershell
-dotnet build .\extensions\MendixStudioAutomation.Extension\MendixStudioAutomation.Extension.csproj
+dotnet build .\extensions\MendixStudioAutomation_Extension\MendixStudioAutomation_Extension.csproj
 ```
 
 Install it into the Mendix app folder with:
@@ -46,7 +46,7 @@ pwsh .\scripts\Install-MendixStudioAutomationExtension.ps1 -AppDirectory C:\User
 This copies the extension into the Mendix-supported app-local location:
 
 ```text
-C:\Users\willi\Mendix\Olari-main\extensions\MendixStudioAutomation.Extension
+C:\Users\willi\Mendix\Olari-main\extensions\MendixStudioAutomation_Extension
 ```
 
 The extension root contains:

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <RootNamespace>MendixStudioAutomation.Extension</RootNamespace>
-    <AssemblyName>MendixStudioAutomation.Extension</AssemblyName>
+    <AssemblyName>MendixStudioAutomation_Extension</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -13,6 +13,10 @@
 
   <ItemGroup>
     <PackageReference Include="Mendix.StudioPro.ExtensionsAPI" Version="10.24.14-build.90436" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="manifest.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <Target Name="CopyExtensionArtifacts" AfterTargets="Build">

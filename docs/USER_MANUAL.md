@@ -63,7 +63,7 @@ Prefer the extension context and fall back to UI automation if the extension is 
 npm run hybrid-context
 ```
 
-The extension project lives in `extensions\MendixStudioAutomation.Extension` and is installed into the Mendix app with `scripts\Install-MendixStudioAutomationExtension.ps1`.
+The extension project lives in `extensions\MendixStudioAutomation_Extension` and is installed into the Mendix app with `scripts\Install-MendixStudioAutomationExtension.ps1`.
 
 ### Generic discovery
 

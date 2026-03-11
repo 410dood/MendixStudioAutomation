@@ -1,12 +1,41 @@
 # Release Notes
 
+## 0.2.2
+
+Higher-level page scaffolding milestone.
+
+- Added `create-clients-page` CLI workflow:
+  - creates a page via existing `Create-StudioProPage` flow
+  - discovers the new page’s Page Explorer target
+  - inserts a default `Data Grid 2` widget into the selected target
+- Added `create-clients-page` and supporting options to CLI (`node src/cli.mjs` and npm script wrapper).
+- Added `studio.createClientsPage` operation in the operation catalog.
+- Added README command examples and notes for the new workflow.
+
+Notes:
+- Top-level navigation-item automation is not yet implemented; this remains a manual Studio Pro step after page creation.
+- `create-clients-page` currently defaults to module `Az_ClientManagement`, page `Clients`, and widget `Data Grid 2`.
+
+## 0.2.1
+
+Hybrid reliability release.
+
+- Added extension-capability discovery from the hybrid extension route and CLI.
+- Added CLI helpers for:
+  - `extension-capabilities`
+  - `extension-search-documents`
+  - `extension-open-document`
+- Persisted `capabilitiesUrl` in the extension `endpoint.json` payload to keep discovery deterministic.
+- Hardened `Install-MendixStudioAutomationExtension.ps1` by removing legacy invalid extension folders (`MendixStudioAutomation.Extension`, `MendixStudioAutomation.ProbeExtension`, `MendixStudioAutomation_ProbeExtension`) before install.
+- Updated extension install metadata cleanup and scripts so hybrid restarts are less brittle.
+
 ## 0.2.0
 
 Hybrid extension foundation release.
 
 Included in this release:
 
-- real Mendix C# extension project at `extensions/MendixStudioAutomation.Extension`
+- real Mendix C# extension project at `extensions/MendixStudioAutomation_Extension`
 - exact package pin to `Mendix.StudioPro.ExtensionsAPI 10.24.14-build.90436`
 - supported `WebServerExtension` with:
   - `/mendix-studio-automation/health`

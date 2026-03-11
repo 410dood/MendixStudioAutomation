@@ -189,7 +189,7 @@ Add orchestrator routing in this repo:
 
 The first hybrid slice is now implemented in this repo as:
 
-- `extensions/MendixStudioAutomation.Extension`
+- `extensions/MendixStudioAutomation_Extension`
 
 Current status:
 

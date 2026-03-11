@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir, stat } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,7 +10,7 @@ const defaultEndpointFile = path.resolve(
     "..",
     "..",
     "extensions",
-    "MendixStudioAutomation.Extension",
+    "MendixStudioAutomation_Extension",
     "runtime",
     "endpoint.json"
 );
@@ -80,6 +80,86 @@ export class HybridExtensionClient {
             context
         };
     }
+
+    async getCapabilities(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const capabilities = await fetchJson(discovery.endpoints.capabilitiesUrl, options.timeoutMs);
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            capabilities
+        };
+    }
+
+    async searchDocuments(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const documents = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "documents/search", {
+            query: options.query ?? options.q,
+            module: options.module,
+            type: options.type,
+            limit: options.limit
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            documents
+        };
+    }
+
+    async openDocument(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "documents/open", {
+            name: options.name,
+            module: options.module,
+            type: options.type
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
 }
 
 async function resolveEndpointDiscovery(options) {
@@ -122,8 +202,7 @@ async function resolveEndpointDiscovery(options) {
         };
     }
 
-    const raw = await readFile(endpointFile, "utf8");
-    const parsed = JSON.parse(raw);
+    const parsed = await readJsonFile(endpointFile);
 
     return {
         available: true,
@@ -132,6 +211,8 @@ async function resolveEndpointDiscovery(options) {
         endpoints: {
             healthUrl: parsed.healthUrl,
             contextUrl: parsed.contextUrl,
+            capabilitiesUrl: parsed.capabilitiesUrl
+                ?? `${(parsed.baseUrl ?? "").replace(/\/$/, "")}/mendix-studio-automation/capabilities`,
             baseUrl: parsed.baseUrl,
             routePrefix: parsed.routePrefix
         }
@@ -141,13 +222,99 @@ async function resolveEndpointDiscovery(options) {
 async function resolveEndpointFileFromInstallMetadata() {
     try {
         await access(installMetadataFile, fsConstants.F_OK);
-        const raw = await readFile(installMetadataFile, "utf8");
-        const parsed = JSON.parse(raw);
+        const parsed = await readJsonFile(installMetadataFile);
+        if (parsed.endpointFile && await pathExists(parsed.endpointFile)) {
+            return parsed.endpointFile;
+        }
+
+        if (parsed.appDirectory) {
+            const discovered = await findEndpointFileInExtensionCache(parsed.appDirectory);
+            if (discovered) {
+                return discovered;
+            }
+        }
+
+        if (process.env.USERPROFILE) {
+            const userRoot = path.join(process.env.USERPROFILE, "Mendix");
+            const fallback = await findEndpointFileInTopLevelAppRoots(userRoot);
+            if (fallback) {
+                return fallback;
+            }
+        }
+
         return parsed.endpointFile || null;
     }
     catch {
         return null;
     }
+}
+
+async function findEndpointFileInExtensionCache(appDirectory) {
+    const cacheRoot = path.join(appDirectory, ".mendix-cache", "extensions-cache");
+
+    if (!(await pathExists(cacheRoot))) {
+        return null;
+    }
+
+    const cacheEntries = await readdir(cacheRoot, {
+        withFileTypes: true
+    });
+
+    const candidates = [];
+    for (const entry of cacheEntries) {
+        if (!entry.isDirectory()) {
+            continue;
+        }
+
+        const endpointFile = path.join(cacheRoot, entry.name, "runtime", "endpoint.json");
+        if (!(await pathExists(endpointFile))) {
+            continue;
+        }
+
+        try {
+            const parsed = await readJsonFile(endpointFile);
+            if (parsed.extensionName === "Mendix Studio Automation") {
+                const endpointStat = await stat(endpointFile);
+                candidates.push({
+                    endpointFile,
+                    rank: endpointStat.mtimeMs
+                });
+            }
+        }
+        catch {
+            // Ignore malformed endpoint files from unrelated extensions.
+        }
+    }
+
+    if (candidates.length === 0) {
+        return null;
+    }
+
+    candidates.sort((left, right) => right.rank - left.rank);
+    return candidates[0].endpointFile;
+}
+
+async function findEndpointFileInTopLevelAppRoots(rootDirectory) {
+    if (!(await pathExists(rootDirectory))) {
+        return null;
+    }
+
+    const appCandidates = await readdir(rootDirectory, {
+        withFileTypes: true
+    });
+    for (const app of appCandidates) {
+        if (!app.isDirectory()) {
+            continue;
+        }
+
+        const appDirectory = path.join(rootDirectory, app.name);
+        const discovered = await findEndpointFileInExtensionCache(appDirectory);
+        if (discovered) {
+            return discovered;
+        }
+    }
+
+    return null;
 }
 
 async function pathExists(targetPath) {
@@ -158,6 +325,11 @@ async function pathExists(targetPath) {
     catch {
         return false;
     }
+}
+
+async function readJsonFile(targetPath) {
+    const raw = await readFile(targetPath, "utf8");
+    return JSON.parse(raw.replace(/^\uFEFF/, ""));
 }
 
 async function fetchJson(url, timeoutMs = 3000) {
@@ -181,6 +353,27 @@ async function fetchJson(url, timeoutMs = 3000) {
     finally {
         clearTimeout(timeout);
     }
+}
+
+function buildExtensionUrl(baseUrl, routeSuffix, query = {}) {
+    if (!baseUrl) {
+        throw new Error("The extension base URL is missing.");
+    }
+
+    const url = new URL(`mendix-studio-automation/${routeSuffix.replace(/^\/+/, "")}`, ensureTrailingSlash(baseUrl));
+    for (const [key, value] of Object.entries(query)) {
+        if (value === undefined || value === null || value === "") {
+            continue;
+        }
+
+        url.searchParams.set(key, String(value));
+    }
+
+    return url.toString();
+}
+
+function ensureTrailingSlash(value) {
+    return value.endsWith("/") ? value : `${value}/`;
 }
 
 function numberOrDefault(value, fallback) {

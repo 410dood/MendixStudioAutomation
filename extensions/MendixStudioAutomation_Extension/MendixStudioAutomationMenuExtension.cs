@@ -5,17 +5,28 @@ using Mendix.StudioPro.ExtensionsAPI.UI.Services;
 
 namespace MendixStudioAutomation.Extension;
 
-[method: ImportingConstructor]
 [Export(typeof(MenuExtension))]
-public sealed class MendixStudioAutomationMenuExtension(
-    IMessageBoxService messageBoxService,
-    IExtensionFileService extensionFileService) : MenuExtension
+public sealed class MendixStudioAutomationMenuExtension : MenuExtension
 {
-    private readonly IMessageBoxService _messageBoxService = messageBoxService;
-    private readonly IExtensionFileService _extensionFileService = extensionFileService;
+    private readonly IMessageBoxService _messageBoxService;
+    private readonly IExtensionFileService _extensionFileService;
+    private readonly ILogService _logService;
+
+    [ImportingConstructor]
+    public MendixStudioAutomationMenuExtension(
+        IMessageBoxService messageBoxService,
+        IExtensionFileService extensionFileService,
+        ILogService logService)
+    {
+        _messageBoxService = messageBoxService;
+        _extensionFileService = extensionFileService;
+        _logService = logService;
+        _logService.Info("[MendixStudioAutomation] MenuExtension constructed.");
+    }
 
     public override IEnumerable<MenuViewModel> GetMenus()
     {
+        _logService.Info("[MendixStudioAutomation] GetMenus invoked.");
         return
         [
             new MenuViewModel(

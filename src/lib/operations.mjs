@@ -106,8 +106,28 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "extension.getCapabilities",
+            description: "Read extension feature capabilities from the in-Studio Mendix extension.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "extension.searchDocuments",
+            description: "Search project documents from the in-Studio Mendix extension.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "extension.openDocument",
+            description: "Open a project document through the in-Studio Mendix extension.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "hybrid.getContext",
             description: "Prefer the in-Studio extension context and fall back to UI automation context.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "studio.createClientsPage",
+            description: "Create a Clients scaffold page and insert a DataGrid widget into a candidate container.",
             status: "implemented-first-pass"
         },
         {

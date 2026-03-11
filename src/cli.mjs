@@ -185,6 +185,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "extension-capabilities": {
+            const result = await client.getExtensionCapabilities(options);
+            formatOutput(result);
+            return;
+        }
+        case "extension-search-documents": {
+            const result = await client.searchExtensionDocuments(options);
+            formatOutput(result);
+            return;
+        }
+        case "extension-open-document": {
+            const result = await client.openExtensionDocument(options);
+            formatOutput(result);
+            return;
+        }
+        case "create-clients-page": {
+            const result = await client.createClientsPage(options);
+            formatOutput(result);
+            return;
+        }
         case "hybrid-context": {
             const result = await client.getHybridContext(options);
             formatOutput(result);
@@ -268,6 +288,10 @@ Commands:
   active-context              Parse the active tab into document/module context
   extension-status            Check whether the in-Studio hybrid extension is available
   extension-context           Read the context exposed by the in-Studio hybrid extension
+  extension-capabilities      Read the feature capabilities exposed by the in-Studio hybrid extension
+  extension-search-documents  Search project documents through the in-Studio hybrid extension
+  extension-open-document     Open a project document through the in-Studio hybrid extension
+  create-clients-page         Create a Clients page and insert a default DataGrid widget
   hybrid-context              Prefer the extension context and fall back to UI automation
   select-tab                  Activate an open Studio Pro editor tab
   close-tab                   Close a specific open Studio Pro editor tab
@@ -318,7 +342,14 @@ Options:
   --module <name>             Filter or disambiguate by Mendix module name, or target module for create-page
   --endpoint-file <path>      Hybrid extension endpoint discovery file
   --endpoint-url <url>        Explicit hybrid extension base URL
+  --query <text>              Extension document search text
+  --type <name>               Extension document type, e.g. Microflow or Page
   --control-type <name>       Optional dialog field type filter such as Edit or ComboBox
+  --widget <name>             Widget name for create-clients-page (defaults to Data Grid 2)
+  --target <name>             Optional explicit Page Explorer target for create-clients-page
+  --template <name>           Optional page template to use for create-clients-page
+  --page-explorer-limit <n>   Max Page Explorer rows considered as insert targets
+  --timeout-ms <n>            Wait timeout in milliseconds
 `);
 }
 

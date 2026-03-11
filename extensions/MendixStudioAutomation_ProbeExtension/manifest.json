@@ -1,0 +1,6 @@
+{
+  "mx_extensions": [
+    "MendixStudioAutomation_ProbeExtension.dll"
+  ],
+  "mx_build_extensions": []
+}

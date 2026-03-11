@@ -9,9 +9,17 @@ internal sealed class ExtensionStateStore
     private string? _documentName;
     private string? _documentType;
     private string? _moduleName;
+    private string? _selectedElementName;
+    private string _selectionSource = "not-yet-implemented";
     private DateTimeOffset _lastDocumentChangeUtc = DateTimeOffset.MinValue;
 
-    public void UpdateActiveDocument(string? documentId, string? documentName, string? documentType, string? moduleName)
+    public void UpdateActiveDocument(
+        string? documentId,
+        string? documentName,
+        string? documentType,
+        string? moduleName,
+        string? selectedElementName = null,
+        string? selectionSource = null)
     {
         lock (_sync)
         {
@@ -19,6 +27,10 @@ internal sealed class ExtensionStateStore
             _documentName = documentName;
             _documentType = documentType;
             _moduleName = moduleName;
+            _selectedElementName = selectedElementName;
+            _selectionSource = string.IsNullOrWhiteSpace(selectionSource)
+                ? "not-yet-implemented"
+                : selectionSource;
             _lastDocumentChangeUtc = DateTimeOffset.UtcNow;
         }
     }
@@ -32,8 +44,8 @@ internal sealed class ExtensionStateStore
                 _documentName,
                 _documentType,
                 _moduleName,
-                null,
-                "not-yet-implemented");
+                _selectedElementName,
+                _selectionSource);
         }
     }
 

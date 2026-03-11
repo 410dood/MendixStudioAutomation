@@ -1,4 +1,4 @@
-# MendixStudioAutomation.Extension
+# MendixStudioAutomation_Extension
 
 This folder contains the first in-Studio part of the hybrid architecture for `Mendix Studio Automation`.
 
@@ -28,20 +28,16 @@ dotnet build
 The build copies all extension artifacts into `dist/`, and `mxextensions.json` points Studio Pro at:
 
 ```text
-dist/MendixStudioAutomation.Extension.dll
+bin\Debug\net8.0-windows\MendixStudioAutomation_Extension.dll
 ```
 
 ## Install in Studio Pro
 
-Use this folder as the extension root in Studio Pro development mode, or copy it under your Mendix app directory as:
+Copy the build output under your Mendix app directory as:
 
 ```text
-<your app>\extensions\MendixStudioAutomation.Extension
+<your app>\extensions\MendixStudioAutomation_Extension
 ```
-
-The required root-level file is:
-
-- `manifest.json`
 
 The project also includes an install helper:
 
@@ -49,10 +45,10 @@ The project also includes an install helper:
 pwsh .\scripts\Install-MendixStudioAutomationExtension.ps1 -AppDirectory C:\Users\willi\Mendix\Olari-main -Build
 ```
 
-That keeps the extension root in the Mendix-app-supported shape:
+That keeps the extension root in the Mendix-documented shape:
 
 - `manifest.json` stays at the extension root
-- `dist/` contains the built assembly and dependencies
+- the DLL and dependencies sit beside `manifest.json`
 - `runtime/endpoint.json` is written beside the manifest for discovery by the Node automation layer
 
 ## Current limits

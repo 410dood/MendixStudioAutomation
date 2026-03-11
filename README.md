@@ -71,6 +71,7 @@ npm run send-keys -- --page "Client_ClinicalDocument_V3" --scope editor --keys "
 npm run run-local
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
+npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
@@ -84,6 +85,9 @@ npm run active-tab
 npm run active-context
 npm run extension-status
 npm run extension-context
+npm run extension-capabilities
+npm run extension-search-documents -- --query ClinicalDocument --module Az_ClientManagement --limit 10
+npm run extension-open-document -- --name "ClinicalDocument_ShowPage" --module Az_ClientManagement
 npm run hybrid-context
 npm run list-scope-elements -- --microflow "ClinicalDocument_ShowPage" --scope editor --near-name "DS_AppConfig" --radius 320
 npm run invoke-scope-element-action -- --microflow "ClinicalDocument_ShowPage" --scope editor --runtime-id "42.1050910.4.15.1.1135" --action rightClick
@@ -106,9 +110,21 @@ npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
 npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3"
 npm run list-editor-labels -- --page "Client_ClinicalDocument_V3"
 npm run insert-widget -- --page "Client_ClinicalDocument_V3" --target "container34" --widget "Text" --dry-run
+npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"
 npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "DocumentType"
 npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 ```
+
+### Clients Page Scaffold
+
+- `create-clients-page` now bundles:
+  - create a page (defaults to module `Az_ClientManagement`, name `Clients`)
+  - discover a likely insertion target in the new page’s Page Explorer
+  - insert a `Data Grid 2` scaffold widget
+
+Notes:
+- This does not yet automate top-level navigation wiring end-to-end; that remains a manual validation step in the Navigation editor after the page is created.
+- If the target selector drifts, use `--target` to point to a specific Page Explorer row.
 
 You can also target the active Studio Pro window by title:
 
@@ -127,7 +143,7 @@ node src/cli.mjs snapshot --title "Olari"
 
 The repo now includes a supported C# Studio Pro extension project at:
 
-- `extensions/MendixStudioAutomation.Extension`
+- `extensions/MendixStudioAutomation_Extension`
 
 It targets the exact package version that matches the current Olari Studio Pro build:
 
@@ -136,7 +152,7 @@ It targets the exact package version that matches the current Olari Studio Pro b
 Build it with:
 
 ```powershell
-dotnet build .\extensions\MendixStudioAutomation.Extension\MendixStudioAutomation.Extension.csproj
+dotnet build .\extensions\MendixStudioAutomation_Extension\MendixStudioAutomation_Extension.csproj
 ```
 
 Install it into a Mendix app with:

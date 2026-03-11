@@ -8,11 +8,12 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$extensionRoot = Join-Path $repoRoot "extensions\MendixStudioAutomation.Extension"
-$projectFile = Join-Path $extensionRoot "MendixStudioAutomation.Extension.csproj"
-$targetRoot = Join-Path $AppDirectory "extensions\MendixStudioAutomation.Extension"
+$extensionRoot = Join-Path $repoRoot "extensions\MendixStudioAutomation_Extension"
+$projectFile = Join-Path $extensionRoot "MendixStudioAutomation_Extension.csproj"
+$targetRoot = Join-Path $AppDirectory "extensions\MendixStudioAutomation_Extension"
 $automationStateDir = Join-Path $repoRoot ".automation-state"
 $installMetadataFile = Join-Path $automationStateDir "hybrid-extension-install.json"
+$buildOutputRoot = Join-Path $extensionRoot "bin\Debug\net8.0-windows"
 
 if (-not (Test-Path $AppDirectory)) {
     throw "App directory not found: $AppDirectory"
@@ -25,13 +26,27 @@ if ($Build) {
     }
 }
 
+@(
+    (Join-Path $AppDirectory "extensions\MendixStudioAutomation.Extension"),
+    (Join-Path $AppDirectory "extensions\MendixStudioAutomation.ProbeExtension"),
+    (Join-Path $AppDirectory "extensions\MendixStudioAutomation_ProbeExtension")
+) | ForEach-Object {
+    if (Test-Path $_) {
+        Remove-Item -Path $_ -Recurse -Force
+    }
+}
+
+if (-not (Test-Path $buildOutputRoot)) {
+    throw "Build output not found: $buildOutputRoot"
+}
+
 New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
 
 $robocopyArgs = @(
-    $extensionRoot,
+    $buildOutputRoot,
     $targetRoot,
     "/MIR",
-    "/XD", "bin", "obj", "runtime",
+    "/XD", "runtime",
     "/XF", "*.user"
 )
 
@@ -40,6 +55,8 @@ $robocopyExitCode = $LASTEXITCODE
 if ($robocopyExitCode -ge 8) {
     throw "robocopy failed with exit code $robocopyExitCode"
 }
+
+Copy-Item -Path (Join-Path $buildOutputRoot "manifest.json") -Destination (Join-Path $targetRoot "manifest.json") -Force
 
 New-Item -ItemType Directory -Path $automationStateDir -Force | Out-Null
 $metadata = [ordered]@{

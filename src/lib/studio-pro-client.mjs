@@ -60,6 +60,85 @@ export class StudioProClient {
         return result;
     }
 
+    async createClientsPage(options = {}) {
+        const normalized = normalizeCreateClientsPageOptions(options);
+        const createResult = await this.createPage({
+            processId: normalized.processId,
+            title: normalized.title,
+            module: normalized.module,
+            pageName: normalized.pageName,
+            template: normalized.template,
+            delayMs: normalized.delayMs,
+            timeoutMs: normalized.timeoutMs
+        });
+
+        if (!createResult?.pageCreated && !createResult?.ok) {
+            return {
+                ok: false,
+                action: "create-clients-page",
+                stage: "create-page",
+                error: createResult?.error ?? "Studio Pro did not confirm that the new page was opened.",
+                createResult
+            };
+        }
+
+        const pageExplorer = await this.listPageExplorerItems({
+            processId: normalized.processId,
+            title: normalized.title,
+            page: normalized.pageName,
+            limit: numberOrDefault(normalized.pageExplorerLimit, 200)
+        });
+
+        const pageExplorerItems = Array.isArray(pageExplorer?.items) ? pageExplorer.items : [];
+        const targetName = normalized.target || pickDefaultPageExplorerTarget(pageExplorerItems);
+        if (!targetName) {
+            return {
+                ok: false,
+                action: "create-clients-page",
+                stage: "locate-target",
+                pageName: normalized.pageName,
+                createResult,
+                pageExplorer,
+                error: "Could not detect a valid page explorer insertion target."
+            };
+        }
+
+        const insertResult = await this.insertWidget({
+            processId: normalized.processId,
+            title: normalized.title,
+            page: normalized.pageName,
+            target: targetName,
+            widget: normalized.widget,
+            delayMs: normalized.delayMs
+        });
+
+        let capabilities = null;
+        try {
+            capabilities = await this.getExtensionCapabilities({
+                processId: normalized.processId,
+                title: normalized.title
+            });
+        } catch (error) {
+            capabilities = {
+                ok: false,
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        return {
+            ok: createResult?.ok && insertResult?.ok,
+            action: "create-clients-page",
+            pageName: normalized.pageName,
+            module: normalized.module,
+            selectedTarget: targetName,
+            insertWidget: normalized.widget,
+            createResult,
+            pageExplorer,
+            insertResult,
+            capabilities
+        };
+    }
+
     async openProperties(options = {}) {
         const resolvedOptions = await resolveContextItemOption(this, options);
         const result = await runPowerShellScript("scripts/automation/Open-StudioProProperties.ps1", {
@@ -79,6 +158,11 @@ export class StudioProClient {
     }
 
     async openItem(options = {}) {
+        const extensionOpenResult = await tryOpenItemViaExtension(this, options);
+        if (extensionOpenResult) {
+            return extensionOpenResult;
+        }
+
         const normalizedOptions = normalizeOpenItemOptions(options);
         let result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizedOptions);
         await rememberActiveTabFromPayload(result);
@@ -353,10 +437,16 @@ export class StudioProClient {
     async getActiveContext(options = {}) {
         const result = await this.getActiveTab(options);
         const tab = result?.activeTab ?? null;
+        const uiContext = tab ? parseStudioProTabContext(tab.name) : null;
+        const extension = await safeGetExtensionContext(this, options);
+        const context = mergeActiveContexts(uiContext, extension?.context ?? null);
 
         return {
             ...result,
-            context: tab ? parseStudioProTabContext(tab.name) : null
+            context,
+            uiContext,
+            extensionContext: extension?.context ?? null,
+            contextSource: extension?.context ? "extension+uia" : "uia"
         };
     }
 
@@ -366,6 +456,18 @@ export class StudioProClient {
 
     async getExtensionContext(options = {}) {
         return this.extensionClient.getContext(options);
+    }
+
+    async getExtensionCapabilities(options = {}) {
+        return this.extensionClient.getCapabilities(options);
+    }
+
+    async searchExtensionDocuments(options = {}) {
+        return this.extensionClient.searchDocuments(options);
+    }
+
+    async openExtensionDocument(options = {}) {
+        return this.extensionClient.openDocument(options);
     }
 
     async getHybridContext(options = {}) {
@@ -697,6 +799,110 @@ function parseStudioProTabContext(tabName) {
     };
 }
 
+function parseExtensionDocumentKind(documentType, documentName) {
+    if (!documentType) {
+        return inferStudioProDocumentKind(documentName);
+    }
+
+    const normalized = String(documentType).toLowerCase();
+    if (normalized.includes("microflow")) {
+        return "microflow";
+    }
+
+    if (normalized.includes("page")) {
+        return "page-or-document";
+    }
+
+    if (normalized.includes("snippet")) {
+        return "snippet";
+    }
+
+    if (normalized.includes("domainmodel") || normalized.includes("domain model")) {
+        return "domain-model";
+    }
+
+    return inferStudioProDocumentKind(documentName);
+}
+
+function mergeActiveContexts(uiContext, extensionContext) {
+    if (!extensionContext?.activeDocument) {
+        return uiContext;
+    }
+
+    const activeDocument = extensionContext.activeDocument;
+    const documentName = activeDocument.documentName ?? uiContext?.documentName ?? null;
+    const moduleName = activeDocument.moduleName ?? uiContext?.moduleName ?? null;
+    const kind = parseExtensionDocumentKind(activeDocument.documentType, documentName);
+    const selectionSource = activeDocument.selectionSource && activeDocument.selectionSource !== "not-yet-implemented"
+        ? activeDocument.selectionSource
+        : (activeDocument.documentName ? "extension-active-document" : uiContext?.selectionSource ?? null);
+
+    return {
+        tabName: uiContext?.tabName ?? (documentName && moduleName ? `${documentName} [${moduleName}]` : documentName),
+        documentName,
+        moduleName,
+        kind,
+        documentId: activeDocument.documentId ?? null,
+        documentType: activeDocument.documentType ?? null,
+        selectedElementName: activeDocument.selectedElementName ?? null,
+        selectionSource
+    };
+}
+
+async function safeGetExtensionContext(client, options) {
+    try {
+        const status = await client.getExtensionStatus(options);
+        if (!status?.available) {
+            return null;
+        }
+
+        const extension = await client.getExtensionContext(options);
+        return extension?.available ? extension : null;
+    }
+    catch {
+        return null;
+    }
+}
+
+async function tryOpenItemViaExtension(client, options) {
+    if (!options?.item) {
+        return null;
+    }
+
+    try {
+        const status = await client.getExtensionStatus(options);
+        if (!status?.available) {
+            return null;
+        }
+
+        const openResult = await client.openExtensionDocument({
+            ...options,
+            name: options.item
+        });
+
+        if (!openResult?.payload?.opened) {
+            return null;
+        }
+
+        const matchedTab = await waitForOpenTabByItemName(client, options.item, options);
+        if (matchedTab) {
+            await writeLastKnownActiveTab(matchedTab);
+        }
+
+        return {
+            ok: true,
+            method: "extensionOpenDocument",
+            verifiedOpen: Boolean(matchedTab),
+            attempts: 1,
+            tab: matchedTab ?? null,
+            extension: openResult.payload
+        };
+    }
+    catch {
+        return null;
+    }
+}
+
 function filterOpenTabs(items, options) {
     return items.filter(tab => {
         if (options.kind && tab.context?.kind !== options.kind) {
@@ -794,6 +1000,55 @@ function normalizeCreatePageOptions(options) {
         DelayMs: numberOrDefault(options.delayMs, 250),
         TimeoutMs: numberOrDefault(options.timeoutMs, 15000)
     };
+}
+
+function normalizeCreateClientsPageOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        module: options.module || "Az_ClientManagement",
+        pageName: options.pageName || options.name || "Clients",
+        template: options.template,
+        target: options.target,
+        widget: options.widget || "Data Grid 2",
+        delayMs: numberOrDefault(options.delayMs, 250),
+        timeoutMs: numberOrDefault(options.timeoutMs, 15000),
+        pageExplorerLimit: numberOrDefault(options.pageExplorerLimit, 200),
+        capabilities: options.capabilities
+    };
+}
+
+function pickDefaultPageExplorerTarget(items) {
+    if (!Array.isArray(items) || items.length === 0) {
+        return null;
+    }
+
+    const normalized = items
+        .map(item => {
+            if (typeof item === "string") {
+                return {
+                    name: item,
+                    lower: item.toLowerCase()
+                };
+            }
+
+            const name = item?.name ?? "";
+            return {
+                name,
+                lower: String(name ?? "").toLowerCase()
+            };
+        })
+        .filter(item => item.name);
+
+    const containerCandidates = normalized
+        .filter(item => /^container\d+$/i.test(item.name) || item.lower.startsWith("container"))
+        .sort((left, right) => (left.name.length - right.name.length) || left.name.localeCompare(right.name));
+
+    if (containerCandidates.length > 0) {
+        return containerCandidates[0].name;
+    }
+
+    return normalized[0].name;
 }
 
 function normalizeOpenItemOptions(options) {
