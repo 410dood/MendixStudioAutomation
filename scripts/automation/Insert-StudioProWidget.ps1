@@ -97,6 +97,7 @@ $dialogError = $null
 $postDialog = $null
 $pageExplorerBefore = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
 $pageExplorerAfter = $pageExplorerBefore
+$mutationDetectedByDialog = $false
 if (-not $DryRun) {
     try {
         $dialogContext = Open-AddWidgetDialogForPageExplorerItem `
@@ -115,8 +116,18 @@ if (-not $DryRun) {
         foreach ($acceptStrategy in @("button", "enter", "doubleClick")) {
             $acceptSelection = Invoke-WidgetDialogAccept -Dialog $dialogContext.NativeDialog -WidgetSelection $widgetSelection -Strategy $acceptStrategy -DelayMs ($DelayMs + 100)
             $postDialogCandidate = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(900, ($DelayMs * 3))) -PollMs 150 -Limit 30
-            $pageExplorerAfterCandidate = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
-            $pageExplorerChanged = Test-PageExplorerSnapshotChanged -Before $pageExplorerBefore -After $pageExplorerAfterCandidate
+            $dialogIndicatesMutation = [bool](
+                $postDialogCandidate -and
+                $postDialogCandidate.window -and
+                $postDialogCandidate.window.name -and
+                $postDialogCandidate.window.name -ne "Select Widget"
+            )
+            $pageExplorerAfterCandidate = $null
+            $pageExplorerChanged = $false
+            if (-not $dialogIndicatesMutation) {
+                $pageExplorerAfterCandidate = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 24
+                $pageExplorerChanged = Test-PageExplorerSnapshotChanged -Before $pageExplorerBefore -After $pageExplorerAfterCandidate
+            }
 
             $acceptAttempts += @(
                 @{
@@ -125,12 +136,14 @@ if (-not $DryRun) {
                     postDialog = $postDialogCandidate
                     pageExplorerAfter = $pageExplorerAfterCandidate
                     pageExplorerChanged = $pageExplorerChanged
+                    dialogIndicatesMutation = $dialogIndicatesMutation
                 }
             )
 
-            if ($pageExplorerChanged -or $postDialogCandidate) {
+            if ($dialogIndicatesMutation -or $pageExplorerChanged -or $postDialogCandidate) {
                 $postDialog = $postDialogCandidate
-                $pageExplorerAfter = $pageExplorerAfterCandidate
+                $pageExplorerAfter = if ($pageExplorerAfterCandidate) { $pageExplorerAfterCandidate } else { $pageExplorerAfter }
+                $mutationDetectedByDialog = $dialogIndicatesMutation
                 break
             }
 
@@ -168,7 +181,9 @@ if (-not $DryRun) {
         $method = "contextMenuDialog"
         if (-not $postDialog) {
             $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(1200, ($DelayMs * 4))) -PollMs 150 -Limit 30
-            $pageExplorerAfter = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
+            if (-not $mutationDetectedByDialog) {
+                $pageExplorerAfter = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 24
+            }
         }
     } catch {
         $dialogError = $_.Exception.Message
@@ -186,7 +201,7 @@ if (-not $DryRun) {
 
         $method = $dragDetails.method
         $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(1200, ($DelayMs * 4))) -PollMs 150 -Limit 30
-        $pageExplorerAfter = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
+        $pageExplorerAfter = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 24
     }
 }
 
@@ -207,6 +222,7 @@ $payload = @{
     dialogStrategy = $dialogStrategy
     dialogError = $dialogError
     postDialog = $postDialog
+    mutationDetectedByDialog = $mutationDetectedByDialog
     pageExplorerBefore = $pageExplorerBefore
     pageExplorerAfter = $pageExplorerAfter
     pageExplorerChanged = (Test-PageExplorerSnapshotChanged -Before $pageExplorerBefore -After $pageExplorerAfter)
