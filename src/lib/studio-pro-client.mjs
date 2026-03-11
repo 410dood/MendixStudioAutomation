@@ -686,7 +686,8 @@ export class StudioProClient {
             outputVariableName: normalized.outputVariableName,
             commit: normalized.commit,
             refreshInClient: normalized.refreshInClient,
-            initialValues: normalized.initialValues
+            initialValues: normalized.initialValues,
+            insertBeforeActivity: normalized.insertBeforeActivity
         });
 
         return {
@@ -697,7 +698,8 @@ export class StudioProClient {
             module: normalized.module,
             outputVariableName: normalized.outputVariableName,
             commit: normalized.commit,
-            refreshInClient: normalized.refreshInClient
+            refreshInClient: normalized.refreshInClient,
+            insertBeforeActivity: normalized.insertBeforeActivity
         };
     }
 
@@ -741,7 +743,8 @@ export class StudioProClient {
             microflow: normalized.microflow,
             module: normalized.module,
             entity: normalized.entity,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity
         });
 
         return {
@@ -750,7 +753,8 @@ export class StudioProClient {
             microflow: normalized.microflow,
             entity: normalized.entity,
             module: normalized.module,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity
         };
     }
 
@@ -3071,7 +3075,8 @@ function normalizeAddMicroflowCreateObjectOptions(options) {
         outputVariableName: options.outputVariableName || "CreatedObject",
         commit: options.commit || "No",
         refreshInClient: options.refreshInClient ?? "false",
-        initialValues: options.initialValues
+        initialValues: options.initialValues,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
     };
 }
 
@@ -3102,7 +3107,8 @@ function normalizeAddMicroflowCreateListOptions(options) {
         microflow: options.microflow ?? options.item,
         module: options.module,
         entity: options.entity,
-        outputVariableName: options.outputVariableName || "CreatedList"
+        outputVariableName: options.outputVariableName || "CreatedList",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
     };
 }
 

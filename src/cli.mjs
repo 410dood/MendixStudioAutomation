@@ -567,6 +567,7 @@ Options:
   --navigation-caption <text>  Optional caption for the generated navigation item
   --entity <name>             Module-qualified or local entity to instantiate, e.g. Document.ClientDocument
   --output-variable-name <text> Output variable name for create/call/retrieve/filter/find actions
+  --insert-before-activity <text> Optional activity caption/action type to insert before (create-object/create-list)
   --commit <name>             Commit mode for create/change actions: Yes|YesWithoutEvents|No
   --refresh-in-client <true|false> Refresh client after create
   --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}

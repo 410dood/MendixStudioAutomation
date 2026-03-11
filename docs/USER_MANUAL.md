@@ -244,10 +244,22 @@ Create an object activity in a microflow through the extension API:
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false --initial-values '{\"Name\":\"Acme\"}'
 ```
 
+Insert a create-object activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --insert-before-activity "Retrieve"
+```
+
 Create a list activity in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
+```
+
+Insert a create-list activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --insert-before-activity "Create object"
 ```
 
 Call another microflow in a microflow through the extension API:

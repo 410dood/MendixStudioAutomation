@@ -605,6 +605,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var outputVariableName = request.QueryString["outputVariableName"]
             ?? request.QueryString["outputVariable"]
             ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -741,15 +745,23 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                     .Select(value => (value.AttributeName, value.Expression))
                     .ToArray());
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Create object activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Create object activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -766,6 +778,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 commit = commitMode.ToString(),
                 refreshInClient,
                 initialValueCount = initialValues.Length,
+                insertionMode,
+                insertBeforeActivity,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/create-object",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -798,6 +814,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var outputVariableName = request.QueryString["outputVariableName"]
             ?? request.QueryString["outputVariable"]
             ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -903,15 +923,23 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 targetEntity,
                 output);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Create list activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Create list activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -925,6 +953,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 entity = targetEntity.Name,
                 entityModule = targetEntityModule,
                 outputVariableName = output,
+                insertionMode,
+                insertBeforeActivity,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/create-list",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -5003,6 +5035,56 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
 
         return null;
+    }
+
+    private bool TryInsertMicroflowActivity(
+        IMicroflow microflow,
+        IActivity activity,
+        string? insertBeforeActivity,
+        out string insertionMode,
+        out string? insertedBeforeCaption,
+        out string? insertedBeforeActionType,
+        out string? error)
+    {
+        insertedBeforeCaption = null;
+        insertedBeforeActionType = null;
+        error = null;
+        if (string.IsNullOrWhiteSpace(insertBeforeActivity))
+        {
+            insertionMode = "after-start";
+            var insertedAfterStart = _microflowService.TryInsertAfterStart(microflow, [activity]);
+            if (!insertedAfterStart)
+            {
+                error = "The API could not insert the activity at the start of the microflow.";
+            }
+
+            return insertedAfterStart;
+        }
+
+        var targetSelector = insertBeforeActivity.Trim();
+        var targetActivity = _microflowService.GetAllMicroflowActivities(microflow)
+            .OfType<IActionActivity>()
+            .FirstOrDefault(candidate =>
+                string.Equals(candidate.Caption, targetSelector, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(candidate.Action?.GetType().Name, targetSelector, StringComparison.OrdinalIgnoreCase));
+
+        if (targetActivity is null)
+        {
+            insertionMode = "before-activity";
+            error = $"No microflow activity matched '{targetSelector}' by caption or action type.";
+            return false;
+        }
+
+        insertionMode = "before-activity";
+        insertedBeforeCaption = targetActivity.Caption;
+        insertedBeforeActionType = targetActivity.Action?.GetType().Name;
+        var insertedBefore = _microflowService.TryInsertBeforeActivity(targetActivity, [activity]);
+        if (!insertedBefore)
+        {
+            error = "The selected insert-before activity does not have exactly one incoming sequence flow.";
+        }
+
+        return insertedBefore;
     }
 
     private static bool MatchesDocument(DocumentDescriptor document, string? query, string? moduleName, string? type)

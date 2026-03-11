@@ -385,7 +385,8 @@ export class HybridExtensionClient {
             outputVariableName: options.outputVariableName ?? options.outputVariable,
             commit: options.commit,
             refreshInClient: options.refreshInClient,
-            initialValues: options.initialValues
+            initialValues: options.initialValues,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
         }), options.timeoutMs);
 
         return {
@@ -414,7 +415,8 @@ export class HybridExtensionClient {
             microflow: options.microflow ?? options.item,
             module: options.module,
             entity: options.entity,
-            outputVariableName: options.outputVariableName ?? options.outputVariable
+            outputVariableName: options.outputVariableName ?? options.outputVariable,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
         }), options.timeoutMs);
 
         return {

@@ -93,8 +93,8 @@ That keeps the extension root in the Mendix-documented shape:
 - error-count reporting is not implemented yet
 - write operations now include a limited, targeted microflow mutation path:
   - launch an in-Studio quick create-object dialog through menu/context menu/web route
-  - create a `Create object` activity in a target microflow
-  - create a `Create list` activity in a target microflow
+  - create a `Create object` activity in a target microflow (optional insert-before targeting)
+  - create a `Create list` activity in a target microflow (optional insert-before targeting)
   - add a `Call microflow` activity in a target microflow
   - add a `Retrieve from database` activity in a target microflow (with optional XPath, sort, and range expressions)
   - add a `Retrieve by association` activity in a target microflow

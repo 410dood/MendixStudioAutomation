@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.2.25
+
+Targeted insertion support for create-object/create-list hybrid mutations.
+
+- Enhanced extension routes:
+  - `/mendix-studio-automation/microflows/create-object`
+  - `/mendix-studio-automation/microflows/create-list`
+- Added optional query argument support:
+  - `insertBeforeActivity` (aliases: `insertBefore`, `beforeActivity`, `beforeCaption`)
+- Insertion behavior:
+  - default remains insert after microflow start
+  - if `insertBeforeActivity` is provided, the extension attempts insert-before by matching activity caption or action type
+  - conflict responses now include insertion details on failure
+- Added Node/CLI support for:
+  - `--insert-before-activity`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.24
 
 Hybrid microflow activity inspection route.
