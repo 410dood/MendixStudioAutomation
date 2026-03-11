@@ -26,7 +26,9 @@ Included in this release:
   - Toolbox items
 - page and toolbox pane inspection now search from the active dock container instead of the whole Studio Pro window
 - editor inspection can now scope itself to the active microflow editor container
+- editor inspection now scopes correctly to the active page designer for `Client_ClinicalDocument_V3`
 - first-pass `insert-widget` flow with `--dry-run`
+- page-side widget selection is now validated against live page-designer controls and page-explorer rows
 - first-pass microflow commands:
   - `select-microflow-node`
   - `insert-action` with `--dry-run`
@@ -45,4 +47,5 @@ Known limitations:
 - `open-item` is more reliable for already-known or already-open documents than for every unopened asset.
 - `select-app-explorer-item` still needs more hardening against alternate left-pane states.
 - page explorer can still report Studio Pro's empty-state placeholder for some page tabs; the command now reports that cleanly instead of scraping unrelated panes.
+- page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - unopened documents that Studio Pro does not resolve through `Go to` now fail explicitly instead of returning misleading editor results.

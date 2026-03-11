@@ -22,11 +22,14 @@ if (-not $bestMatch) {
 }
 
 $nativeTarget = Resolve-NativeElementByRuntimeId -Root $attached.Element -ExpectedRuntimeId $bestMatch.runtimeId -Depth 15
-if (-not $nativeTarget) {
-    throw "Could not resolve the native automation element for '$Widget'."
+$method = $null
+$target = $bestMatch
+if ($nativeTarget) {
+    $method = Invoke-ElementAction -Element $nativeTarget -Action "click"
+    $target = Convert-AutomationElement -Element $nativeTarget
+} else {
+    $method = Invoke-BoundsClick -Bounds $bestMatch.boundingRectangle
 }
-
-$method = Invoke-ElementAction -Element $nativeTarget -Action "click"
 
 $payload = @{
     ok = $true
@@ -37,7 +40,7 @@ $payload = @{
     method = $method
     openMethod = $context.OpenMethod
     tab = $context.Tab
-    target = Convert-AutomationElement -Element $nativeTarget
+    target = $target
 }
 
 $payload | ConvertTo-Json -Depth 20

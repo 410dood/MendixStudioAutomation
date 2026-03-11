@@ -42,6 +42,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - scope page/toolbox/editor discovery to the active Studio Pro dock container instead of scanning the whole window
 - fail fast when a page or microflow command cannot confirm that Studio Pro actually opened the requested document
 - prepare or execute first-pass widget insertion through Page Explorer + Toolbox
+- detect real page-designer controls on `Client_ClinicalDocument_V3`, including `Structure mode`, `Parameters (8)`, `Olari_Popup_Default`, and real Page Explorer rows such as `container34`
 - select a visible microflow node/action label
 - prepare or execute first-pass microflow action insertion through the Toolbox
 
@@ -56,7 +57,8 @@ npm run find -- --name "App Explorer"
 npm run find -- --control-type TreeItem --name "Document"
 npm run click -- --runtime-id "42.333896.3.1"
 npm run open-item -- --item "Client_ClinicalDocument_V4"
-npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Page is empty" --surface pageExplorer
+npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
+npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Structure mode"
 npm run popup-status
 npm run wait-ready -- --timeout-ms 60000
 npm run list-open-tabs
@@ -68,13 +70,13 @@ npm run select-tab -- --tab "Client_ClinicalDocument_V3" --module "Az_ClientMana
 npm run close-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]" --dry-run
 npm run close-tab -- --dry-run
 npm run select-app-explorer-item -- --item "Client_ClinicalDocument_V3"
-npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "Page is empty"
-npm run select-toolbox-item -- --item "Create object"
+npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "container34"
+npm run select-toolbox-item -- --item "Text"
 npm run list-app-explorer-items
 npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
-npm run list-toolbox-items -- --microflow "ClinicalDocument_ShowPage"
-npm run list-editor-labels -- --microflow "ClinicalDocument_ShowPage"
-npm run insert-widget -- --page "Client_ClinicalDocument_V4" --target "container34" --widget "Deeply Nested List/Data View" --dry-run
+npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3"
+npm run list-editor-labels -- --page "Client_ClinicalDocument_V3"
+npm run insert-widget -- --page "Client_ClinicalDocument_V3" --target "container34" --widget "Text" --dry-run
 npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "DocumentType"
 npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 ```
@@ -104,9 +106,10 @@ Phase 2:
 - current `open-item`, `select-widget`, `select-explorer-item`, `insert-widget`, `select-microflow-node`, and `insert-action` now prefer an already open matching editor tab before falling back to `Go to`
 - current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
 - current `select-widget` can target both the editor surface and a named alternate surface like `pageExplorer`
-- current `select-explorer-item` targets exact visible Page Explorer rows from the Page Explorer dock container
-- current `select-toolbox-item` targets exact visible Toolbox items from the Toolbox dock container
-- current `insert-widget` supports a dry-run verification mode and an execution mode based on toolbox double-click insertion
+- current `select-widget` is validated against real page-designer labels on `Client_ClinicalDocument_V3`
+- current `select-explorer-item` targets exact visible Page Explorer rows from the Page Explorer dock container and is validated against `container34`
+- current `select-toolbox-item` targets exact visible Toolbox items from the Toolbox dock container and is validated for both page and microflow toolbox content
+- current `insert-widget` supports a dry-run verification mode and is validated end-to-end for resolving `container34` + `Text`
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - operation recorder and selector stabilization

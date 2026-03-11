@@ -13,12 +13,12 @@ export const operationCatalog = {
         {
             id: "page.selectWidget",
             description: "Select a visible widget on the active page canvas.",
-            status: "implemented-first-pass"
+            status: "implemented-validated"
         },
         {
             id: "page.insertWidget",
             description: "Insert a toolbox widget into the active page.",
-            status: "implemented-first-pass"
+            status: "implemented-dry-run-validated"
         },
         {
             id: "toolbox.selectItem",
@@ -58,7 +58,7 @@ export const operationCatalog = {
         {
             id: "page.selectExplorerItem",
             description: "Select an exact visible Page Explorer row for the active page.",
-            status: "implemented-first-pass"
+            status: "implemented-validated"
         },
         {
             id: "appExplorer.selectItem",

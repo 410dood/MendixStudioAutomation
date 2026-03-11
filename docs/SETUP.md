@@ -42,8 +42,9 @@ npm run wait-ready -- --timeout-ms 5000
 If those work, try a safe selection-only command:
 
 ```powershell
-npm run select-toolbox-item -- --item "Create object"
-npm run list-toolbox-items -- --microflow "ClinicalDocument_ShowPage" --limit 8
+npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
+npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3" --limit 12
+npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3" --limit 12
 ```
 
 You can also confirm that open document tabs are discoverable:

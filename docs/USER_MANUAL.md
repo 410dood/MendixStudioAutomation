@@ -95,27 +95,28 @@ npm run close-tab -- --dry-run
 Select visible designer text:
 
 ```powershell
-npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Page is empty" --surface pageExplorer
+npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
+npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Structure mode"
 ```
 
 Select visible Page Explorer rows:
 
 ```powershell
-npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "Page is empty"
+npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "container34"
 npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
 ```
 
 Select a Toolbox item:
 
 ```powershell
-npm run select-toolbox-item -- --item "Create object"
-npm run list-toolbox-items -- --microflow "ClinicalDocument_ShowPage"
+npm run select-toolbox-item -- --item "Text"
+npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3"
 ```
 
 Prepare a widget insertion without changing the page:
 
 ```powershell
-npm run insert-widget -- --page "Client_ClinicalDocument_V4" --target "container34" --widget "Deeply Nested List/Data View" --dry-run
+npm run insert-widget -- --page "Client_ClinicalDocument_V3" --target "container34" --widget "Text" --dry-run
 ```
 
 Remove `--dry-run` only when you want to execute the current first-pass insertion flow.
@@ -149,6 +150,7 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 
 - Some Studio Pro panes expose rows as text, some as data rows, and some as custom WPF controls.
 - The Toolbox pane is now discovered from its own dock container, which is substantially more reliable than the earlier whole-window scan.
+- The page-designer path is now validated on `Client_ClinicalDocument_V3`, including `Structure mode`, `Olari_Popup_Default`, and real Page Explorer rows like `container34`.
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.
