@@ -341,6 +341,37 @@ export class HybridExtensionClient {
             payload
         };
     }
+
+    async addMicroflowRetrieveDatabase(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/retrieve-database", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            outputVariableName: options.outputVariableName ?? options.outputVariable,
+            xPathConstraint: options.xPathConstraint ?? options.xpath,
+            retrieveFirst: options.retrieveFirst
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
 }
 
 async function resolveEndpointDiscovery(options) {
@@ -400,6 +431,7 @@ async function resolveEndpointDiscovery(options) {
                 navigationPopulateUrl: parsed.navigationPopulateUrl,
                 microflowCreateObjectUrl: parsed.microflowCreateObjectUrl,
                 microflowCreateListUrl: parsed.microflowCreateListUrl,
+                microflowRetrieveDatabaseUrl: parsed.microflowRetrieveDatabaseUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
                 microflowChangeAttributeUrl: parsed.microflowChangeAttributeUrl,

@@ -235,6 +235,12 @@ Create a list activity in a microflow through the extension API:
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
 ```
 
+Retrieve objects from database in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -305,6 +311,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
 - `add-microflow-create-list` inserts `Create list` activities only at the start of the selected microflow.
+- `add-microflow-retrieve-database` inserts `Retrieve from database` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-change-attribute` inserts `Change attribute` activities only at the start of the selected microflow.

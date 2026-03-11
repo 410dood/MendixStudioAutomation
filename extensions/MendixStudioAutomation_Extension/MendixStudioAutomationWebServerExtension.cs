@@ -75,6 +75,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/navigation/populate", HandlePopulateNavigationAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-object", HandleCreateMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-list", HandleCreateMicroflowListAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/retrieve-database", HandleRetrieveDatabaseMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/delete-object", HandleDeleteMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/commit-object", HandleCommitMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/change-attribute", HandleChangeMicroflowAttributeAsync);
@@ -151,6 +152,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "navigation.populate",
             "microflow.createObject",
             "microflow.createList",
+            "microflow.retrieveDatabase",
             "microflow.deleteObject",
             "microflow.commitObject",
             "microflow.changeAttribute",
@@ -734,6 +736,174 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleRetrieveDatabaseMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var entityName = request.QueryString["entity"];
+        var outputVariableName = request.QueryString["outputVariableName"]
+            ?? request.QueryString["outputVariable"]
+            ?? request.QueryString["output"];
+        var xPathConstraint = request.QueryString["xPathConstraint"] ?? request.QueryString["xpath"] ?? request.QueryString["xPath"];
+        var retrieveJustFirst = TryParseBool(request.QueryString["retrieveFirst"], false);
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(entityName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'entity' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName!.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            var entityModuleHint = module;
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+
+            var entityMatches = ResolveEntities(project, entityName, entityModuleHint);
+            if (entityMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No entity named '{entityName}' was found.",
+                    entity = entityName,
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (entityMatches.Length > 1)
+            {
+                var ambiguousEntities = entityMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple entities matched the request. Include --module to disambiguate.",
+                    entity = entityName,
+                    module = normalizedModuleName,
+                    matches = ambiguousEntities
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetEntity = entityMatches[0].Entity;
+            var targetEntityModule = entityMatches[0].ModuleName;
+            var defaultOutput = retrieveJustFirst ? "RetrievedObject" : "RetrievedObjects";
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? defaultOutput : outputVariableName!.Trim();
+            var normalizedXpath = xPathConstraint ?? string.Empty;
+
+            using var tx = CurrentApp.StartTransaction($"Add Retrieve database activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateDatabaseRetrieveSourceActivity(
+                CurrentApp,
+                output,
+                targetEntity,
+                normalizedXpath,
+                retrieveJustFirst,
+                Array.Empty<AttributeSorting>());
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert a Retrieve activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                entity = targetEntity.Name,
+                entityModule = targetEntityModule,
+                outputVariableName = output,
+                retrieveFirst = retrieveJustFirst,
+                xPathConstraint = normalizedXpath,
+                route = "microflows/retrieve-database",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow retrieve-database activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private Task HandleDeleteMicroflowObjectAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
         if (CurrentApp?.Root is not IProject project)
@@ -1273,6 +1443,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 navigationPopulateUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/navigation/populate"),
                 microflowCreateObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-object"),
                 microflowCreateListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-list"),
+                microflowRetrieveDatabaseUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/retrieve-database"),
                 microflowDeleteObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/delete-object"),
                 microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object"),
                 microflowChangeAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/change-attribute")

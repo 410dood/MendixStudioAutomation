@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.2.8
+
+Hybrid write-path expansion for microflow database retrieval.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/retrieve-database`
+- Added Studio Pro client support for:
+  - inserting a `Retrieve from database` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm script:
+  - `add-microflow-retrieve-database`
+  - `npm run add-microflow-retrieve-database`
+- Added options to support database retrieval insertion:
+  - `--entity`
+  - `--output-variable-name`
+  - `--x-path-constraint`
+  - `--retrieve-first`
+  - `--microflow`
+  - `--module`
+- Updated operation catalog with:
+  - `microflow.retrieveDatabase`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+- Kept commit-related behavior unchanged (review-first workflow; no version-control commits).
+
 ## 0.2.7
 
 Hybrid write-path expansion for microflow list creation.

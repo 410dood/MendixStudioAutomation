@@ -654,6 +654,63 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowRetrieveDatabase(options = {}) {
+        const normalized = normalizeAddMicroflowRetrieveDatabaseOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-database",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.entity) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-database",
+                error: "An --entity argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-database",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.retrieveDatabase"))) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-database",
+                error: "Extension capabilities do not include microflow.retrieveDatabase."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowRetrieveDatabase({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            outputVariableName: normalized.outputVariableName,
+            xPathConstraint: normalized.xPathConstraint,
+            retrieveFirst: normalized.retrieveFirst
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-retrieve-database",
+            microflow: normalized.microflow,
+            entity: normalized.entity,
+            module: normalized.module,
+            outputVariableName: normalized.outputVariableName,
+            xPathConstraint: normalized.xPathConstraint,
+            retrieveFirst: normalized.retrieveFirst
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -1409,6 +1466,19 @@ function normalizeAddMicroflowCreateListOptions(options) {
         module: options.module,
         entity: options.entity,
         outputVariableName: options.outputVariableName || "CreatedList"
+    };
+}
+
+function normalizeAddMicroflowRetrieveDatabaseOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        outputVariableName: options.outputVariableName || "RetrievedObjects",
+        xPathConstraint: options.xPathConstraint ?? options.xpath ?? "",
+        retrieveFirst: options.retrieveFirst ?? "false"
     };
 }
 
