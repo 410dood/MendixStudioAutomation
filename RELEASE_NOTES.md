@@ -1,5 +1,29 @@
 # Release Notes
 
+## 0.2.20
+
+Hybrid write-path expansion for microflow reduce-aggregate operations.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/reduce-aggregate`
+- Added extension capability:
+  - `microflow.reduceAggregate`
+- Added Studio Pro client support for:
+  - inserting a `Reduce aggregate` action into a selected microflow via extension service APIs
+  - configurable reduce result type and initial expression
+- Added CLI plumbing and npm script:
+  - `add-microflow-reduce-aggregate`
+  - `npm run add-microflow-reduce-aggregate`
+- Added CLI options:
+  - `--initial-expression`
+  - `--reduce-type`
+- Updated operation catalog with:
+  - `microflow.reduceAggregate`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.19
 
 Runtime verification expansion for local runs.

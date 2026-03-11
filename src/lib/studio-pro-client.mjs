@@ -1588,6 +1588,81 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowReduceAggregate(options = {}) {
+        const normalized = normalizeMicroflowReduceAggregateOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-reduce-aggregate",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-reduce-aggregate",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (!normalized.aggregateExpression) {
+            return {
+                ok: false,
+                action: "add-microflow-reduce-aggregate",
+                error: "An --aggregate-expression (or --expression) argument is required."
+            };
+        }
+
+        if (!normalized.initialExpression) {
+            return {
+                ok: false,
+                action: "add-microflow-reduce-aggregate",
+                error: "An --initial-expression (or --initial-value) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-reduce-aggregate",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.reduceAggregate"))) {
+            return {
+                ok: false,
+                action: "add-microflow-reduce-aggregate",
+                error: "Extension capabilities do not include microflow.reduceAggregate."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowReduceAggregate({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateExpression: normalized.aggregateExpression,
+            initialExpression: normalized.initialExpression,
+            reduceType: normalized.reduceType
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-reduce-aggregate",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateExpression: normalized.aggregateExpression,
+            initialExpression: normalized.initialExpression,
+            reduceType: normalized.reduceType
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -2709,6 +2784,20 @@ function normalizeMicroflowSortListOptions(options) {
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || "SortedList",
         sortDescending: options.sortDescending ?? options.descending ?? "false"
+    };
+}
+
+function normalizeMicroflowReduceAggregateOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || "ReducedAggregate",
+        aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
+        initialExpression: options.initialExpression ?? options.initialValue ?? options.initial,
+        reduceType: options.reduceType ?? options.dataType ?? options.type ?? "Decimal"
     };
 }
 

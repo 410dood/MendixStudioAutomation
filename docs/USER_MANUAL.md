@@ -322,6 +322,12 @@ Sort a list in a microflow through the extension API:
 npm run add-microflow-sort-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "SortedClientDocumentList" --sort-descending false
 ```
 
+Insert a reduce-aggregate activity in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-reduce-aggregate -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ReducedVersionTotal" --aggregate-expression '$currentValue + $currentObject/VersionNumber' --initial-expression "0" --reduce-type Decimal
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -428,6 +434,7 @@ npm run summarize-knowledge-gaps
 - `add-microflow-aggregate-by-expression` inserts `Aggregate by expression` activities only at the start of the selected microflow.
 - `add-microflow-change-list` inserts `Change list` activities only at the start of the selected microflow.
 - `add-microflow-sort-list` inserts `Sort list` activities only at the start of the selected microflow.
+- `add-microflow-reduce-aggregate` inserts `Reduce aggregate` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.

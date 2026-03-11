@@ -1,8 +1,10 @@
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using Mendix.StudioPro.ExtensionsAPI.Model;
+using Mendix.StudioPro.ExtensionsAPI.Model.DataTypes;
 using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
 using Mendix.StudioPro.ExtensionsAPI.Model.MicroflowExpressions;
 using Mendix.StudioPro.ExtensionsAPI.Model.Microflows;
@@ -93,6 +95,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/microflows/aggregate-by-expression", HandleAggregateByExpressionMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/change-list", HandleChangeListMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/sort-list", HandleSortListMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/reduce-aggregate", HandleReduceAggregateMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/delete-object", HandleDeleteMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/commit-object", HandleCommitMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/rollback-object", HandleRollbackMicroflowObjectAsync);
@@ -242,6 +245,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "microflow.aggregateByExpression",
             "microflow.changeList",
             "microflow.sortList",
+            "microflow.reduceAggregate",
             "microflow.deleteObject",
             "microflow.commitObject",
             "microflow.rollbackObject",
@@ -2962,6 +2966,169 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleReduceAggregateMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
+        var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var aggregateExpressionText = request.QueryString["aggregateExpression"] ?? request.QueryString["expression"] ?? request.QueryString["value"];
+        var initialExpressionText = request.QueryString["initialExpression"] ?? request.QueryString["initialValue"] ?? request.QueryString["initial"];
+        var reduceTypeText = request.QueryString["reduceType"] ?? request.QueryString["dataType"] ?? request.QueryString["type"];
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(listVariableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'listVariable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(aggregateExpressionText))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'aggregateExpression' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(initialExpressionText))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'initialExpression' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (!TryParseReduceDataType(reduceTypeText, out var reduceDataType))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'reduceType' query parameter is invalid. Allowed values: String, Integer, Decimal, Float, Boolean, DateTime."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var sourceList = listVariableName.Trim();
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? "ReducedAggregate" : outputVariableName.Trim();
+            var aggregateExpression = _microflowExpressionService.CreateFromString(ToExpressionText(aggregateExpressionText.Trim()));
+            var initialExpression = _microflowExpressionService.CreateFromString(ToExpressionText(initialExpressionText.Trim()));
+
+            using var tx = CurrentApp.StartTransaction($"Add Reduce aggregate activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateReduceAggregateActivity(
+                CurrentApp,
+                sourceList,
+                output,
+                aggregateExpression,
+                initialExpression,
+                reduceDataType);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert a Reduce aggregate activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                listVariable = sourceList,
+                outputVariableName = output,
+                aggregateExpression = aggregateExpressionText.Trim(),
+                initialExpression = initialExpressionText.Trim(),
+                reduceType = reduceTypeText?.Trim() ?? "Decimal",
+                route = "microflows/reduce-aggregate",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow reduce-aggregate activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private Task HandleDeleteMicroflowObjectAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
         if (CurrentApp?.Root is not IProject project)
@@ -3824,6 +3991,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowAggregateByExpressionUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/aggregate-by-expression"),
                 microflowChangeListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/change-list"),
                 microflowSortListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/sort-list"),
+                microflowReduceAggregateUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/reduce-aggregate"),
                 microflowDeleteObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/delete-object"),
                 microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object"),
                 microflowRollbackObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/rollback-object"),
@@ -4488,6 +4656,37 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         return false;
     }
 
+    private static bool TryParseReduceDataType(string? raw, out DataType dataType)
+    {
+        var normalized = string.IsNullOrWhiteSpace(raw) ? "Decimal" : raw.Trim();
+        switch (normalized.ToLowerInvariant())
+        {
+            case "string":
+                dataType = DataType.String;
+                return true;
+            case "integer":
+            case "int":
+                dataType = DataType.Integer;
+                return true;
+            case "decimal":
+                dataType = DataType.Decimal;
+                return true;
+            case "float":
+                dataType = DataType.Float;
+                return true;
+            case "boolean":
+            case "bool":
+                dataType = DataType.Boolean;
+                return true;
+            case "datetime":
+                dataType = DataType.DateTime;
+                return true;
+            default:
+                dataType = DataType.Decimal;
+                return false;
+        }
+    }
+
     private static (IMicroflow Microflow, string Name, string ModuleName)[] ResolveMicroflows(
         IProject project,
         IModule? moduleHint,
@@ -4661,6 +4860,22 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
 
     private static string ToExpressionText(string value)
     {
+        if (bool.TryParse(value, out _))
+        {
+            return value.ToLowerInvariant();
+        }
+
+        if (string.Equals(value, "null", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, "empty", StringComparison.OrdinalIgnoreCase))
+        {
+            return value.ToLowerInvariant();
+        }
+
+        if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+        {
+            return value;
+        }
+
         if (value.StartsWith("$", StringComparison.Ordinal)
             || value.StartsWith("[", StringComparison.Ordinal)
             || value.StartsWith("!", StringComparison.Ordinal)

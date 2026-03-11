@@ -806,6 +806,38 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowReduceAggregate(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/reduce-aggregate", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
+            initialExpression: options.initialExpression ?? options.initialValue ?? options.initial,
+            reduceType: options.reduceType ?? options.dataType ?? options.type
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowChangeAssociation(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -912,6 +944,7 @@ async function resolveEndpointDiscovery(options) {
                 microflowAggregateByExpressionUrl: parsed.microflowAggregateByExpressionUrl,
                 microflowChangeListUrl: parsed.microflowChangeListUrl,
                 microflowSortListUrl: parsed.microflowSortListUrl,
+                microflowReduceAggregateUrl: parsed.microflowReduceAggregateUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
                 microflowRollbackObjectUrl: parsed.microflowRollbackObjectUrl,

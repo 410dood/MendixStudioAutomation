@@ -290,6 +290,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-reduce-aggregate": {
+            const result = await client.addMicroflowReduceAggregate(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -439,6 +444,7 @@ Commands:
   add-microflow-aggregate-by-expression Add a microflow Aggregate by expression activity through the extension
   add-microflow-change-list   Add a microflow Change list activity through the extension
   add-microflow-sort-list     Add a microflow Sort list activity through the extension
+  add-microflow-reduce-aggregate Add a microflow Reduce aggregate activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-rollback-object Add a microflow Rollback object activity through the extension
@@ -533,6 +539,8 @@ Options:
   --find-expression <text>    Expression for find-by-association actions
   --aggregate-expression <text> Expression for aggregate-by-expression actions
   --aggregate-function <text> Aggregate function: Sum|Average|Count|Minimum|Maximum|All|Any|Reduce
+  --initial-expression <text> Initial expression for reduce-aggregate actions
+  --reduce-type <name>      Result type for reduce-aggregate: String|Integer|Decimal|Float|Boolean|DateTime
   --sort-descending <true|false> Sort descending for sort-list actions (default: false)
   --x-path-constraint <text>  Optional XPath constraint for retrieve-database action
   --retrieve-first <true|false> Retrieve first object instead of a list
