@@ -416,7 +416,8 @@ export class StudioProClient {
     }
 
     async setDialogField(options = {}) {
-        return runPowerShellScript("scripts/automation/Set-StudioProDialogField.ps1", normalizeDialogFieldOptions(options));
+        const result = await runPowerShellScript("scripts/automation/Set-StudioProDialogField.ps1", normalizeDialogFieldOptions(options));
+        return verifySetDialogFieldResult(result, options);
     }
 
     async listEditorMenuItems(options = {}) {
@@ -4040,6 +4041,47 @@ function normalizeDialogFieldOptions(options) {
     };
 }
 
+function verifySetDialogFieldResult(result, options = {}) {
+    const expectedValue = normalizeExpectedDialogTextValue(options.verifyValue ?? options.expectedValue);
+    const expectedToggleState = parseExpectedDialogToggleState(options.verifyToggleState ?? options.expectedToggleState);
+    const observedValue = result?.observedValue ?? {};
+    const verification = {
+        expectedValue,
+        expectedToggleState,
+        observedTextValue: observedValue?.textValue ?? null,
+        observedToggleState: observedValue?.toggleState ?? null,
+        observedIsToggled: observedValue?.isToggled ?? null,
+        valueMatched: expectedValue === null
+            ? null
+            : String(observedValue?.textValue ?? "") === expectedValue,
+        toggleMatched: expectedToggleState === null
+            ? null
+            : String(observedValue?.toggleState ?? "").toLowerCase() === expectedToggleState.toLowerCase()
+    };
+
+    const failures = [];
+    if (verification.valueMatched === false) {
+        failures.push(`observed text value '${verification.observedTextValue ?? ""}' did not match expected '${expectedValue}'`);
+    }
+    if (verification.toggleMatched === false) {
+        failures.push(`observed toggle state '${verification.observedToggleState ?? ""}' did not match expected '${expectedToggleState}'`);
+    }
+
+    if (failures.length === 0) {
+        return {
+            ...result,
+            verification
+        };
+    }
+
+    return {
+        ...result,
+        ok: false,
+        verification,
+        error: `Dialog field verification failed: ${failures.join("; ")}.`
+    };
+}
+
 function normalizeInsertWidgetOptions(options) {
     return {
         ProcessId: options.processId,
@@ -4301,4 +4343,33 @@ function parseExpectedHeaders(raw) {
             };
         })
         .filter(Boolean);
+}
+
+function normalizeExpectedDialogTextValue(raw) {
+    if (raw === undefined || raw === null) {
+        return null;
+    }
+
+    return String(raw);
+}
+
+function parseExpectedDialogToggleState(raw) {
+    if (raw === undefined || raw === null || raw === "") {
+        return null;
+    }
+
+    const value = String(raw).trim().toLowerCase();
+    if (["on", "off", "indeterminate"].includes(value)) {
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    if (["1", "true", "yes", "y", "checked"].includes(value)) {
+        return "On";
+    }
+
+    if (["0", "false", "no", "n", "unchecked"].includes(value)) {
+        return "Off";
+    }
+
+    return String(raw);
 }

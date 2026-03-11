@@ -562,6 +562,8 @@ Options:
   --control <name>            Visible control name inside a Studio Pro dialog
   --label <name>              Visible field label inside a Studio Pro dialog
   --value <text>              Value to set into a native Studio Pro dialog field
+  --verify-value <text>       Require set-dialog-field to observe an exact post-write text value
+  --verify-toggle-state <t>   Require set-dialog-field to observe toggle state On|Off|Indeterminate (also accepts true/false)
   --element <name>            Visible editor element name to target for a context menu
   --menu-item <name>          Editor context-menu item to invoke
   --menu-path <a>b>           Editor context-menu path, e.g. "Add>Activity"

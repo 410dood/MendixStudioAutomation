@@ -1132,6 +1132,7 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
 - `create-page` is currently strongest when the desired template is already visible in the right-hand template panel. Left-side template-category switching in the wizard still needs more hardening.
+- `set-dialog-field` now supports `--verify-value` and `--verify-toggle-state`, so callers can require an exact observed post-write text or toggle state.
 - `set-dialog-field` now reports observed post-write text/toggle state in its response payload so dialog mutations can be verified programmatically.
 - `set-dialog-field` now supports `CheckBox` and `ToggleButton` controls in native Studio Pro dialogs, including boolean value normalization for `true/false`, `yes/no`, `on/off`, and `1/0`.
 - `set-dialog-field` is present but still experimental; it needs more validation across a wider range of Studio Pro property dialogs.
