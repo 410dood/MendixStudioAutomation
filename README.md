@@ -291,6 +291,7 @@ Phase 2:
 - current dialog inspection is sufficient to read local-run blockers such as Studio Pro `Information` dialogs
 - current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
 - current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` controls
+- current `set-dialog-field` now reports the observed post-write text/toggle state so dialog mutations can be verified directly
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - current `insert-action` now records before/after microflow-editor snapshots and any post-action dialog so failed action-insert gestures are diagnosable instead of opaque

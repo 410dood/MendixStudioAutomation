@@ -135,6 +135,21 @@ function Convert-AutomationElement {
         $isSelected = $null
     }
 
+    $toggleState = $null
+    $isToggled = $null
+    try {
+        $togglePattern = $null
+        if ($Element.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern, [ref]$togglePattern)) {
+            $toggleState = [string]$togglePattern.Current.ToggleState
+            if ($togglePattern.Current.ToggleState -ne [System.Windows.Automation.ToggleState]::Indeterminate) {
+                $isToggled = $togglePattern.Current.ToggleState -eq [System.Windows.Automation.ToggleState]::On
+            }
+        }
+    } catch {
+        $toggleState = $null
+        $isToggled = $null
+    }
+
     return @{
         name = $Element.Current.Name
         automationId = $Element.Current.AutomationId
@@ -146,6 +161,8 @@ function Convert-AutomationElement {
         isEnabled = $Element.Current.IsEnabled
         isOffscreen = $Element.Current.IsOffscreen
         isSelected = $isSelected
+        toggleState = $toggleState
+        isToggled = $isToggled
         boundingRectangle = Convert-BoundingRectangle -Rect $Element.Current.BoundingRectangle
     }
 }
@@ -1721,6 +1738,51 @@ function ConvertTo-DialogBooleanValue {
     }
 }
 
+function Get-DialogFieldObservedValue {
+    param(
+        [System.Windows.Automation.AutomationElement]$Field
+    )
+
+    if (-not $Field) {
+        return @{
+            textValue = $null
+            toggleState = $null
+            isToggled = $null
+        }
+    }
+
+    $textValue = $null
+    try {
+        $valuePattern = $null
+        if ($Field.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$valuePattern)) {
+            $textValue = $valuePattern.Current.Value
+        }
+    } catch {
+        $textValue = $null
+    }
+
+    $toggleState = $null
+    $isToggled = $null
+    try {
+        $togglePattern = $null
+        if ($Field.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern, [ref]$togglePattern)) {
+            $toggleState = [string]$togglePattern.Current.ToggleState
+            if ($togglePattern.Current.ToggleState -ne [System.Windows.Automation.ToggleState]::Indeterminate) {
+                $isToggled = $togglePattern.Current.ToggleState -eq [System.Windows.Automation.ToggleState]::On
+            }
+        }
+    } catch {
+        $toggleState = $null
+        $isToggled = $null
+    }
+
+    return @{
+        textValue = $textValue
+        toggleState = $toggleState
+        isToggled = $isToggled
+    }
+}
+
 function Set-DialogFieldValue {
     param(
         [System.Windows.Automation.AutomationElement]$Dialog,
@@ -1802,12 +1864,15 @@ function Set-DialogFieldValue {
         }
     }
 
+    $observedValue = Get-DialogFieldObservedValue -Field $nativeField
+
     return @{
         method = $method
         selection = $selection
         label = $FieldMatch.label
         field = $FieldMatch.field
         value = $Value
+        observedValue = $observedValue
     }
 }
 

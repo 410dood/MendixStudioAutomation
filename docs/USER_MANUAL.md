@@ -125,7 +125,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 ```
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
-`set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened. It currently supports `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` fields, and checkbox/toggle values accept `true/false`, `yes/no`, `on/off`, and `1/0`.
+`set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened. It currently supports `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` fields, and checkbox/toggle values accept `true/false`, `yes/no`, `on/off`, and `1/0`. Successful writes now also report the observed post-write text/toggle state.
 
 ### Properties dialogs
 

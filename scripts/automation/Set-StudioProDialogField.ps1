@@ -50,6 +50,7 @@ $payload = @{
     method = $result.method
     field = $result.field
     labelMatch = $result.label
+    observedValue = $result.observedValue
     selection = $result.selection
     window = $dialogMatch
 }
