@@ -606,6 +606,94 @@ export class StudioProClient {
         };
     }
 
+    async findMicroflowActivities(options = {}) {
+        const normalized = normalizeMicroflowActivityFindOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "find-microflow-activities",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        const listed = await this.listMicroflowActivities({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module
+        });
+
+        if (!listed?.ok) {
+            return {
+                ...listed,
+                action: "find-microflow-activities",
+                query: normalized.query,
+                actionType: normalized.actionType,
+                variable: normalized.variable
+            };
+        }
+
+        const rawItems = Array.isArray(listed?.payload?.items)
+            ? listed.payload.items
+            : Array.isArray(listed?.items)
+                ? listed.items
+                : [];
+
+        const queryText = normalized.query.toLowerCase();
+        const actionTypeText = normalized.actionType.toLowerCase();
+        const variableText = normalized.variable.toLowerCase();
+
+        const filtered = rawItems.filter(item => {
+            const caption = String(item?.caption ?? "").toLowerCase();
+            const actionType = String(item?.actionType ?? "").toLowerCase();
+            const activityType = String(item?.activityType ?? "").toLowerCase();
+            const listOperationType = String(item?.listOperationType ?? "").toLowerCase();
+            const variables = Array.isArray(item?.variables)
+                ? item.variables.map(value => String(value))
+                : [];
+            const variablesLower = variables.map(value => value.toLowerCase());
+            const haystack = `${caption} ${actionType} ${activityType} ${listOperationType} ${variablesLower.join(" ")}`;
+
+            if (queryText && !haystack.includes(queryText)) {
+                return false;
+            }
+
+            if (actionTypeText && actionType !== actionTypeText && activityType !== actionTypeText && listOperationType !== actionTypeText) {
+                return false;
+            }
+
+            if (variableText && !variablesLower.some(value => value === variableText || value.includes(variableText))) {
+                return false;
+            }
+
+            return true;
+        });
+
+        const limitedItems = filtered.slice(0, normalized.limit);
+        const listedPayload = listed?.payload && typeof listed.payload === "object"
+            ? listed.payload
+            : {};
+
+        return {
+            ...listed,
+            action: "find-microflow-activities",
+            query: normalized.query,
+            actionType: normalized.actionType,
+            variable: normalized.variable,
+            limit: normalized.limit,
+            totalActivities: rawItems.length,
+            matchedCount: filtered.length,
+            items: limitedItems,
+            count: limitedItems.length,
+            payload: {
+                ...listedPayload,
+                items: limitedItems,
+                count: limitedItems.length,
+                matchedCount: filtered.length,
+                totalActivities: rawItems.length
+            }
+        };
+    }
+
     async openQuickCreateObjectDialog(options = {}) {
         const normalized = normalizeOpenQuickCreateObjectDialogOptions(options);
         const extensionStatus = await this.getExtensionStatus(options);
@@ -3114,6 +3202,17 @@ function normalizeMicroflowActivityListOptions(options) {
         title: options.title,
         microflow: options.microflow ?? options.item ?? options.name,
         module: options.module
+    };
+}
+
+function normalizeMicroflowActivityFindOptions(options) {
+    const parsedLimit = numberOrDefault(options.limit, 200);
+    return {
+        ...normalizeMicroflowActivityListOptions(options),
+        query: String(options.query ?? options.q ?? "").trim(),
+        actionType: String(options.actionType ?? options.type ?? "").trim(),
+        variable: String(options.variable ?? options.var ?? "").trim(),
+        limit: parsedLimit > 0 ? parsedLimit : 200
     };
 }
 

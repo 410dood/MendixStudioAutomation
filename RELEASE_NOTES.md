@@ -1,5 +1,30 @@
 # Release Notes
 
+## 0.2.28
+
+Filtered microflow activity finder command for faster index targeting and debugging.
+
+- Added Studio Pro client support for:
+  - `find-microflow-activities`
+- Added CLI/npm support for:
+  - `find-microflow-activities`
+  - `npm run find-microflow-activities`
+- Added activity finder filters:
+  - `--query` text match across caption/action/activity/list-operation/variables
+  - `--action-type` exact match against action/activity/list-operation type
+  - `--variable` exact-or-contains match against activity variable names
+  - bounded `--limit` (defaults to `200`, resets to `200` when non-positive)
+- Finder responses now include filtered `payload.items` plus:
+  - `totalActivities`
+  - `matchedCount`
+  - `count`
+  - `limit`
+- Updated operation catalog with:
+  - `microflow.findActivities`
+- Updated documentation:
+  - README
+  - User Manual
+
 ## 0.2.27
 
 Deterministic insert-before index targeting for selected hybrid microflow mutations.

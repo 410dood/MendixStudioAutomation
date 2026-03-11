@@ -76,6 +76,7 @@
     "extension-search-documents": "node src/cli.mjs extension-search-documents",
     "extension-open-document": "node src/cli.mjs extension-open-document",
     "list-microflow-activities": "node src/cli.mjs list-microflow-activities",
+    "find-microflow-activities": "node src/cli.mjs find-microflow-activities",
     "open-quick-create-object-dialog": "node src/cli.mjs open-quick-create-object-dialog",
     "record-knowledge-gap": "node src/cli.mjs record-knowledge-gap",
     "list-knowledge-gaps": "node src/cli.mjs list-knowledge-gaps",

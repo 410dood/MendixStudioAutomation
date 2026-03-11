@@ -196,6 +196,11 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.findActivities",
+            description: "Filter microflow activities by query, action type, or variable through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.connectNodes",
             description: "Connect two microflow nodes on the designer surface.",
             status: "planned"

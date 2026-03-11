@@ -70,6 +70,12 @@ List activity metadata for a target microflow:
 npm run list-microflow-activities -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement"
 ```
 
+Filter activity metadata for a target microflow:
+
+```powershell
+npm run find-microflow-activities -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --query "retrieve" --action-type "RetrieveByAssociation" --variable "ClientDocumentList" --limit 25
+```
+
 The extension project lives in `extensions\MendixStudioAutomation_Extension` and is installed into the Mendix app with `scripts\Install-MendixStudioAutomationExtension.ps1`.
 
 ### Generic discovery
@@ -526,6 +532,7 @@ npm run summarize-knowledge-gaps
 - `add-microflow-call` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-retrieve-database` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-retrieve-association` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `find-microflow-activities` filters `list-microflow-activities` results by `--query`, `--action-type`, and `--variable`.
 - `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.
 - `add-microflow-find-by-association` inserts `Find by association` activities only at the start of the selected microflow.
 - `add-microflow-filter-by-attribute` inserts `Filter by attribute` activities only at the start of the selected microflow.

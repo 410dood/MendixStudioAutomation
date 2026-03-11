@@ -210,6 +210,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "find-microflow-activities": {
+            const result = await client.findMicroflowActivities(options);
+            formatOutput(result);
+            return;
+        }
         case "open-quick-create-object-dialog": {
             const result = await client.openQuickCreateObjectDialog(options);
             formatOutput(result);
@@ -468,6 +473,7 @@ Commands:
   extension-search-documents  Search project documents through the in-Studio hybrid extension
   extension-open-document     Open a project document through the in-Studio hybrid extension
   list-microflow-activities   List activity metadata for a microflow through the extension
+  find-microflow-activities   Filter activity metadata for a microflow through the extension
   open-quick-create-object-dialog Open the in-Studio quick create-object modal dialog
   add-navigation-shortcut     Add a document to the web navigation profile through the extension
   add-microflow-create-object Add a microflow Create object activity through the extension
@@ -556,6 +562,7 @@ Options:
   --endpoint-file <path>      Hybrid extension endpoint discovery file
   --endpoint-url <url>        Explicit hybrid extension base URL
   --query <text>              Extension document search text
+  --action-type <name>        Activity/action type filter for find-microflow-activities
   --type <name>               Extension document type, e.g. Microflow or Page
   --control-type <name>       Optional dialog field type filter such as Edit or ComboBox
   --widget <name>             Widget name for create-clients-page (defaults to Data Grid 2)

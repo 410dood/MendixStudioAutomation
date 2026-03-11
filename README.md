@@ -95,6 +95,7 @@ npm run extension-capabilities
 npm run extension-search-documents -- --query ClinicalDocument --module Az_ClientManagement --limit 10
 npm run extension-open-document -- --name "ClinicalDocument_ShowPage" --module Az_ClientManagement
 npm run list-microflow-activities -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement"
+npm run find-microflow-activities -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --query "retrieve" --action-type "RetrieveByAssociation"
 npm run open-quick-create-object-dialog -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "CreatedObject"
 npm run record-knowledge-gap -- --requested-capability "page.insertWidget" --observed-issue "Intermittent selector drift in Select Widget dialog" --impact "Blocks repeatable page automation" --context "Client_ClinicalDocument_V3"
 npm run list-knowledge-gaps -- --status open --limit 20
@@ -240,6 +241,7 @@ Phase 2:
 - current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
 - current `extension-status`, `extension-context`, and `hybrid-context` can discover and query the in-Studio hybrid extension when its `runtime/endpoint.json` file exists
 - current `list-microflow-activities` returns activity/action metadata for a target microflow, including available variable names
+- current `find-microflow-activities` filters microflow activity metadata by query text, action type, and variable name
 - current hybrid extension project is a real Mendix `WebServerExtension` plus `MenuExtension`, not a placeholder stub
 - current hybrid extension also provides a `ContextMenuExtension<IDocument>` for microflow document actions
 - current `open-quick-create-object-dialog` opens a modal webview dialog to stage/create a `Create object` action with prefilled context
