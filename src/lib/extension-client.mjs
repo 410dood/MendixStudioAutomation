@@ -447,7 +447,8 @@ export class HybridExtensionClient {
             calledMicroflow: options.calledMicroflow ?? options.called ?? options.call,
             calledModule: options.calledModule,
             outputVariableName: options.outputVariableName ?? options.outputVariable,
-            parameterMappings: options.parameterMappings ?? options.parameters
+            parameterMappings: options.parameterMappings ?? options.parameters,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
         }), options.timeoutMs);
 
         return {
@@ -482,7 +483,8 @@ export class HybridExtensionClient {
             sortAttribute: options.sortAttribute ?? options.attribute,
             sortDescending: options.sortDescending ?? options.descending,
             rangeOffsetExpression: options.rangeOffsetExpression ?? options.rangeStartExpression ?? options.offsetExpression ?? options.startExpression,
-            rangeAmountExpression: options.rangeAmountExpression ?? options.rangeLengthExpression ?? options.limitExpression ?? options.amountExpression
+            rangeAmountExpression: options.rangeAmountExpression ?? options.rangeLengthExpression ?? options.limitExpression ?? options.amountExpression,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
         }), options.timeoutMs);
 
         return {
@@ -513,7 +515,8 @@ export class HybridExtensionClient {
             entity: options.entity,
             association: options.association,
             entityVariable: options.entityVariable ?? options.entityVar ?? options.fromVariable ?? options.variable,
-            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
         }), options.timeoutMs);
 
         return {

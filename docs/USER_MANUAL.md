@@ -268,6 +268,12 @@ Call another microflow in a microflow through the extension API:
 npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --parameter-mappings "{}"
 ```
 
+Insert a call-microflow activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --insert-before-activity "Retrieve"
+```
+
 Retrieve objects from database in a microflow through the extension API:
 
 ```powershell
@@ -284,6 +290,12 @@ Retrieve objects by association in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
+```
+
+Insert a retrieve-association activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj" --insert-before-activity "Create object"
 ```
 
 Filter a list by association in a microflow through the extension API:
@@ -487,9 +499,9 @@ npm run summarize-knowledge-gaps
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
 - `add-microflow-create-list` inserts `Create list` activities only at the start of the selected microflow.
-- `add-microflow-call` inserts `Call microflow` activities only at the start of the selected microflow.
-- `add-microflow-retrieve-database` inserts `Retrieve from database` activities only at the start of the selected microflow.
-- `add-microflow-retrieve-association` inserts `Retrieve by association` activities only at the start of the selected microflow.
+- `add-microflow-call` supports insert-after-start by default and optional `--insert-before-activity` targeting.
+- `add-microflow-retrieve-database` supports insert-after-start by default and optional `--insert-before-activity` targeting.
+- `add-microflow-retrieve-association` supports insert-after-start by default and optional `--insert-before-activity` targeting.
 - `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.
 - `add-microflow-find-by-association` inserts `Find by association` activities only at the start of the selected microflow.
 - `add-microflow-filter-by-attribute` inserts `Filter by attribute` activities only at the start of the selected microflow.

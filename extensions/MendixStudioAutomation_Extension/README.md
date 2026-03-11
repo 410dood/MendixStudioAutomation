@@ -95,9 +95,9 @@ That keeps the extension root in the Mendix-documented shape:
   - launch an in-Studio quick create-object dialog through menu/context menu/web route
   - create a `Create object` activity in a target microflow (optional insert-before targeting)
   - create a `Create list` activity in a target microflow (optional insert-before targeting)
-  - add a `Call microflow` activity in a target microflow
-  - add a `Retrieve from database` activity in a target microflow (with optional XPath, sort, and range expressions)
-  - add a `Retrieve by association` activity in a target microflow
+  - add a `Call microflow` activity in a target microflow (optional insert-before targeting)
+  - add a `Retrieve from database` activity in a target microflow (with optional XPath, sort, range expressions, and insert-before targeting)
+  - add a `Retrieve by association` activity in a target microflow (optional insert-before targeting)
   - add a `Filter by association` activity in a target microflow
   - add a `Find by association` activity in a target microflow
   - add a `Filter by attribute` activity in a target microflow

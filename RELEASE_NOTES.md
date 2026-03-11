@@ -1,5 +1,26 @@
 # Release Notes
 
+## 0.2.26
+
+Targeted insertion expansion for call and retrieve hybrid mutations.
+
+- Enhanced extension routes:
+  - `/mendix-studio-automation/microflows/call-microflow`
+  - `/mendix-studio-automation/microflows/retrieve-database`
+  - `/mendix-studio-automation/microflows/retrieve-association`
+- Added optional query argument support:
+  - `insertBeforeActivity` (aliases: `insertBefore`, `beforeActivity`, `beforeCaption`)
+- Insertion behavior:
+  - default remains insert after microflow start
+  - if `insertBeforeActivity` is provided, the extension attempts insert-before by matching activity caption or action type
+  - conflict responses include insertion details on failure
+- Added Node/CLI support for:
+  - `--insert-before-activity` on `add-microflow-call`, `add-microflow-retrieve-database`, and `add-microflow-retrieve-association`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.25
 
 Targeted insertion support for create-object/create-list hybrid mutations.

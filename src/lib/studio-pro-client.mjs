@@ -808,7 +808,8 @@ export class StudioProClient {
             calledMicroflow: normalized.calledMicroflow,
             calledModule: normalized.calledModule,
             outputVariableName: normalized.outputVariableName,
-            parameterMappings: normalized.parameterMappingsRaw
+            parameterMappings: normalized.parameterMappingsRaw,
+            insertBeforeActivity: normalized.insertBeforeActivity
         });
 
         return {
@@ -819,7 +820,8 @@ export class StudioProClient {
             calledMicroflow: normalized.calledMicroflow,
             calledModule: normalized.calledModule,
             outputVariableName: normalized.outputVariableName,
-            parameterMappings: normalized.parameterMappings
+            parameterMappings: normalized.parameterMappings,
+            insertBeforeActivity: normalized.insertBeforeActivity
         };
     }
 
@@ -885,7 +887,8 @@ export class StudioProClient {
             sortAttribute: normalized.sortAttribute,
             sortDescending: normalized.sortDescending,
             rangeOffsetExpression: normalized.rangeOffsetExpression,
-            rangeAmountExpression: normalized.rangeAmountExpression
+            rangeAmountExpression: normalized.rangeAmountExpression,
+            insertBeforeActivity: normalized.insertBeforeActivity
         });
 
         return {
@@ -900,7 +903,8 @@ export class StudioProClient {
             sortAttribute: normalized.sortAttribute,
             sortDescending: normalized.sortDescending,
             rangeOffsetExpression: normalized.rangeOffsetExpression,
-            rangeAmountExpression: normalized.rangeAmountExpression
+            rangeAmountExpression: normalized.rangeAmountExpression,
+            insertBeforeActivity: normalized.insertBeforeActivity
         };
     }
 
@@ -954,7 +958,8 @@ export class StudioProClient {
             entity: normalized.entity,
             association: normalized.association,
             entityVariable: normalized.entityVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity
         });
 
         return {
@@ -965,7 +970,8 @@ export class StudioProClient {
             entity: normalized.entity,
             association: normalized.association,
             entityVariable: normalized.entityVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity
         };
     }
 
@@ -3142,6 +3148,7 @@ function normalizeAddMicroflowCallMicroflowOptions(options) {
         calledMicroflow: options.calledMicroflow ?? options.called ?? options.call,
         calledModule: options.calledModule,
         outputVariableName: options.outputVariableName || "CallResult",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
         parameterMappings,
         parameterMappingsRaw: typeof parameterMappingsRaw === "string"
             ? parameterMappingsRaw
@@ -3177,6 +3184,7 @@ function normalizeAddMicroflowRetrieveDatabaseOptions(options) {
         sortDescending: options.sortDescending ?? options.descending ?? "false",
         rangeOffsetExpression,
         rangeAmountExpression,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
         hasRangeOffsetExpression: String(rangeOffsetExpression).trim().length > 0,
         hasRangeAmountExpression: String(rangeAmountExpression).trim().length > 0
     };
@@ -3191,7 +3199,8 @@ function normalizeAddMicroflowRetrieveAssociationOptions(options) {
         entity: options.entity,
         association: options.association,
         entityVariable: options.entityVariable ?? options.entityVar ?? options.fromVariable ?? options.variable ?? options.target,
-        outputVariableName: options.outputVariableName || "RetrievedByAssociation"
+        outputVariableName: options.outputVariableName || "RetrievedByAssociation",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption
     };
 }
 
