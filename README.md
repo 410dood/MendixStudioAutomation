@@ -159,6 +159,10 @@ npm run add-microflow-list-union -- --microflow "ClinicalDocument_ShowPage" --mo
 npm run add-microflow-list-intersect -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "SharedClientDocumentList"
 npm run add-microflow-list-subtract -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "RemainingClientDocumentList"
 npm run add-microflow-list-equals -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "ClientDocumentListsMatch"
+npm run add-microflow-list-union -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "CombinedClientDocumentList" --insert-before-index 11
+npm run add-microflow-list-intersect -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "SharedClientDocumentList" --insert-before-activity "Retrieve"
+npm run add-microflow-list-subtract -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "RemainingClientDocumentList" --insert-before-activity "Create object"
+npm run add-microflow-list-equals -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --other-list-variable "DraftClientDocumentList" --output-variable-name "ClientDocumentListsMatch" --insert-before-index 12
 npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
 npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --refresh-in-client false
@@ -292,6 +296,7 @@ Phase 2:
 - current `add-microflow-list-intersect` now inserts SDK-backed `List intersect` activities through the hybrid extension route
 - current `add-microflow-list-subtract` now inserts SDK-backed `List subtract` activities through the hybrid extension route
 - current `add-microflow-list-equals` now inserts SDK-backed `List equals` activities through the hybrid extension route
+- current binary list actions (`list-union`, `list-intersect`, `list-subtract`, `list-equals`) now also support optional `--insert-before-activity` and `--insert-before-index`
 - current `add-microflow-delete-object` now inserts SDK-backed `Delete object` activities through the hybrid extension route
 - current `add-microflow-commit-object` now inserts SDK-backed `Commit object` activities through the hybrid extension route
 - current `add-microflow-rollback-object` now inserts SDK-backed `Rollback object` activities through the hybrid extension route

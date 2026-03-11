@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.2.31
+
+Insert-before targeting for binary list microflow operations.
+
+- Enhanced extension route family:
+  - `/mendix-studio-automation/microflows/list-union`
+  - `/mendix-studio-automation/microflows/list-intersect`
+  - `/mendix-studio-automation/microflows/list-subtract`
+  - `/mendix-studio-automation/microflows/list-equals`
+- Added optional query argument support:
+  - `insertBeforeActivity` (aliases: `insertBefore`, `beforeActivity`, `beforeCaption`)
+  - `insertBeforeIndex` (alias: `beforeIndex`)
+- Added Node/CLI propagation for:
+  - `add-microflow-list-union`
+  - `add-microflow-list-intersect`
+  - `add-microflow-list-subtract`
+  - `add-microflow-list-equals`
+- Insertion behavior:
+  - default remains insert after microflow start
+  - when `insertBeforeActivity` is supplied, insertion matches by caption/action type
+  - when `insertBeforeIndex` is supplied, insertion is index-based from `list-microflow-activities`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.30
 
 Local RAG-style retrieval for automation procedures and capabilities.

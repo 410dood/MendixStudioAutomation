@@ -2055,7 +2055,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2065,7 +2067,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -2118,7 +2122,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2128,7 +2134,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -2181,7 +2189,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2191,7 +2201,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -2244,7 +2256,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2254,7 +2268,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             otherListVariable: normalized.otherListVariable,
-            outputVariableName: normalized.outputVariableName
+            outputVariableName: normalized.outputVariableName,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -3496,7 +3512,9 @@ function normalizeMicroflowBinaryListOperationOptions(options, defaultOutputVari
             ?? options.objectVariable
             ?? options.value
             ?? options.itemVariable
-            ?? options.variable
+            ?? options.variable,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 

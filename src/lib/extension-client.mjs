@@ -992,7 +992,9 @@ export class HybridExtensionClient {
             module: options.module,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
-            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -1022,7 +1024,9 @@ export class HybridExtensionClient {
             module: options.module,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
-            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -1052,7 +1056,9 @@ export class HybridExtensionClient {
             module: options.module,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
-            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -1082,7 +1088,9 @@ export class HybridExtensionClient {
             module: options.module,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             otherListVariable: options.otherListVariable ?? options.secondListVariable ?? options.objectVariable ?? options.value ?? options.itemVariable ?? options.variable,
-            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {

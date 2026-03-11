@@ -3839,6 +3839,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             ?? request.QueryString["value"]
             ?? request.QueryString["itemVariable"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         var routeSuffix = operationKind switch
         {
@@ -3955,15 +3960,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 operation);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = $"The API could not insert a {routeSuffix} activity at the start of the microflow.",
+                    error = insertionError ?? $"The API could not insert a {routeSuffix} activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3977,6 +3992,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 listVariable = sourceList,
                 secondVariable,
                 outputVariableName = output,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = $"microflows/{routeSuffix}",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
