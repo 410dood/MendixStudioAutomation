@@ -70,6 +70,16 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "get-properties-dialog-field": {
+            const result = await client.getPropertiesDialogField(options);
+            formatOutput(result);
+            return;
+        }
+        case "set-properties-dialog-field": {
+            const result = await client.setPropertiesDialogField(options);
+            formatOutput(result);
+            return;
+        }
         case "sync-properties-dialog": {
             const result = await client.syncPropertiesDialog(options);
             formatOutput(result);
@@ -495,6 +505,8 @@ Commands:
   open-properties             Open the properties dialog for a selected Studio Pro item
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
+  get-properties-dialog-field Open a properties dialog and read one labeled field
+  set-properties-dialog-field Open a properties dialog and set one labeled field
   sync-properties-dialog      Open a properties dialog and sync it from a JSON field plan
   open-item                   Open a Studio Pro document by name with Ctrl+G
   select-widget               Select a visible named widget or page element

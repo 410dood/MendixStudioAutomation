@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.50
+
+Direct single-field properties editing workflows.
+
+- Added `get-properties-dialog-field` to open a Studio Pro properties dialog from a page or microflow target and read one labeled field directly.
+- Added `set-properties-dialog-field` to open a Studio Pro properties dialog from a page or microflow target and apply one labeled field edit with the existing verification options.
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.49
 
 Review-first properties dialog workflows.
