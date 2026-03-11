@@ -121,6 +121,7 @@ npm run select-toolbox-item -- --item "Text"
 npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
+npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
 npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
 npm run set-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --value true --control-type CheckBox --verify-toggle-state On
 npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
@@ -291,6 +292,7 @@ Phase 2:
 - current `insert-widget` is now producing confirmed Page Explorer mutations on `Client_ClinicalDocument_V3`, including live insertions under `container39` and `container38`
 - current dialog inspection is sufficient to read local-run blockers such as Studio Pro `Information` dialogs
 - current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
+- current `get-dialog-field` can inspect native dialog field values and toggle state by visible label
 - current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` controls
 - current `set-dialog-field` now reports the observed post-write text/toggle state so dialog mutations can be verified directly
 - current `set-dialog-field` now supports `--verify-value` and `--verify-toggle-state` to fail fast when the observed dialog state does not match the expected result

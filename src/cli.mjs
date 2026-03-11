@@ -120,6 +120,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "get-dialog-field": {
+            const result = await client.getDialogField(options);
+            formatOutput(result);
+            return;
+        }
         case "set-dialog-field": {
             const result = await client.setDialogField(options);
             formatOutput(result);
@@ -460,6 +465,7 @@ Commands:
   invoke-scope-element-action Click or invoke a scoped Studio Pro element by runtime id
   list-dialog-items           List visible named controls inside a Studio Pro dialog
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
+  get-dialog-field            Read a native Studio Pro dialog field by its visible label
   set-dialog-field            Set a native Studio Pro dialog field by its visible label
   list-editor-menu-items      Open an editor element context menu and list its items
   invoke-editor-menu-item     Invoke a named editor element context-menu item

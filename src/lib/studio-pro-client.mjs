@@ -415,6 +415,14 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/Invoke-StudioProDialogControl.ps1", normalizeDialogControlOptions(options));
     }
 
+    async getDialogField(options = {}) {
+        const result = await runPowerShellScript("scripts/automation/Get-StudioProDialogField.ps1", normalizeGetDialogFieldOptions(options));
+        return verifySetDialogFieldResult(result, {
+            verifyValue: options.verifyValue ?? options.expectedValue,
+            verifyToggleState: options.verifyToggleState ?? options.expectedToggleState
+        });
+    }
+
     async setDialogField(options = {}) {
         const result = await runPowerShellScript("scripts/automation/Set-StudioProDialogField.ps1", normalizeDialogFieldOptions(options));
         return verifySetDialogFieldResult(result, options);
@@ -4038,6 +4046,16 @@ function normalizeDialogFieldOptions(options) {
         Value: options.value ?? "",
         ControlType: options.controlType,
         DelayMs: numberOrDefault(options.delayMs, 250)
+    };
+}
+
+function normalizeGetDialogFieldOptions(options) {
+    return {
+        ProcessId: options.processId,
+        WindowTitlePattern: options.title,
+        Dialog: options.dialog,
+        Label: options.label,
+        ControlType: options.controlType
     };
 }
 
