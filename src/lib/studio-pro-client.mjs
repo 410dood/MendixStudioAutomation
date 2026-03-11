@@ -423,8 +423,62 @@ export class StudioProClient {
         const result = await runPowerShellScript("scripts/automation/Get-StudioProDialogField.ps1", normalizeGetDialogFieldOptions(options));
         return verifySetDialogFieldResult(result, {
             verifyValue: options.verifyValue ?? options.expectedValue,
+            verifyValueContains: options.verifyValueContains ?? options.expectedValueContains,
             verifyToggleState: options.verifyToggleState ?? options.expectedToggleState
         });
+    }
+
+    async setDialogFields(options = {}) {
+        const fields = parseDialogFieldBatch(options.fieldsJson ?? options.fields ?? options.fieldMap);
+        if (fields.length === 0) {
+            return {
+                ok: false,
+                action: "set-dialog-fields",
+                error: "At least one dialog field entry is required. Pass --fields-json with a JSON object or array."
+            };
+        }
+
+        const continueOnError = toBoolean(options.continueOnError, false);
+        const results = [];
+        for (const field of fields) {
+            try {
+                const result = await this.setDialogField({
+                    ...options,
+                    label: field.label,
+                    value: field.value,
+                    controlType: field.controlType ?? options.controlType,
+                    verifyValue: field.verifyValue,
+                    verifyValueContains: field.verifyValueContains,
+                    verifyToggleState: field.verifyToggleState
+                });
+                results.push(result);
+                if (!result?.ok && !continueOnError) {
+                    break;
+                }
+            } catch (error) {
+                const failure = {
+                    ok: false,
+                    action: "set-dialog-field",
+                    dialog: options.dialog,
+                    label: field.label,
+                    error: error instanceof Error ? error.message : String(error)
+                };
+                results.push(failure);
+                if (!continueOnError) {
+                    break;
+                }
+            }
+        }
+
+        return {
+            ok: results.length > 0 && results.every(entry => entry?.ok),
+            action: "set-dialog-fields",
+            dialog: options.dialog,
+            continueOnError,
+            count: results.length,
+            requestedCount: fields.length,
+            results
+        };
     }
 
     async setDialogField(options = {}) {
@@ -4415,4 +4469,53 @@ function parseExpectedDialogToggleState(raw) {
     }
 
     return String(raw);
+}
+
+function parseDialogFieldBatch(raw) {
+    if (raw === undefined || raw === null || raw === "") {
+        return [];
+    }
+
+    let parsed = raw;
+    if (typeof raw === "string") {
+        try {
+            parsed = JSON.parse(raw);
+        } catch (error) {
+            throw new Error(`Failed to parse --fields-json: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    if (Array.isArray(parsed)) {
+        return parsed
+            .map(entry => normalizeDialogFieldBatchEntry(entry))
+            .filter(Boolean);
+    }
+
+    if (typeof parsed === "object") {
+        return Object.entries(parsed)
+            .map(([label, value]) => normalizeDialogFieldBatchEntry({ label, value }))
+            .filter(Boolean);
+    }
+
+    throw new Error("--fields-json must be a JSON object or array.");
+}
+
+function normalizeDialogFieldBatchEntry(entry) {
+    if (!entry || typeof entry !== "object") {
+        return null;
+    }
+
+    const label = typeof entry.label === "string" ? entry.label.trim() : "";
+    if (!label) {
+        return null;
+    }
+
+    return {
+        label,
+        value: entry.value ?? "",
+        controlType: entry.controlType,
+        verifyValue: entry.verifyValue,
+        verifyValueContains: entry.verifyValueContains,
+        verifyToggleState: entry.verifyToggleState
+    };
 }

@@ -130,6 +130,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "set-dialog-fields": {
+            const result = await client.setDialogFields(options);
+            formatOutput(result);
+            return;
+        }
         case "set-dialog-field": {
             const result = await client.setDialogField(options);
             formatOutput(result);
@@ -472,6 +477,7 @@ Commands:
   list-dialog-fields          List visible dialog labels that resolve to field/value pairs
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
   get-dialog-field            Read a native Studio Pro dialog field by its visible label
+  set-dialog-fields           Set multiple native Studio Pro dialog fields from JSON input
   set-dialog-field            Set a native Studio Pro dialog field by its visible label
   list-editor-menu-items      Open an editor element context menu and list its items
   invoke-editor-menu-item     Invoke a named editor element context-menu item
@@ -575,9 +581,11 @@ Options:
   --control <name>            Visible control name inside a Studio Pro dialog
   --label <name>              Visible field label inside a Studio Pro dialog
   --value <text>              Value to set into a native Studio Pro dialog field
+  --fields-json <json>        JSON object/array for set-dialog-fields batch updates
   --verify-value <text>       Require set-dialog-field to observe an exact post-write text value
   --verify-value-contains <t> Require get/set-dialog-field to observe a post-read/write text substring
   --verify-toggle-state <t>   Require set-dialog-field to observe toggle state On|Off|Indeterminate (also accepts true/false)
+  --continue-on-error <bool>  Continue batch dialog field updates after a field-level failure
   --element <name>            Visible editor element name to target for a context menu
   --menu-item <name>          Editor context-menu item to invoke
   --menu-path <a>b>           Editor context-menu path, e.g. "Add>Activity"
