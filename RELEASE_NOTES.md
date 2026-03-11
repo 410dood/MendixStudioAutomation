@@ -1,5 +1,21 @@
 # Release Notes
 
+## 0.2.36
+
+Richer local runtime verification assertions.
+
+- Enhanced `run-local-verify` to support optional HTTP assertions:
+  - `verifyStatus` / `expectedStatus` for specific status-code validation
+  - `verifyText` / `expectedText` for response-body substring validation
+  - `verifyLocation` / `expectedLocation` for redirect Location header validation
+- Added result diagnostics:
+  - last observed `location`
+  - short `responseSnippet` on failure
+  - echoed expected assertion inputs in verification output
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.35
 
 Insert-before targeting for change/sort/reduce microflow operations.

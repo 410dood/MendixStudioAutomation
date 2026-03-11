@@ -44,9 +44,15 @@ export class StudioProClient {
         const url = options.url || options.verifyUrl || process.env.MENDIX_LOCAL_URL || "http://localhost:8080";
         const timeoutMs = numberOrDefault(options.verifyTimeoutMs ?? options.timeoutMs, 120000);
         const pollMs = numberOrDefault(options.verifyPollMs ?? options.pollMs, 2000);
+        const expectedStatus = parseExpectedStatusCodes(options.verifyStatus ?? options.expectedStatus ?? options.status);
+        const expectedText = options.verifyText ?? options.expectedText ?? null;
+        const expectedLocation = options.verifyLocation ?? options.expectedLocation ?? null;
         const verify = await waitForHttpReachable(url, {
             timeoutMs,
-            pollMs
+            pollMs,
+            expectedStatus,
+            expectedText,
+            expectedLocation
         });
 
         return {
@@ -55,6 +61,9 @@ export class StudioProClient {
             url,
             timeoutMs,
             pollMs,
+            expectedStatus,
+            expectedText,
+            expectedLocation,
             runResult,
             verify
         };
@@ -3844,9 +3853,18 @@ function numberOrDefault(value, fallback) {
 async function waitForHttpReachable(url, options = {}) {
     const timeoutMs = numberOrDefault(options.timeoutMs, 120000);
     const pollMs = numberOrDefault(options.pollMs, 2000);
+    const expectedStatusCodes = Array.isArray(options.expectedStatus) ? options.expectedStatus : [];
+    const expectedText = typeof options.expectedText === "string" && options.expectedText.length > 0
+        ? options.expectedText
+        : null;
+    const expectedLocation = typeof options.expectedLocation === "string" && options.expectedLocation.length > 0
+        ? options.expectedLocation
+        : null;
     const startedAt = Date.now();
     let attempts = 0;
     let lastStatus = null;
+    let lastLocation = null;
+    let lastBodySnippet = null;
     let lastError = null;
 
     while (Date.now() - startedAt <= timeoutMs) {
@@ -3857,14 +3875,40 @@ async function waitForHttpReachable(url, options = {}) {
                 redirect: "manual"
             });
             lastStatus = response.status;
-            if (response.status >= 200 && response.status < 500) {
+            lastLocation = response.headers.get("location");
+            const bodyText = expectedText ? await response.text() : null;
+            lastBodySnippet = bodyText ? bodyText.slice(0, 240) : null;
+
+            const statusOk = expectedStatusCodes.length > 0
+                ? expectedStatusCodes.includes(response.status)
+                : (response.status >= 200 && response.status < 500);
+            const textOk = expectedText ? Boolean(bodyText?.includes(expectedText)) : true;
+            const locationOk = expectedLocation
+                ? Boolean(lastLocation && lastLocation.includes(expectedLocation))
+                : true;
+
+            if (statusOk && textOk && locationOk) {
                 return {
                     ok: true,
                     url,
                     attempts,
                     status: response.status,
+                    location: lastLocation,
+                    expectedStatus: expectedStatusCodes,
+                    expectedText,
+                    expectedLocation,
                     elapsedMs: Date.now() - startedAt
                 };
+            }
+
+            if (!statusOk) {
+                lastError = expectedStatusCodes.length > 0
+                    ? `Expected status ${expectedStatusCodes.join(", ")} but got ${response.status}.`
+                    : null;
+            } else if (!textOk) {
+                lastError = `Response did not contain expected text '${expectedText}'.`;
+            } else if (!locationOk) {
+                lastError = `Redirect location did not contain expected value '${expectedLocation}'.`;
             }
         } catch (error) {
             lastError = error instanceof Error ? error.message : String(error);
@@ -3878,7 +3922,29 @@ async function waitForHttpReachable(url, options = {}) {
         url,
         attempts,
         status: lastStatus,
+        location: lastLocation,
+        responseSnippet: lastBodySnippet,
+        expectedStatus: expectedStatusCodes,
+        expectedText,
+        expectedLocation,
         elapsedMs: Date.now() - startedAt,
         error: lastError ?? `Timed out waiting for ${url} to become reachable.`
     };
+}
+
+function parseExpectedStatusCodes(raw) {
+    if (!raw && raw !== 0) {
+        return [];
+    }
+
+    if (Array.isArray(raw)) {
+        return raw
+            .map(value => Number.parseInt(String(value), 10))
+            .filter(Number.isFinite);
+    }
+
+    return String(raw)
+        .split(",")
+        .map(value => Number.parseInt(value.trim(), 10))
+        .filter(Number.isFinite);
 }

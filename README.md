@@ -75,6 +75,7 @@ npm run click -- --runtime-id "42.333896.3.1"
 npm run send-keys -- --page "Client_ClinicalDocument_V3" --scope editor --keys "^,"
 npm run run-local
 npm run run-local-verify -- --url "http://localhost:8080" --verify-timeout-ms 120000 --verify-poll-ms 2000
+npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-text "Mendix"
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"

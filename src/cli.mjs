@@ -537,6 +537,9 @@ Options:
   --url <url>                 URL used by run-local-verify (default: http://localhost:8080)
   --verify-timeout-ms <n>     Max wait for run-local-verify URL readiness (default: 120000)
   --verify-poll-ms <n>        Poll interval for run-local-verify URL readiness (default: 2000)
+  --verify-status <codes>     Comma-separated expected HTTP status codes for run-local-verify
+  --verify-text <text>        Required substring in HTTP response body for run-local-verify
+  --verify-location <text>    Required substring in HTTP Location header for run-local-verify
   --page-name <name>          Page name for create-page
   --scope <name>              UI scope (editor/pageExplorer/toolbox) or comma-separated rag-search sources
   --item <name>               Document, page, snippet, microflow, or entity name to open
