@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.2.44
+
+Structured ambiguity reporting for extension-backed document open.
+
+- Enhanced `open-item` extension fallback so it now:
+  - prefers exact name + module + type matches from extension search results
+  - returns structured candidate matches when the search is ambiguous
+  - returns a targeted error when a selected extension search match still cannot be opened
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.43
 
 Optional redirect-following for local runtime verification.

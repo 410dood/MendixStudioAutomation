@@ -3195,15 +3195,43 @@ async function tryOpenItemViaExtension(client, options) {
                     ? searchResult.items
                     : [];
 
-            const exactNameMatch = rawItems.find(item =>
+            const exactNameMatches = rawItems.filter(item =>
                 typeof item?.name === "string" &&
                 item.name.localeCompare(options.item, undefined, { sensitivity: "accent" }) === 0
             );
-            const uniqueMatch = rawItems.length === 1 ? rawItems[0] : null;
-            const selectedMatch = exactNameMatch ?? uniqueMatch ?? null;
+            const exactModuleMatches = exactNameMatches.filter(item =>
+                !options.module || item?.moduleName === options.module
+            );
+            const exactTypeMatches = exactModuleMatches.filter(item =>
+                !options.type || item?.type === options.type
+            );
+
+            let selectedMatch = null;
+            if (exactTypeMatches.length === 1) {
+                selectedMatch = exactTypeMatches[0];
+            } else if (exactModuleMatches.length === 1) {
+                selectedMatch = exactModuleMatches[0];
+            } else if (exactNameMatches.length === 1) {
+                selectedMatch = exactNameMatches[0];
+            } else if (rawItems.length === 1) {
+                selectedMatch = rawItems[0];
+            }
 
             if (!selectedMatch?.name) {
-                return null;
+                return {
+                    ok: false,
+                    method: "extensionSearchDocuments",
+                    error: rawItems.length === 0
+                        ? `No extension document search results matched '${options.item}'.`
+                        : `Multiple extension document search results matched '${options.item}'. Provide --module or --type to disambiguate.`,
+                    item: options.item,
+                    module: options.module ?? null,
+                    type: options.type ?? null,
+                    count: rawItems.length,
+                    matches: rawItems,
+                    verifiedOpen: false,
+                    attempts: 2
+                };
             }
 
             openResult = await client.openExtensionDocument({
@@ -3214,7 +3242,16 @@ async function tryOpenItemViaExtension(client, options) {
             });
 
             if (!openResult?.payload?.opened) {
-                return null;
+                return {
+                    ok: false,
+                    method: "extensionSearchThenOpenDocument",
+                    error: `The extension found '${selectedMatch.name}' but could not open it.`,
+                    item: options.item,
+                    selectedDocument: selectedMatch,
+                    extension: openResult?.payload ?? null,
+                    verifiedOpen: false,
+                    attempts: 2
+                };
             }
 
             const matchedTabFromSearch = await waitForOpenTabByItemName(client, selectedMatch.name, options);
