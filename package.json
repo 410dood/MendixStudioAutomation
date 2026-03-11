@@ -18,6 +18,7 @@
     "add-navigation-shortcut": "node src/cli.mjs add-navigation-shortcut",
     "add-microflow-create-object": "node src/cli.mjs add-microflow-create-object",
     "add-microflow-create-list": "node src/cli.mjs add-microflow-create-list",
+    "add-microflow-call": "node src/cli.mjs add-microflow-call",
     "add-microflow-retrieve-database": "node src/cli.mjs add-microflow-retrieve-database",
     "add-microflow-retrieve-association": "node src/cli.mjs add-microflow-retrieve-association",
     "add-microflow-filter-by-association": "node src/cli.mjs add-microflow-filter-by-association",

@@ -20,6 +20,7 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/navigation/populate`
   - `/mendix-studio-automation/microflows/create-object`
   - `/mendix-studio-automation/microflows/create-list`
+  - `/mendix-studio-automation/microflows/call-microflow`
   - `/mendix-studio-automation/microflows/retrieve-database`
   - `/mendix-studio-automation/microflows/retrieve-association`
   - `/mendix-studio-automation/microflows/filter-by-association`
@@ -77,6 +78,7 @@ That keeps the extension root in the Mendix-documented shape:
   - launch an in-Studio quick create-object dialog through menu/context menu/web route
   - create a `Create object` activity in a target microflow
   - create a `Create list` activity in a target microflow
+  - add a `Call microflow` activity in a target microflow
   - add a `Retrieve from database` activity in a target microflow
   - add a `Retrieve by association` activity in a target microflow
   - add a `Filter by association` activity in a target microflow

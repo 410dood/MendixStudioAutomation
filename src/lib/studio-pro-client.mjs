@@ -692,6 +692,71 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowCallMicroflow(options = {}) {
+        const normalized = normalizeAddMicroflowCallMicroflowOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-call",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.calledMicroflow) {
+            return {
+                ok: false,
+                action: "add-microflow-call",
+                error: "A --called-microflow argument is required."
+            };
+        }
+
+        if (normalized.parameterMappingsRaw && !normalized.parameterMappingsValid) {
+            return {
+                ok: false,
+                action: "add-microflow-call",
+                error: "parameter-mappings must be a valid JSON object string."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-call",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.callMicroflow"))) {
+            return {
+                ok: false,
+                action: "add-microflow-call",
+                error: "Extension capabilities do not include microflow.callMicroflow."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowCallMicroflow({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            calledMicroflow: normalized.calledMicroflow,
+            calledModule: normalized.calledModule,
+            outputVariableName: normalized.outputVariableName,
+            parameterMappings: normalized.parameterMappingsRaw
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-call",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            calledMicroflow: normalized.calledMicroflow,
+            calledModule: normalized.calledModule,
+            outputVariableName: normalized.outputVariableName,
+            parameterMappings: normalized.parameterMappings
+        };
+    }
+
     async addMicroflowRetrieveDatabase(options = {}) {
         const normalized = normalizeAddMicroflowRetrieveDatabaseOptions(options);
         if (!normalized.microflow) {
@@ -1909,6 +1974,44 @@ function normalizeAddMicroflowCreateListOptions(options) {
         module: options.module,
         entity: options.entity,
         outputVariableName: options.outputVariableName || "CreatedList"
+    };
+}
+
+function normalizeAddMicroflowCallMicroflowOptions(options) {
+    const parameterMappingsRaw = options.parameterMappings ?? options.parameters ?? options.parameterValues ?? null;
+    let parameterMappings = {};
+    let parameterMappingsValid = true;
+
+    if (typeof parameterMappingsRaw === "string" && parameterMappingsRaw.trim().length > 0) {
+        try {
+            const parsed = JSON.parse(parameterMappingsRaw);
+            if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
+                parameterMappingsValid = false;
+            } else {
+                parameterMappings = parsed;
+            }
+        } catch {
+            parameterMappingsValid = false;
+        }
+    } else if (parameterMappingsRaw && typeof parameterMappingsRaw === "object" && !Array.isArray(parameterMappingsRaw)) {
+        parameterMappings = parameterMappingsRaw;
+    } else if (parameterMappingsRaw !== null && parameterMappingsRaw !== undefined && parameterMappingsRaw !== "") {
+        parameterMappingsValid = false;
+    }
+
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        calledMicroflow: options.calledMicroflow ?? options.called ?? options.call,
+        calledModule: options.calledModule,
+        outputVariableName: options.outputVariableName || "CallResult",
+        parameterMappings,
+        parameterMappingsRaw: typeof parameterMappingsRaw === "string"
+            ? parameterMappingsRaw
+            : JSON.stringify(parameterMappings),
+        parameterMappingsValid
     };
 }
 

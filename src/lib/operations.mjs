@@ -201,6 +201,11 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.callMicroflow",
+            description: "Insert a Call microflow activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.retrieveDatabase",
             description: "Insert a Retrieve from database activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"

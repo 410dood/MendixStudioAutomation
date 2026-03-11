@@ -220,6 +220,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-call": {
+            const result = await client.addMicroflowCallMicroflow(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-retrieve-database": {
             const result = await client.addMicroflowRetrieveDatabase(options);
             formatOutput(result);
@@ -375,6 +380,7 @@ Commands:
   add-navigation-shortcut     Add a document to the web navigation profile through the extension
   add-microflow-create-object Add a microflow Create object activity through the extension
   add-microflow-create-list   Add a microflow Create list activity through the extension
+  add-microflow-call          Add a microflow Call microflow activity through the extension
   add-microflow-retrieve-database Add a microflow Retrieve from database activity through the extension
   add-microflow-retrieve-association Add a microflow Retrieve by association activity through the extension
   add-microflow-filter-by-association Add a microflow Filter by association activity through the extension
@@ -449,10 +455,13 @@ Options:
   --add-navigation            Attempt to add the created/opened page to web navigation via extension
   --navigation-caption <text>  Optional caption for the generated navigation item
   --entity <name>             Module-qualified or local entity to instantiate, e.g. Document.ClientDocument
-  --output-variable-name <text> Output variable name for create-object/create-list/retrieve-database/retrieve-association/filter-by-association/find-by-association actions
+  --output-variable-name <text> Output variable name for create/call/retrieve/filter/find actions
   --commit <name>             Commit mode for create/change actions: Yes|YesWithoutEvents|No
   --refresh-in-client <true|false> Refresh client after create
   --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}
+  --called-microflow <name>   Called microflow for add-microflow-call; supports Module.Microflow
+  --called-module <name>      Optional module hint for called microflow resolution
+  --parameter-mappings <json> JSON object of call parameter expressions, e.g. {"P_Name":"$Name","P_Count":"1"}
   --variable <name>           Existing scope variable name for delete/commit/rollback/change-attribute/change-association actions
   --entity-variable <name>    Source object variable for retrieve-association actions
   --list-variable <name>      Source list variable for filter/find-by-association actions

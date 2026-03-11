@@ -36,7 +36,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - open an in-Studio quick create-object modal dialog (menu, context menu, or CLI trigger)
 - track and summarize automation knowledge gaps locally for prioritization
 - add opened pages to the web navigation profile via the hybrid extension route
-- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Retrieve from database`, `Retrieve by association`, `Filter by association`, `Find by association`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
+- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Call microflow`, `Retrieve from database`, `Retrieve by association`, `Filter by association`, `Find by association`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -124,6 +124,7 @@ npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node 
 npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Document" --entity "ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
+npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --parameter-mappings "{}"
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
 npm run add-microflow-filter-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FilteredClientDocumentList" --filter-expression "$ClientObj"
@@ -229,6 +230,7 @@ Phase 2:
 - current `insert-action` now records before/after microflow-editor snapshots and any post-action dialog so failed action-insert gestures are diagnosable instead of opaque
 - current `add-microflow-create-object` now inserts SDK-backed `Create object` activities through the hybrid extension route
 - current `add-microflow-create-list` now inserts SDK-backed `Create list` activities through the hybrid extension route
+- current `add-microflow-call` now inserts SDK-backed `Call microflow` activities through the hybrid extension route
 - current `add-microflow-retrieve-database` now inserts SDK-backed `Retrieve from database` activities through the hybrid extension route
 - current `add-microflow-retrieve-association` now inserts SDK-backed `Retrieve by association` activities through the hybrid extension route
 - current `add-microflow-filter-by-association` now inserts SDK-backed `Filter by association` activities through the hybrid extension route

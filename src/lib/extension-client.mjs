@@ -400,6 +400,37 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowCallMicroflow(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/call-microflow", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            calledMicroflow: options.calledMicroflow ?? options.called ?? options.call,
+            calledModule: options.calledModule,
+            outputVariableName: options.outputVariableName ?? options.outputVariable,
+            parameterMappings: options.parameterMappings ?? options.parameters
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowRetrieveDatabase(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -619,6 +650,7 @@ async function resolveEndpointDiscovery(options) {
                 navigationPopulateUrl: parsed.navigationPopulateUrl,
                 microflowCreateObjectUrl: parsed.microflowCreateObjectUrl,
                 microflowCreateListUrl: parsed.microflowCreateListUrl,
+                microflowCallMicroflowUrl: parsed.microflowCallMicroflowUrl,
                 microflowRetrieveDatabaseUrl: parsed.microflowRetrieveDatabaseUrl,
                 microflowRetrieveAssociationUrl: parsed.microflowRetrieveAssociationUrl,
                 microflowFilterByAssociationUrl: parsed.microflowFilterByAssociationUrl,

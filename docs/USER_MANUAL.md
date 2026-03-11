@@ -243,6 +243,12 @@ Create a list activity in a microflow through the extension API:
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
 ```
 
+Call another microflow in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --parameter-mappings "{}"
+```
+
 Retrieve objects from database in a microflow through the extension API:
 
 ```powershell
@@ -360,6 +366,7 @@ npm run summarize-knowledge-gaps
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
 - `add-microflow-create-list` inserts `Create list` activities only at the start of the selected microflow.
+- `add-microflow-call` inserts `Call microflow` activities only at the start of the selected microflow.
 - `add-microflow-retrieve-database` inserts `Retrieve from database` activities only at the start of the selected microflow.
 - `add-microflow-retrieve-association` inserts `Retrieve by association` activities only at the start of the selected microflow.
 - `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.

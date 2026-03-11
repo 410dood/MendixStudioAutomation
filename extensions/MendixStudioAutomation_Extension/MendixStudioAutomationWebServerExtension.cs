@@ -80,6 +80,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/navigation/populate", HandlePopulateNavigationAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-object", HandleCreateMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-list", HandleCreateMicroflowListAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/call-microflow", HandleCallMicroflowActivityAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/retrieve-database", HandleRetrieveDatabaseMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/retrieve-association", HandleRetrieveAssociationMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/filter-by-association", HandleFilterByAssociationMicroflowAsync);
@@ -220,6 +221,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "navigation.populate",
             "microflow.createObject",
             "microflow.createList",
+            "microflow.callMicroflow",
             "microflow.retrieveDatabase",
             "microflow.retrieveAssociation",
             "microflow.filterByAssociation",
@@ -801,6 +803,251 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         catch (Exception ex)
         {
             _logService.Error("Failed to create microflow list activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
+    private Task HandleCallMicroflowActivityAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var calledMicroflowInput = request.QueryString["calledMicroflow"] ?? request.QueryString["call"];
+        var calledModuleInput = request.QueryString["calledModule"];
+        var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var parameterMappingsRaw = request.QueryString["parameterMappings"] ?? request.QueryString["parameters"];
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(calledMicroflowInput))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'calledMicroflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var targetMicroflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (targetMicroflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (targetMicroflowMatches.Length > 1)
+            {
+                var ambiguousTargetMicroflows = targetMicroflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple target microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousTargetMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = targetMicroflowMatches[0].Microflow;
+            var targetMicroflowModule = targetMicroflowMatches[0].ModuleName;
+
+            var calledMicroflowText = calledMicroflowInput.Trim();
+            string calledMicroflowName;
+            string? calledModuleName = string.IsNullOrWhiteSpace(calledModuleInput) ? null : calledModuleInput.Trim();
+            var calledParts = calledMicroflowText.Split('.', 2, StringSplitOptions.RemoveEmptyEntries);
+            if (calledParts.Length == 2)
+            {
+                calledModuleName ??= calledParts[0].Trim();
+                calledMicroflowName = calledParts[1].Trim();
+            }
+            else
+            {
+                calledMicroflowName = calledMicroflowText;
+            }
+
+            var calledModule = ResolveModule(project, calledModuleName);
+            if (calledModuleName is not null && calledModule is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{calledModuleName}' was found for called microflow resolution.",
+                    calledMicroflow = calledMicroflowText,
+                    calledModule = calledModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var calledMicroflowMatches = ResolveMicroflows(project, calledModule, calledMicroflowName, allowAllModules: true);
+            if (calledMicroflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = calledModule is null
+                        ? $"No called microflow named '{calledMicroflowName}' was found."
+                        : $"No called microflow named '{calledMicroflowName}' was found in module '{calledModule.Name}'.",
+                    calledMicroflow = calledMicroflowText,
+                    calledModule = calledModule?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (calledMicroflowMatches.Length > 1)
+            {
+                var ambiguousCalledMicroflows = calledMicroflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple called microflows matched the request. Include --called-module or qualify --called-microflow with Module.Microflow.",
+                    calledMicroflow = calledMicroflowText,
+                    calledModule = calledModuleName,
+                    matches = ambiguousCalledMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var calledMicroflow = calledMicroflowMatches[0].Microflow;
+            var calledMicroflowModule = calledMicroflowMatches[0].ModuleName;
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? "CallResult" : outputVariableName.Trim();
+
+            var parsedMappings = ParseCallParameterMappings(parameterMappingsRaw, _microflowExpressionService);
+            if (parsedMappings is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "parameterMappings must be a JSON object whose values are valid Mendix expressions.",
+                    raw = parameterMappingsRaw
+                }, HttpStatusCode.BadRequest, cancellationToken);
+            }
+
+            var calledParameters = _microflowService.GetParameters(calledMicroflow);
+            var parameterLookup = calledParameters.ToDictionary(parameter => parameter.Name, StringComparer.OrdinalIgnoreCase);
+            var unknownMappings = parsedMappings
+                .Where(mapping => !parameterLookup.ContainsKey(mapping.ParameterName))
+                .Select(mapping => mapping.ParameterName)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            if (unknownMappings.Length > 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "parameterMappings contains parameters that do not exist on the called microflow.",
+                    unknownParameters = unknownMappings,
+                    calledMicroflow = calledMicroflow.QualifiedName
+                }, HttpStatusCode.BadRequest, cancellationToken);
+            }
+
+            var missingMappings = calledParameters
+                .Where(parameter => !parsedMappings.Any(mapping => string.Equals(mapping.ParameterName, parameter.Name, StringComparison.OrdinalIgnoreCase)))
+                .Select(parameter => parameter.Name)
+                .ToArray();
+
+            if (missingMappings.Length > 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "parameterMappings is missing required called microflow parameters.",
+                    missingParameters = missingMappings,
+                    calledMicroflow = calledMicroflow.QualifiedName
+                }, HttpStatusCode.BadRequest, cancellationToken);
+            }
+
+            using var tx = CurrentApp.StartTransaction($"Add Call microflow activity to {targetMicroflow}");
+            var microflowCallActivity = CurrentApp.Create<IActionActivity>();
+            var microflowCallAction = CurrentApp.Create<IMicroflowCallAction>();
+            microflowCallAction.MicroflowCall = CurrentApp.Create<IMicroflowCall>();
+            microflowCallAction.MicroflowCall.Microflow = calledMicroflow.QualifiedName;
+            microflowCallAction.OutputVariableName = output;
+
+            foreach (var mapping in parsedMappings)
+            {
+                var parameter = parameterLookup[mapping.ParameterName];
+                var parameterMapping = CurrentApp.Create<IMicroflowCallParameterMapping>();
+                parameterMapping.Parameter = parameter.QualifiedName;
+                parameterMapping.Argument = mapping.Expression;
+                microflowCallAction.MicroflowCall.AddParameterMapping(parameterMapping);
+            }
+
+            microflowCallActivity.Action = microflowCallAction;
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [microflowCallActivity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert a Call microflow activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                calledMicroflow = calledMicroflow.Name,
+                calledMicroflowModule,
+                calledQualifiedName = calledMicroflow.QualifiedName,
+                outputVariableName = output,
+                parameterMappingCount = parsedMappings.Length,
+                route = "microflows/call-microflow",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow call activity.", ex);
             return WriteJsonAsync(response, new
             {
                 ok = false,
@@ -2316,6 +2563,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 navigationPopulateUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/navigation/populate"),
                 microflowCreateObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-object"),
                 microflowCreateListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-list"),
+                microflowCallMicroflowUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/call-microflow"),
                 microflowRetrieveDatabaseUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/retrieve-database"),
                 microflowRetrieveAssociationUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/retrieve-association"),
                 microflowFilterByAssociationUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/filter-by-association"),
@@ -3020,6 +3268,51 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
 
         return [.. candidates];
+    }
+
+    private static (string ParameterName, IMicroflowExpression Expression)[]? ParseCallParameterMappings(
+        string? rawParameterMappings,
+        IMicroflowExpressionService expressionService)
+    {
+        if (string.IsNullOrWhiteSpace(rawParameterMappings))
+        {
+            return Array.Empty<(string, IMicroflowExpression)>();
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(rawParameterMappings);
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                return null;
+            }
+
+            var mappings = new List<(string ParameterName, IMicroflowExpression Expression)>();
+            foreach (var property in document.RootElement.EnumerateObject())
+            {
+                if (string.IsNullOrWhiteSpace(property.Name))
+                {
+                    return null;
+                }
+
+                var expressionText = property.Value.ValueKind switch
+                {
+                    JsonValueKind.String when !string.IsNullOrWhiteSpace(property.Value.GetString())
+                        => ToExpressionText(property.Value.GetString()!),
+                    JsonValueKind.String => "\"\"",
+                    _ => property.Value.GetRawText()
+                };
+
+                var expression = expressionService.CreateFromString(expressionText);
+                mappings.Add((property.Name, expression));
+            }
+
+            return [.. mappings];
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static (string AttributeName, IMicroflowExpression Expression)[]? ParseInitialValues(

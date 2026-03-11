@@ -1,5 +1,30 @@
 # Release Notes
 
+## 0.2.14
+
+Hybrid write-path expansion for microflow call activities.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/call-microflow`
+- Added extension capability:
+  - `microflow.callMicroflow`
+- Added Studio Pro client support for:
+  - inserting a `Call microflow` action into a selected microflow via extension service APIs
+  - optional parameter mapping through JSON expressions
+- Added CLI plumbing and npm script:
+  - `add-microflow-call`
+  - `npm run add-microflow-call`
+- Added options for call insertion:
+  - `--called-microflow`
+  - `--called-module`
+  - `--parameter-mappings`
+- Updated operation catalog with:
+  - `microflow.callMicroflow`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.13
 
 Sample-pattern integration milestone (`ExtensionAPI-Samples` aligned to Studio Pro `10.24.14`).
