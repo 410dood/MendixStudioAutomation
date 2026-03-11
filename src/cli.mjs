@@ -245,6 +245,21 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-filter-by-attribute": {
+            const result = await client.addMicroflowFilterByAttribute(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-find-by-attribute": {
+            const result = await client.addMicroflowFindByAttribute(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-find-by-expression": {
+            const result = await client.addMicroflowFindByExpression(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -385,6 +400,9 @@ Commands:
   add-microflow-retrieve-association Add a microflow Retrieve by association activity through the extension
   add-microflow-filter-by-association Add a microflow Filter by association activity through the extension
   add-microflow-find-by-association Add a microflow Find by association activity through the extension
+  add-microflow-filter-by-attribute Add a microflow Filter by attribute activity through the extension
+  add-microflow-find-by-attribute Add a microflow Find by attribute activity through the extension
+  add-microflow-find-by-expression Add a microflow Find by expression activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-rollback-object Add a microflow Rollback object activity through the extension

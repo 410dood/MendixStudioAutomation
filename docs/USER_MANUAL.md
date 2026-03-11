@@ -273,6 +273,24 @@ Find a list item by association in a microflow through the extension API:
 npm run add-microflow-find-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FoundClientDocument" --find-expression "$ClientObj"
 ```
 
+Filter a list by attribute in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-filter-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "DraftClientDocuments" --filter-expression "Draft"
+```
+
+Find a list item by attribute in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-find-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "FirstDraftClientDocument" --find-expression "Draft"
+```
+
+Find a list item by expression in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-find-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstMatchingDocument" --find-expression '$currentObject/Status = ''Draft'''
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -371,6 +389,9 @@ npm run summarize-knowledge-gaps
 - `add-microflow-retrieve-association` inserts `Retrieve by association` activities only at the start of the selected microflow.
 - `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.
 - `add-microflow-find-by-association` inserts `Find by association` activities only at the start of the selected microflow.
+- `add-microflow-filter-by-attribute` inserts `Filter by attribute` activities only at the start of the selected microflow.
+- `add-microflow-find-by-attribute` inserts `Find by attribute` activities only at the start of the selected microflow.
+- `add-microflow-find-by-expression` inserts `Find by expression` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.

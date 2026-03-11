@@ -1029,6 +1029,219 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowFilterByAttribute(options = {}) {
+        const normalized = normalizeMicroflowAttributeListExpressionOptions(options, "FilteredByAttribute");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-attribute",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.attribute) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-attribute",
+                error: "An --attribute argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-attribute",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (normalized.expression === undefined || normalized.expression === null || normalized.expression === "") {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-attribute",
+                error: "A --filter-expression (or --expression) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-attribute",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.filterByAttribute"))) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-attribute",
+                error: "Extension capabilities do not include microflow.filterByAttribute."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowFilterByAttribute({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            filterExpression: normalized.expression
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-filter-by-attribute",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            filterExpression: normalized.expression
+        };
+    }
+
+    async addMicroflowFindByAttribute(options = {}) {
+        const normalized = normalizeMicroflowAttributeListExpressionOptions(options, "FoundByAttribute");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-attribute",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.attribute) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-attribute",
+                error: "An --attribute argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-attribute",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (normalized.expression === undefined || normalized.expression === null || normalized.expression === "") {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-attribute",
+                error: "A --find-expression (or --expression) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-attribute",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.findByAttribute"))) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-attribute",
+                error: "Extension capabilities do not include microflow.findByAttribute."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowFindByAttribute({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            findExpression: normalized.expression
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-find-by-attribute",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            findExpression: normalized.expression
+        };
+    }
+
+    async addMicroflowFindByExpression(options = {}) {
+        const normalized = normalizeMicroflowListExpressionOptions(options, "FoundByExpression");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-expression",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-expression",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (normalized.expression === undefined || normalized.expression === null || normalized.expression === "") {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-expression",
+                error: "A --find-expression (or --expression) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-expression",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.findByExpression"))) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-expression",
+                error: "Extension capabilities do not include microflow.findByExpression."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowFindByExpression({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            findExpression: normalized.expression
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-find-by-expression",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            findExpression: normalized.expression
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -2052,6 +2265,32 @@ function normalizeMicroflowAssociationListExpressionOptions(options, defaultOutp
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
         expression: options.filterExpression ?? options.findExpression ?? options.expression ?? options.value
+    };
+}
+
+function normalizeMicroflowAttributeListExpressionOptions(options, defaultOutputVariableName = "AttributeResult") {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        attribute: options.attribute,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
+        expression: options.filterExpression ?? options.findExpression ?? options.expression ?? options.value
+    };
+}
+
+function normalizeMicroflowListExpressionOptions(options, defaultOutputVariableName = "ExpressionResult") {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
+        expression: options.findExpression ?? options.filterExpression ?? options.expression ?? options.value
     };
 }
 

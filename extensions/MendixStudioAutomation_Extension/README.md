@@ -25,6 +25,9 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/microflows/retrieve-association`
   - `/mendix-studio-automation/microflows/filter-by-association`
   - `/mendix-studio-automation/microflows/find-by-association`
+  - `/mendix-studio-automation/microflows/filter-by-attribute`
+  - `/mendix-studio-automation/microflows/find-by-attribute`
+  - `/mendix-studio-automation/microflows/find-by-expression`
   - `/mendix-studio-automation/microflows/delete-object`
   - `/mendix-studio-automation/microflows/commit-object`
   - `/mendix-studio-automation/microflows/rollback-object`
@@ -83,6 +86,9 @@ That keeps the extension root in the Mendix-documented shape:
   - add a `Retrieve by association` activity in a target microflow
   - add a `Filter by association` activity in a target microflow
   - add a `Find by association` activity in a target microflow
+  - add a `Filter by attribute` activity in a target microflow
+  - add a `Find by attribute` activity in a target microflow
+  - add a `Find by expression` activity in a target microflow
   - add a `Delete object` activity in a target microflow
   - add a `Commit object` activity in a target microflow
   - add a `Rollback object` activity in a target microflow

@@ -557,6 +557,100 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowFilterByAttribute(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/filter-by-attribute", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            attribute: options.attribute,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            filterExpression: options.filterExpression ?? options.expression ?? options.value
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowFindByAttribute(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/find-by-attribute", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            attribute: options.attribute,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            findExpression: options.findExpression ?? options.expression ?? options.value
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowFindByExpression(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/find-by-expression", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            findExpression: options.findExpression ?? options.expression ?? options.value
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowChangeAssociation(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -655,6 +749,9 @@ async function resolveEndpointDiscovery(options) {
                 microflowRetrieveAssociationUrl: parsed.microflowRetrieveAssociationUrl,
                 microflowFilterByAssociationUrl: parsed.microflowFilterByAssociationUrl,
                 microflowFindByAssociationUrl: parsed.microflowFindByAssociationUrl,
+                microflowFilterByAttributeUrl: parsed.microflowFilterByAttributeUrl,
+                microflowFindByAttributeUrl: parsed.microflowFindByAttributeUrl,
+                microflowFindByExpressionUrl: parsed.microflowFindByExpressionUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
                 microflowRollbackObjectUrl: parsed.microflowRollbackObjectUrl,

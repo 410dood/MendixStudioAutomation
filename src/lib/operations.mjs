@@ -226,6 +226,21 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.filterByAttribute",
+            description: "Insert a Filter by attribute activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.findByAttribute",
+            description: "Insert a Find by attribute activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.findByExpression",
+            description: "Insert a Find by expression activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.deleteObject",
             description: "Insert a Delete object activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"

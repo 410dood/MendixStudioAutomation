@@ -1,5 +1,37 @@
 # Release Notes
 
+## 0.2.15
+
+Hybrid write-path expansion for microflow attribute/expression list operations.
+
+- Added new extension routes:
+  - `/mendix-studio-automation/microflows/filter-by-attribute`
+  - `/mendix-studio-automation/microflows/find-by-attribute`
+  - `/mendix-studio-automation/microflows/find-by-expression`
+- Added extension capabilities:
+  - `microflow.filterByAttribute`
+  - `microflow.findByAttribute`
+  - `microflow.findByExpression`
+- Added Studio Pro client support for:
+  - inserting a `Filter by attribute` action into a selected microflow via extension service APIs
+  - inserting a `Find by attribute` action into a selected microflow via extension service APIs
+  - inserting a `Find by expression` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm scripts:
+  - `add-microflow-filter-by-attribute`
+  - `add-microflow-find-by-attribute`
+  - `add-microflow-find-by-expression`
+  - `npm run add-microflow-filter-by-attribute`
+  - `npm run add-microflow-find-by-attribute`
+  - `npm run add-microflow-find-by-expression`
+- Updated operation catalog with:
+  - `microflow.filterByAttribute`
+  - `microflow.findByAttribute`
+  - `microflow.findByExpression`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.14
 
 Hybrid write-path expansion for microflow call activities.
