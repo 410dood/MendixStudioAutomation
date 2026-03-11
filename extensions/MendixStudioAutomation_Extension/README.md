@@ -17,6 +17,7 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/documents/open`
   - `/mendix-studio-automation/navigation/populate`
   - `/mendix-studio-automation/microflows/create-object`
+  - `/mendix-studio-automation/microflows/create-list`
   - `/mendix-studio-automation/microflows/delete-object`
   - `/mendix-studio-automation/microflows/commit-object`
   - `/mendix-studio-automation/microflows/change-attribute`
@@ -64,6 +65,7 @@ That keeps the extension root in the Mendix-documented shape:
 - error-count reporting is not implemented yet
 - write operations now include a limited, targeted microflow mutation path:
   - create a `Create object` activity in a target microflow
+  - create a `Create list` activity in a target microflow
   - add a `Delete object` activity in a target microflow
   - add a `Commit object` activity in a target microflow
   - add a `Change attribute` activity in a target microflow

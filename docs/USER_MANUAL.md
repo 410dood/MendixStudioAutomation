@@ -229,6 +229,12 @@ Create an object activity in a microflow through the extension API:
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false --initial-values '{\"Name\":\"Acme\"}'
 ```
 
+Create a list activity in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -298,6 +304,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
+- `add-microflow-create-list` inserts `Create list` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-change-attribute` inserts `Change attribute` activities only at the start of the selected microflow.

@@ -601,6 +601,59 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowCreateList(options = {}) {
+        const normalized = normalizeAddMicroflowCreateListOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-create-list",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.entity) {
+            return {
+                ok: false,
+                action: "add-microflow-create-list",
+                error: "An --entity argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-create-list",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.createList"))) {
+            return {
+                ok: false,
+                action: "add-microflow-create-list",
+                error: "Extension capabilities do not include microflow.createList."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowCreateList({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-create-list",
+            microflow: normalized.microflow,
+            entity: normalized.entity,
+            module: normalized.module,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -1345,6 +1398,17 @@ function normalizeAddMicroflowCreateObjectOptions(options) {
         commit: options.commit || "No",
         refreshInClient: options.refreshInClient ?? "false",
         initialValues: options.initialValues
+    };
+}
+
+function normalizeAddMicroflowCreateListOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        outputVariableName: options.outputVariableName || "CreatedList"
     };
 }
 

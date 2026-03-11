@@ -34,7 +34,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - create pages through Studio Pro's native `New Document` and `Create Page` wizards
 - query an in-Studio hybrid extension over a supported local webserver route
 - add opened pages to the web navigation profile via the hybrid extension route
-- insert selected microflow activities through hybrid extension routes (`Create object`, `Delete object`, `Commit object`, `Change attribute`)
+- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Delete object`, `Commit object`, `Change attribute`)
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -117,6 +117,7 @@ npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clien
 npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "DocumentType"
 npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Document" --entity "ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false
+npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
 npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
 npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No
@@ -212,6 +213,7 @@ Phase 2:
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - current `insert-action` now records before/after microflow-editor snapshots and any post-action dialog so failed action-insert gestures are diagnosable instead of opaque
 - current `add-microflow-create-object` now inserts SDK-backed `Create object` activities through the hybrid extension route
+- current `add-microflow-create-list` now inserts SDK-backed `Create list` activities through the hybrid extension route
 - current `add-microflow-delete-object` now inserts SDK-backed `Delete object` activities through the hybrid extension route
 - current `add-microflow-commit-object` now inserts SDK-backed `Commit object` activities through the hybrid extension route
 - current `add-microflow-change-attribute` now inserts SDK-backed `Change attribute` activities through the hybrid extension route

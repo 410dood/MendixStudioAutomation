@@ -176,6 +176,11 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.createList",
+            description: "Insert a Create list activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.deleteObject",
             description: "Insert a Delete object activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"

@@ -210,6 +210,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-create-list": {
+            const result = await client.addMicroflowCreateList(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -318,6 +323,7 @@ Commands:
   extension-open-document     Open a project document through the in-Studio hybrid extension
   add-navigation-shortcut     Add a document to the web navigation profile through the extension
   add-microflow-create-object Add a microflow Create object activity through the extension
+  add-microflow-create-list   Add a microflow Create list activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-change-attribute Add a microflow Change attribute activity through the extension
@@ -383,7 +389,7 @@ Options:
   --add-navigation            Attempt to add the created/opened page to web navigation via extension
   --navigation-caption <text>  Optional caption for the generated navigation item
   --entity <name>             Module-qualified or local entity to instantiate, e.g. Document.ClientDocument
-  --output-variable-name <text> Output variable name for the created object (default: CreatedObject)
+  --output-variable-name <text> Output variable name for create-object/create-list actions
   --commit <name>             Create object commit mode: Yes|YesWithoutEvents|No
   --refresh-in-client <true|false> Refresh client after create
   --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}
