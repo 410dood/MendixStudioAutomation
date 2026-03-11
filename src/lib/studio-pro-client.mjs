@@ -173,21 +173,24 @@ export class StudioProClient {
     }
 
     async addNavigationShortcut(options = {}) {
-        const normalized = normalizeCreateClientsPageOptions(options);
-        const normalizedOptions = {
-            ...options,
-            page: options.page ?? normalized.pageName,
-            caption: options.caption
-        };
+        const normalized = normalizeNavigationShortcutOptions(options);
+
+        if (!normalized.page) {
+            return {
+                ok: false,
+                action: "add-navigation-shortcut",
+                error: "A --page (or --name) argument is required."
+            };
+        }
 
         return this.extensionClient.addNavigationShortcut({
             ...options,
             processId: normalized.processId,
             title: normalized.title,
-            page: normalizedOptions.page,
-            caption: normalizedOptions.caption,
+            page: normalized.page,
+            caption: normalized.caption,
             module: normalized.module,
-            type: "Page"
+            type: normalized.type
         });
     }
 
@@ -1069,6 +1072,17 @@ function normalizeCreateClientsPageOptions(options) {
         timeoutMs: numberOrDefault(options.timeoutMs, 15000),
         pageExplorerLimit: numberOrDefault(options.pageExplorerLimit, 200),
         capabilities: options.capabilities
+    };
+}
+
+function normalizeNavigationShortcutOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        page: options.page ?? options.pageName ?? options.name,
+        type: options.type || "Page",
+        module: options.module,
+        caption: options.caption || options.navigationCaption
     };
 }
 

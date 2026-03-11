@@ -200,7 +200,10 @@ async function resolveEndpointDiscovery(options) {
             endpointFile: null,
             endpoints: {
                 healthUrl: `${endpointUrl}/mendix-studio-automation/health`,
-                contextUrl: `${endpointUrl}/mendix-studio-automation/context`
+                contextUrl: `${endpointUrl}/mendix-studio-automation/context`,
+                capabilitiesUrl: `${endpointUrl}/mendix-studio-automation/capabilities`,
+                baseUrl: endpointUrl,
+                routePrefix: "mendix-studio-automation"
             }
         };
     }
