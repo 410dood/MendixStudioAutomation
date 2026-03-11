@@ -503,6 +503,62 @@ export class StudioProClient {
         };
     }
 
+    async syncDialogFields(options = {}) {
+        const comparison = await this.compareDialogFields(options);
+        if (!comparison?.ok && !comparison?.diff) {
+            return {
+                ...comparison,
+                action: "sync-dialog-fields"
+            };
+        }
+
+        const changedEntries = Array.isArray(comparison?.diff?.changed) ? comparison.diff.changed : [];
+        const continueOnError = toBoolean(options.continueOnError, false);
+        if (changedEntries.length === 0) {
+            return {
+                ok: true,
+                action: "sync-dialog-fields",
+                dialog: options.dialog,
+                batchSource: comparison.batchSource ?? null,
+                fieldsFile: comparison.fieldsFile ?? null,
+                changedCount: 0,
+                appliedCount: 0,
+                skippedUnchanged: comparison.expectedCount ?? 0,
+                comparison,
+                results: []
+            };
+        }
+
+        const fieldsToApply = changedEntries.map(entry => ({
+            label: entry.label,
+            value: entry.expected?.value ?? "",
+            controlType: entry.expected?.controlType ?? null,
+            verifyValue: entry.expected?.verifyValue ?? null,
+            verifyValueContains: entry.expected?.verifyValueContains ?? null,
+            verifyToggleState: entry.expected?.verifyToggleState ?? null
+        }));
+
+        const updateResult = await this.setDialogFields({
+            ...options,
+            fieldsJson: JSON.stringify(fieldsToApply),
+            continueOnError
+        });
+
+        return {
+            ok: Boolean(comparison?.diff?.missing?.length === 0) && Boolean(updateResult?.ok),
+            action: "sync-dialog-fields",
+            dialog: options.dialog,
+            batchSource: comparison.batchSource ?? null,
+            fieldsFile: comparison.fieldsFile ?? null,
+            changedCount: changedEntries.length,
+            appliedCount: updateResult?.count ?? 0,
+            skippedUnchanged: Math.max((comparison.expectedCount ?? 0) - changedEntries.length, 0),
+            missingCount: comparison?.diff?.missing?.length ?? 0,
+            comparison,
+            updateResult
+        };
+    }
+
     async invokeDialogControl(options = {}) {
         return runPowerShellScript("scripts/automation/Invoke-StudioProDialogControl.ps1", normalizeDialogControlOptions(options));
     }

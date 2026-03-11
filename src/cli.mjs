@@ -130,6 +130,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "sync-dialog-fields": {
+            const result = await client.syncDialogFields(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-dialog-control": {
             const result = await client.invokeDialogControl(options);
             formatOutput(result);
@@ -487,6 +492,7 @@ Commands:
   list-dialog-fields          List visible dialog labels that resolve to field/value pairs
   export-dialog-fields        Export dialog field/value pairs to a JSON file for reuse
   compare-dialog-fields       Compare a live dialog against a JSON field plan
+  sync-dialog-fields          Apply only the changed fields from a JSON dialog plan
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
   get-dialog-field            Read a native Studio Pro dialog field by its visible label
   set-dialog-fields           Set multiple native Studio Pro dialog fields from JSON input

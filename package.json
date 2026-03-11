@@ -60,6 +60,7 @@
     "list-dialog-fields": "node src/cli.mjs list-dialog-fields",
     "export-dialog-fields": "node src/cli.mjs export-dialog-fields",
     "compare-dialog-fields": "node src/cli.mjs compare-dialog-fields",
+    "sync-dialog-fields": "node src/cli.mjs sync-dialog-fields",
     "invoke-dialog-control": "node src/cli.mjs invoke-dialog-control",
     "get-dialog-field": "node src/cli.mjs get-dialog-field",
     "set-dialog-fields": "node src/cli.mjs set-dialog-fields",
