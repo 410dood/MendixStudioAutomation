@@ -241,6 +241,21 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.aggregateList",
+            description: "Insert an Aggregate list activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.aggregateByAttribute",
+            description: "Insert an Aggregate by attribute activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.aggregateByExpression",
+            description: "Insert an Aggregate by expression activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.deleteObject",
             description: "Insert a Delete object activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"

@@ -88,6 +88,9 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/microflows/filter-by-attribute", HandleFilterByAttributeMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/find-by-attribute", HandleFindByAttributeMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/find-by-expression", HandleFindByExpressionMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/aggregate-list", HandleAggregateListMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/aggregate-by-attribute", HandleAggregateByAttributeMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/aggregate-by-expression", HandleAggregateByExpressionMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/delete-object", HandleDeleteMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/commit-object", HandleCommitMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/rollback-object", HandleRollbackMicroflowObjectAsync);
@@ -232,6 +235,9 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "microflow.filterByAttribute",
             "microflow.findByAttribute",
             "microflow.findByExpression",
+            "microflow.aggregateList",
+            "microflow.aggregateByAttribute",
+            "microflow.aggregateByExpression",
             "microflow.deleteObject",
             "microflow.commitObject",
             "microflow.rollbackObject",
@@ -2192,6 +2198,456 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleAggregateListMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
+        var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+
+        if (!TryParseAggregateFunctionEnum(request.QueryString["aggregateFunction"] ?? request.QueryString["function"], out var aggregateFunction))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"The 'aggregateFunction' query parameter is invalid. Allowed values: {string.Join(", ", Enum.GetNames<AggregateFunctionEnum>())}."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(listVariableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'listVariable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var sourceList = listVariableName.Trim();
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? "AggregatedValue" : outputVariableName.Trim();
+
+            using var tx = CurrentApp.StartTransaction($"Add Aggregate list activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateAggregateListActivity(
+                CurrentApp,
+                sourceList,
+                output,
+                aggregateFunction);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert an Aggregate list activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                listVariable = sourceList,
+                outputVariableName = output,
+                aggregateFunction = aggregateFunction.ToString(),
+                route = "microflows/aggregate-list",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow aggregate-list activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
+    private Task HandleAggregateByAttributeMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var entityName = request.QueryString["entity"];
+        var attributeName = request.QueryString["attribute"];
+        var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
+        var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+
+        if (!TryParseAggregateFunctionEnum(request.QueryString["aggregateFunction"] ?? request.QueryString["function"], out var aggregateFunction))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"The 'aggregateFunction' query parameter is invalid. Allowed values: {string.Join(", ", Enum.GetNames<AggregateFunctionEnum>())}."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(attributeName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'attribute' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(listVariableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'listVariable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var attributeResolution = ResolveAttribute(project, module, entityName, attributeName);
+            if (!attributeResolution.Ok)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = attributeResolution.Error,
+                    entity = entityName,
+                    attribute = attributeName,
+                    module = normalizedModuleName,
+                    matches = attributeResolution.Candidates
+                }, attributeResolution.StatusCode, cancellationToken);
+            }
+
+            var sourceList = listVariableName.Trim();
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? "AggregatedAttributeValue" : outputVariableName.Trim();
+
+            using var tx = CurrentApp.StartTransaction($"Add Aggregate by attribute activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateAggregateListByAttributeActivity(
+                CurrentApp,
+                attributeResolution.Attribute!,
+                sourceList,
+                output,
+                aggregateFunction);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert an Aggregate by attribute activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                entity = attributeResolution.EntityName,
+                entityModule = attributeResolution.EntityModuleName,
+                attribute = attributeResolution.Attribute!.Name,
+                listVariable = sourceList,
+                outputVariableName = output,
+                aggregateFunction = aggregateFunction.ToString(),
+                route = "microflows/aggregate-by-attribute",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow aggregate-by-attribute activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
+    private Task HandleAggregateByExpressionMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
+        var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var aggregateExpressionText = request.QueryString["aggregateExpression"] ?? request.QueryString["expression"] ?? request.QueryString["value"];
+
+        if (!TryParseAggregateFunctionEnum(request.QueryString["aggregateFunction"] ?? request.QueryString["function"], out var aggregateFunction))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"The 'aggregateFunction' query parameter is invalid. Allowed values: {string.Join(", ", Enum.GetNames<AggregateFunctionEnum>())}."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(listVariableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'listVariable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(aggregateExpressionText))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'aggregateExpression' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var sourceList = listVariableName.Trim();
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? "AggregatedExpressionValue" : outputVariableName.Trim();
+            var aggregateExpression = _microflowExpressionService.CreateFromString(ToExpressionText(aggregateExpressionText.Trim()));
+
+            using var tx = CurrentApp.StartTransaction($"Add Aggregate by expression activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateAggregateListByExpressionActivity(
+                CurrentApp,
+                aggregateExpression,
+                sourceList,
+                output,
+                aggregateFunction);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert an Aggregate by expression activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                listVariable = sourceList,
+                outputVariableName = output,
+                aggregateExpression = aggregateExpressionText.Trim(),
+                aggregateFunction = aggregateFunction.ToString(),
+                route = "microflows/aggregate-by-expression",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow aggregate-by-expression activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private Task HandleDeleteMicroflowObjectAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
         if (CurrentApp?.Root is not IProject project)
@@ -3049,6 +3505,9 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowFilterByAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/filter-by-attribute"),
                 microflowFindByAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/find-by-attribute"),
                 microflowFindByExpressionUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/find-by-expression"),
+                microflowAggregateListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/aggregate-list"),
+                microflowAggregateByAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/aggregate-by-attribute"),
+                microflowAggregateByExpressionUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/aggregate-by-expression"),
                 microflowDeleteObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/delete-object"),
                 microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object"),
                 microflowRollbackObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/rollback-object"),
@@ -3674,6 +4133,22 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
 
         if (Enum.TryParse<CommitEnum>(raw, ignoreCase: true, out commitMode))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryParseAggregateFunctionEnum(string? raw, out AggregateFunctionEnum aggregateFunction)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            aggregateFunction = AggregateFunctionEnum.Count;
+            return true;
+        }
+
+        if (Enum.TryParse<AggregateFunctionEnum>(raw, ignoreCase: true, out aggregateFunction))
         {
             return true;
         }

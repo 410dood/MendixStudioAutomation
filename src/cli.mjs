@@ -260,6 +260,21 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-aggregate-list": {
+            const result = await client.addMicroflowAggregateList(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-aggregate-by-attribute": {
+            const result = await client.addMicroflowAggregateByAttribute(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-aggregate-by-expression": {
+            const result = await client.addMicroflowAggregateByExpression(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -403,6 +418,9 @@ Commands:
   add-microflow-filter-by-attribute Add a microflow Filter by attribute activity through the extension
   add-microflow-find-by-attribute Add a microflow Find by attribute activity through the extension
   add-microflow-find-by-expression Add a microflow Find by expression activity through the extension
+  add-microflow-aggregate-list Add a microflow Aggregate list activity through the extension
+  add-microflow-aggregate-by-attribute Add a microflow Aggregate by attribute activity through the extension
+  add-microflow-aggregate-by-expression Add a microflow Aggregate by expression activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-rollback-object Add a microflow Rollback object activity through the extension
@@ -491,6 +509,8 @@ Options:
   --change-type <name>        Change type for change-attribute/change-association actions: Set|Add|Remove
   --filter-expression <text>  Expression for filter-by-association actions
   --find-expression <text>    Expression for find-by-association actions
+  --aggregate-expression <text> Expression for aggregate-by-expression actions
+  --aggregate-function <text> Aggregate function: Sum|Average|Count|Minimum|Maximum|All|Any|Reduce
   --x-path-constraint <text>  Optional XPath constraint for retrieve-database action
   --retrieve-first <true|false> Retrieve first object instead of a list
   --requested-capability <text> Capability requested when recording a knowledge gap

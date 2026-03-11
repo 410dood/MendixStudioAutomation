@@ -291,6 +291,24 @@ Find a list item by expression in a microflow through the extension API:
 npm run add-microflow-find-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstMatchingDocument" --find-expression '$currentObject/Status = ''Draft'''
 ```
 
+Aggregate a list in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-aggregate-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ClientDocumentCount" --aggregate-function Count
+```
+
+Aggregate a list by attribute in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-aggregate-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "VersionNumber" --list-variable "ClientDocumentList" --output-variable-name "TotalVersionNumber" --aggregate-function Sum
+```
+
+Aggregate a list by expression in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-aggregate-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "WeightedTotal" --aggregate-expression '$currentObject/VersionNumber * 1' --aggregate-function Sum
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -392,6 +410,9 @@ npm run summarize-knowledge-gaps
 - `add-microflow-filter-by-attribute` inserts `Filter by attribute` activities only at the start of the selected microflow.
 - `add-microflow-find-by-attribute` inserts `Find by attribute` activities only at the start of the selected microflow.
 - `add-microflow-find-by-expression` inserts `Find by expression` activities only at the start of the selected microflow.
+- `add-microflow-aggregate-list` inserts `Aggregate list` activities only at the start of the selected microflow.
+- `add-microflow-aggregate-by-attribute` inserts `Aggregate by attribute` activities only at the start of the selected microflow.
+- `add-microflow-aggregate-by-expression` inserts `Aggregate by expression` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.

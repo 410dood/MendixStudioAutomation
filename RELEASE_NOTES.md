@@ -1,5 +1,40 @@
 # Release Notes
 
+## 0.2.16
+
+Hybrid write-path expansion for microflow aggregate operations.
+
+- Added new extension routes:
+  - `/mendix-studio-automation/microflows/aggregate-list`
+  - `/mendix-studio-automation/microflows/aggregate-by-attribute`
+  - `/mendix-studio-automation/microflows/aggregate-by-expression`
+- Added extension capabilities:
+  - `microflow.aggregateList`
+  - `microflow.aggregateByAttribute`
+  - `microflow.aggregateByExpression`
+- Added Studio Pro client support for:
+  - inserting an `Aggregate list` action into a selected microflow via extension service APIs
+  - inserting an `Aggregate by attribute` action into a selected microflow via extension service APIs
+  - inserting an `Aggregate by expression` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm scripts:
+  - `add-microflow-aggregate-list`
+  - `add-microflow-aggregate-by-attribute`
+  - `add-microflow-aggregate-by-expression`
+  - `npm run add-microflow-aggregate-list`
+  - `npm run add-microflow-aggregate-by-attribute`
+  - `npm run add-microflow-aggregate-by-expression`
+- Added CLI options:
+  - `--aggregate-function`
+  - `--aggregate-expression`
+- Updated operation catalog with:
+  - `microflow.aggregateList`
+  - `microflow.aggregateByAttribute`
+  - `microflow.aggregateByExpression`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.15
 
 Hybrid write-path expansion for microflow attribute/expression list operations.

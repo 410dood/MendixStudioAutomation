@@ -1242,6 +1242,193 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowAggregateList(options = {}) {
+        const normalized = normalizeMicroflowAggregateListOptions(options, "AggregatedValue");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-list",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-list",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-list",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.aggregateList"))) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-list",
+                error: "Extension capabilities do not include microflow.aggregateList."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowAggregateList({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateFunction: normalized.aggregateFunction
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-aggregate-list",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateFunction: normalized.aggregateFunction
+        };
+    }
+
+    async addMicroflowAggregateByAttribute(options = {}) {
+        const normalized = normalizeMicroflowAggregateAttributeOptions(options, "AggregatedAttributeValue");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-attribute",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.attribute) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-attribute",
+                error: "An --attribute argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-attribute",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-attribute",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.aggregateByAttribute"))) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-attribute",
+                error: "Extension capabilities do not include microflow.aggregateByAttribute."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowAggregateByAttribute({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateFunction: normalized.aggregateFunction
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-aggregate-by-attribute",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateFunction: normalized.aggregateFunction
+        };
+    }
+
+    async addMicroflowAggregateByExpression(options = {}) {
+        const normalized = normalizeMicroflowAggregateExpressionOptions(options, "AggregatedExpressionValue");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-expression",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-expression",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (normalized.aggregateExpression === undefined || normalized.aggregateExpression === null || normalized.aggregateExpression === "") {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-expression",
+                error: "An --aggregate-expression (or --expression) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-expression",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.aggregateByExpression"))) {
+            return {
+                ok: false,
+                action: "add-microflow-aggregate-by-expression",
+                error: "Extension capabilities do not include microflow.aggregateByExpression."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowAggregateByExpression({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateExpression: normalized.aggregateExpression,
+            aggregateFunction: normalized.aggregateFunction
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-aggregate-by-expression",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            aggregateExpression: normalized.aggregateExpression,
+            aggregateFunction: normalized.aggregateFunction
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -2291,6 +2478,45 @@ function normalizeMicroflowListExpressionOptions(options, defaultOutputVariableN
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
         expression: options.findExpression ?? options.filterExpression ?? options.expression ?? options.value
+    };
+}
+
+function normalizeMicroflowAggregateListOptions(options, defaultOutputVariableName = "AggregatedValue") {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
+        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count"
+    };
+}
+
+function normalizeMicroflowAggregateAttributeOptions(options, defaultOutputVariableName = "AggregatedAttributeValue") {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        attribute: options.attribute,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
+        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count"
+    };
+}
+
+function normalizeMicroflowAggregateExpressionOptions(options, defaultOutputVariableName = "AggregatedExpressionValue") {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
+        aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
+        aggregateFunction: options.aggregateFunction ?? options.function ?? "Count"
     };
 }
 
