@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.2.45
+
+Final-destination URL assertions for runtime verification.
+
+- Enhanced `run-local-verify` with:
+  - `verifyFinalUrl` / `expectedFinalUrl`
+- This allows assertions against the final resolved URL after redirects when `verifyFollowRedirects` is enabled.
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.44
 
 Structured ambiguity reporting for extension-backed document open.
