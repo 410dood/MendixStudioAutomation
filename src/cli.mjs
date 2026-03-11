@@ -589,6 +589,9 @@ Options:
   --sort-descending <true|false> Sort descending for sort-list actions (default: false)
   --x-path-constraint <text>  Optional XPath constraint for retrieve-database action
   --retrieve-first <true|false> Retrieve first object instead of a list
+  --sort-attribute <name>     Optional sort attribute for retrieve-database actions
+  --range-offset-expression <text> Optional start expression for ranged retrieve-database actions
+  --range-amount-expression <text> Optional amount expression for ranged retrieve-database actions
   --requested-capability <text> Capability requested when recording a knowledge gap
   --observed-issue <text>     What failed or is missing
   --impact <text>             Why the gap matters

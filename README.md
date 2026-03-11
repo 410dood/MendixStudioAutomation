@@ -127,6 +127,7 @@ npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" -
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
 npm run add-microflow-call -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --called-microflow "General.ACT_GetCurrentAccount" --output-variable-name "CurrentAccount" --parameter-mappings "{}"
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
+npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentWindow" --x-path-constraint "[Status='Draft']" --sort-attribute "Status" --sort-descending false --range-offset-expression "0" --range-amount-expression "25"
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
 npm run add-microflow-filter-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FilteredClientDocumentList" --filter-expression "$ClientObj"
 npm run add-microflow-find-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FoundClientDocument" --find-expression "$ClientObj"
@@ -249,6 +250,7 @@ Phase 2:
 - current `add-microflow-create-list` now inserts SDK-backed `Create list` activities through the hybrid extension route
 - current `add-microflow-call` now inserts SDK-backed `Call microflow` activities through the hybrid extension route
 - current `add-microflow-retrieve-database` now inserts SDK-backed `Retrieve from database` activities through the hybrid extension route
+- current `add-microflow-retrieve-database` now also supports optional sort attributes and ranged retrieval expressions
 - current `add-microflow-retrieve-association` now inserts SDK-backed `Retrieve by association` activities through the hybrid extension route
 - current `add-microflow-filter-by-association` now inserts SDK-backed `Filter by association` activities through the hybrid extension route
 - current `add-microflow-find-by-association` now inserts SDK-backed `Find by association` activities through the hybrid extension route

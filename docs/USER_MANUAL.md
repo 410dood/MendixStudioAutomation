@@ -256,6 +256,12 @@ Retrieve objects from database in a microflow through the extension API:
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
 ```
 
+Retrieve a ranged and sorted window from database in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentWindow" --x-path-constraint "[Status='Draft']" --sort-attribute "Status" --sort-descending false --range-offset-expression "0" --range-amount-expression "25"
+```
+
 Retrieve objects by association in a microflow through the extension API:
 
 ```powershell

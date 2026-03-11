@@ -1109,6 +1109,36 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             ?? request.QueryString["output"];
         var xPathConstraint = request.QueryString["xPathConstraint"] ?? request.QueryString["xpath"] ?? request.QueryString["xPath"];
         var retrieveJustFirst = TryParseBool(request.QueryString["retrieveFirst"], false);
+        var sortAttributeName = request.QueryString["sortAttribute"] ?? request.QueryString["sortBy"] ?? request.QueryString["orderByAttribute"];
+        var sortDescending = TryParseBool(request.QueryString["sortDescending"] ?? request.QueryString["descending"], false);
+        var rangeOffsetExpressionRaw = request.QueryString["rangeOffsetExpression"]
+            ?? request.QueryString["rangeStartExpression"]
+            ?? request.QueryString["offsetExpression"]
+            ?? request.QueryString["startExpression"];
+        var rangeAmountExpressionRaw = request.QueryString["rangeAmountExpression"]
+            ?? request.QueryString["rangeLengthExpression"]
+            ?? request.QueryString["limitExpression"]
+            ?? request.QueryString["amountExpression"];
+        var hasRangeOffsetExpression = !string.IsNullOrWhiteSpace(rangeOffsetExpressionRaw);
+        var hasRangeAmountExpression = !string.IsNullOrWhiteSpace(rangeAmountExpressionRaw);
+
+        if (hasRangeOffsetExpression ^ hasRangeAmountExpression)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "Both rangeOffsetExpression and rangeAmountExpression are required when specifying a retrieval range."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (retrieveJustFirst && hasRangeOffsetExpression)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "retrieveFirst cannot be combined with rangeOffsetExpression/rangeAmountExpression."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -1209,15 +1239,50 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             var defaultOutput = retrieveJustFirst ? "RetrievedObject" : "RetrievedObjects";
             var output = string.IsNullOrWhiteSpace(outputVariableName) ? defaultOutput : outputVariableName!.Trim();
             var normalizedXpath = xPathConstraint ?? string.Empty;
+            AttributeSorting[] sorting = Array.Empty<AttributeSorting>();
+            string? resolvedSortAttribute = null;
+            if (!string.IsNullOrWhiteSpace(sortAttributeName))
+            {
+                var sortAttributeResolution = ResolveAttribute(project, module, entityName, sortAttributeName);
+                if (!sortAttributeResolution.Ok)
+                {
+                    return WriteJsonAsync(response, new
+                    {
+                        ok = false,
+                        error = sortAttributeResolution.Error,
+                        entity = entityName,
+                        attribute = sortAttributeName,
+                        module = normalizedModuleName,
+                        matches = sortAttributeResolution.Candidates
+                    }, sortAttributeResolution.StatusCode, cancellationToken);
+                }
+
+                sorting =
+                [
+                    new AttributeSorting(sortAttributeResolution.Attribute!, sortDescending)
+                ];
+                resolvedSortAttribute = sortAttributeResolution.Attribute!.Name;
+            }
 
             using var tx = CurrentApp.StartTransaction($"Add Retrieve database activity to {targetMicroflow}");
-            var activity = _microflowActivitiesService.CreateDatabaseRetrieveSourceActivity(
-                CurrentApp,
-                output,
-                targetEntity,
-                normalizedXpath,
-                retrieveJustFirst,
-                Array.Empty<AttributeSorting>());
+            var activity = hasRangeOffsetExpression
+                ? _microflowActivitiesService.CreateDatabaseRetrieveSourceActivity(
+                    CurrentApp,
+                    output,
+                    targetEntity,
+                    normalizedXpath,
+                    (
+                        _microflowExpressionService.CreateFromString(ToExpressionText(rangeOffsetExpressionRaw!)),
+                        _microflowExpressionService.CreateFromString(ToExpressionText(rangeAmountExpressionRaw!))
+                    ),
+                    sorting)
+                : _microflowActivitiesService.CreateDatabaseRetrieveSourceActivity(
+                    CurrentApp,
+                    output,
+                    targetEntity,
+                    normalizedXpath,
+                    retrieveJustFirst,
+                    sorting);
 
             var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
             if (!inserted)
@@ -1243,6 +1308,10 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 outputVariableName = output,
                 retrieveFirst = retrieveJustFirst,
                 xPathConstraint = normalizedXpath,
+                sortAttribute = resolvedSortAttribute,
+                sortDescending,
+                rangeOffsetExpression = hasRangeOffsetExpression ? rangeOffsetExpressionRaw : null,
+                rangeAmountExpression = hasRangeAmountExpression ? rangeAmountExpressionRaw : null,
                 route = "microflows/retrieve-database",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);

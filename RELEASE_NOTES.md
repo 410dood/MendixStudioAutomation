@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.2.23
+
+Hybrid retrieve-database expansion with sorting and range expressions.
+
+- Enhanced extension route:
+  - `/mendix-studio-automation/microflows/retrieve-database`
+- Added retrieve-database options:
+  - optional `sortAttribute` and `sortDescending`
+  - optional `rangeOffsetExpression` and `rangeAmountExpression`
+  - validation to prevent invalid combinations (partial range args or range + `retrieveFirst`)
+- Added Node/CLI support for:
+  - `--sort-attribute`
+  - `--range-offset-expression`
+  - `--range-amount-expression`
+  - existing `--sort-descending` now also applies to retrieve-database sort
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.22
 
 Hybrid write-path expansion for binary list microflow operations.

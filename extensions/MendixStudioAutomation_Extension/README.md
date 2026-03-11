@@ -95,7 +95,7 @@ That keeps the extension root in the Mendix-documented shape:
   - create a `Create object` activity in a target microflow
   - create a `Create list` activity in a target microflow
   - add a `Call microflow` activity in a target microflow
-  - add a `Retrieve from database` activity in a target microflow
+  - add a `Retrieve from database` activity in a target microflow (with optional XPath, sort, and range expressions)
   - add a `Retrieve by association` activity in a target microflow
   - add a `Filter by association` activity in a target microflow
   - add a `Find by association` activity in a target microflow

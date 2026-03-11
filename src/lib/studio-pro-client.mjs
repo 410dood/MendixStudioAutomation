@@ -796,6 +796,22 @@ export class StudioProClient {
             };
         }
 
+        if (normalized.hasRangeOffsetExpression !== normalized.hasRangeAmountExpression) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-database",
+                error: "Both --range-offset-expression and --range-amount-expression are required when specifying a range."
+            };
+        }
+
+        if (normalized.retrieveFirstBool && normalized.hasRangeOffsetExpression) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-database",
+                error: "--retrieve-first cannot be combined with range expressions."
+            };
+        }
+
         const extensionStatus = await this.getExtensionStatus(options);
         if (!extensionStatus?.available) {
             return {
@@ -820,7 +836,11 @@ export class StudioProClient {
             entity: normalized.entity,
             outputVariableName: normalized.outputVariableName,
             xPathConstraint: normalized.xPathConstraint,
-            retrieveFirst: normalized.retrieveFirst
+            retrieveFirst: normalized.retrieveFirst,
+            sortAttribute: normalized.sortAttribute,
+            sortDescending: normalized.sortDescending,
+            rangeOffsetExpression: normalized.rangeOffsetExpression,
+            rangeAmountExpression: normalized.rangeAmountExpression
         });
 
         return {
@@ -831,7 +851,11 @@ export class StudioProClient {
             module: normalized.module,
             outputVariableName: normalized.outputVariableName,
             xPathConstraint: normalized.xPathConstraint,
-            retrieveFirst: normalized.retrieveFirst
+            retrieveFirst: normalized.retrieveFirst,
+            sortAttribute: normalized.sortAttribute,
+            sortDescending: normalized.sortDescending,
+            rangeOffsetExpression: normalized.rangeOffsetExpression,
+            rangeAmountExpression: normalized.rangeAmountExpression
         };
     }
 
@@ -3071,6 +3095,18 @@ function normalizeAddMicroflowCallMicroflowOptions(options) {
 }
 
 function normalizeAddMicroflowRetrieveDatabaseOptions(options) {
+    const retrieveFirstRaw = options.retrieveFirst ?? "false";
+    const rangeOffsetExpression = options.rangeOffsetExpression
+        ?? options.rangeStartExpression
+        ?? options.offsetExpression
+        ?? options.startExpression
+        ?? "";
+    const rangeAmountExpression = options.rangeAmountExpression
+        ?? options.rangeLengthExpression
+        ?? options.limitExpression
+        ?? options.amountExpression
+        ?? "";
+
     return {
         processId: options.processId,
         title: options.title,
@@ -3079,7 +3115,14 @@ function normalizeAddMicroflowRetrieveDatabaseOptions(options) {
         entity: options.entity,
         outputVariableName: options.outputVariableName || "RetrievedObjects",
         xPathConstraint: options.xPathConstraint ?? options.xpath ?? "",
-        retrieveFirst: options.retrieveFirst ?? "false"
+        retrieveFirst: retrieveFirstRaw,
+        retrieveFirstBool: String(retrieveFirstRaw).toLowerCase() === "true",
+        sortAttribute: options.sortAttribute ?? options.sortBy ?? options.orderByAttribute ?? "",
+        sortDescending: options.sortDescending ?? options.descending ?? "false",
+        rangeOffsetExpression,
+        rangeAmountExpression,
+        hasRangeOffsetExpression: String(rangeOffsetExpression).trim().length > 0,
+        hasRangeAmountExpression: String(rangeAmountExpression).trim().length > 0
     };
 }
 

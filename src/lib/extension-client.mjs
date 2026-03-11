@@ -449,7 +449,11 @@ export class HybridExtensionClient {
             entity: options.entity,
             outputVariableName: options.outputVariableName ?? options.outputVariable,
             xPathConstraint: options.xPathConstraint ?? options.xpath,
-            retrieveFirst: options.retrieveFirst
+            retrieveFirst: options.retrieveFirst,
+            sortAttribute: options.sortAttribute ?? options.attribute,
+            sortDescending: options.sortDescending ?? options.descending,
+            rangeOffsetExpression: options.rangeOffsetExpression ?? options.rangeStartExpression ?? options.offsetExpression ?? options.startExpression,
+            rangeAmountExpression: options.rangeAmountExpression ?? options.rangeLengthExpression ?? options.limitExpression ?? options.amountExpression
         }), options.timeoutMs);
 
         return {
