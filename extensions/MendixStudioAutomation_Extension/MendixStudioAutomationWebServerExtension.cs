@@ -4006,6 +4006,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
         var moduleName = request.QueryString["module"];
         var variableName = request.QueryString["variable"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -4076,15 +4081,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
 
             using var tx = CurrentApp.StartTransaction($"Add Delete object activity to {targetMicroflow}");
             var activity = _microflowActivitiesService.CreateDeleteObjectActivity(CurrentApp, variable);
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Delete object activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Delete object activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -4096,6 +4111,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflow = microflowName,
                 microflowModule = targetMicroflowModule,
                 variableName = variable,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/delete-object",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -4125,6 +4145,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
         var moduleName = request.QueryString["module"];
         var variableName = request.QueryString["variable"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -4197,15 +4222,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
 
             using var tx = CurrentApp.StartTransaction($"Add Commit object activity to {targetMicroflow}");
             var activity = _microflowActivitiesService.CreateCommitObjectActivity(CurrentApp, variable, withEvents, refreshInClient);
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Commit object activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Commit object activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -4219,6 +4254,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 variableName = variable,
                 withEvents,
                 refreshInClient,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/commit-object",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -4248,6 +4288,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
         var moduleName = request.QueryString["module"];
         var variableName = request.QueryString["variable"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -4319,15 +4364,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
 
             using var tx = CurrentApp.StartTransaction($"Add Rollback object activity to {targetMicroflow}");
             var activity = _microflowActivitiesService.CreateRollbackObjectActivity(CurrentApp, variable, refreshInClient);
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Rollback object activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Rollback object activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -4340,6 +4395,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowModule = targetMicroflowModule,
                 variableName = variable,
                 refreshInClient,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/rollback-object",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -4372,6 +4432,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var associationName = request.QueryString["association"];
         var variableName = request.QueryString["variable"];
         var value = request.QueryString["value"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -4501,15 +4566,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 variable,
                 commitMode);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Change association activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Change association activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -4527,6 +4602,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 changeType = changeType.ToString(),
                 commit = commitMode.ToString(),
                 value,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/change-association",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -4559,6 +4639,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var attributeName = request.QueryString["attribute"];
         var variableName = request.QueryString["variable"];
         var value = request.QueryString["value"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -4689,15 +4774,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 variable,
                 commitMode);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Change object activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Change object activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -4715,6 +4810,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 changeType = changeType.ToString(),
                 commit = commitMode.ToString(),
                 value,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/change-attribute",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);

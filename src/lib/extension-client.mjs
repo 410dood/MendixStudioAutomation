@@ -232,7 +232,9 @@ export class HybridExtensionClient {
         const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/delete-object", {
             microflow: options.microflow ?? options.item,
             module: options.module,
-            variable: options.variable
+            variable: options.variable,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -262,7 +264,9 @@ export class HybridExtensionClient {
             module: options.module,
             variable: options.variable,
             withEvents: options.withEvents,
-            refreshInClient: options.refreshInClient
+            refreshInClient: options.refreshInClient,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -291,7 +295,9 @@ export class HybridExtensionClient {
             microflow: options.microflow ?? options.item,
             module: options.module,
             variable: options.variable,
-            refreshInClient: options.refreshInClient
+            refreshInClient: options.refreshInClient,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -324,7 +330,9 @@ export class HybridExtensionClient {
             variable: options.variable,
             value: options.value,
             changeType: options.changeType,
-            commit: options.commit
+            commit: options.commit,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -1107,7 +1115,9 @@ export class HybridExtensionClient {
             variable: options.variable,
             value: options.value,
             changeType: options.changeType,
-            commit: options.commit
+            commit: options.commit,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {

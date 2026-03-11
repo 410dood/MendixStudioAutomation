@@ -442,10 +442,22 @@ Delete a scoped variable in a microflow through the extension API:
 npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
 ```
 
+Insert the delete-object activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --insert-before-index 9
+```
+
 Commit a scoped variable in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
+```
+
+Insert the commit-object activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --insert-before-activity "Retrieve"
 ```
 
 Rollback a scoped variable in a microflow through the extension API:
@@ -454,16 +466,34 @@ Rollback a scoped variable in a microflow through the extension API:
 npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --refresh-in-client false
 ```
 
+Insert the rollback-object activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --insert-before-activity "Create object"
+```
+
 Change an attribute on a scoped variable in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No
 ```
 
+Insert the change-attribute activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No --insert-before-index 10
+```
+
 Change an association on a scoped variable in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-change-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --variable "ClientDocumentObj" --value "$ClientObj" --change-type Set --commit No
+```
+
+Insert the change-association activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-change-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --variable "ClientDocumentObj" --value "$ClientObj" --change-type Set --commit No --insert-before-activity "Commit"
 ```
 
 As with page insertion, keep `--dry-run` on until the selector path is confirmed.
@@ -551,11 +581,11 @@ npm run summarize-knowledge-gaps
 - `add-microflow-list-intersect` inserts `List intersect` activities only at the start of the selected microflow.
 - `add-microflow-list-subtract` inserts `List subtract` activities only at the start of the selected microflow.
 - `add-microflow-list-equals` inserts `List equals` activities only at the start of the selected microflow.
-- `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
-- `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
-- `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.
-- `add-microflow-change-attribute` inserts `Change attribute` activities only at the start of the selected microflow.
-- `add-microflow-change-association` inserts `Change association` activities only at the start of the selected microflow.
+- `add-microflow-delete-object` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-commit-object` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-rollback-object` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-change-attribute` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-change-association` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.

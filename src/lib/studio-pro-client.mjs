@@ -2296,7 +2296,9 @@ export class StudioProClient {
             ...options,
             microflow: normalized.microflow,
             module: normalized.module,
-            variable: normalized.variable
+            variable: normalized.variable,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2304,7 +2306,9 @@ export class StudioProClient {
             action: "add-microflow-delete-object",
             microflow: normalized.microflow,
             module: normalized.module,
-            variable: normalized.variable
+            variable: normalized.variable,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -2349,7 +2353,9 @@ export class StudioProClient {
             module: normalized.module,
             variable: normalized.variable,
             withEvents: normalized.withEvents,
-            refreshInClient: normalized.refreshInClient
+            refreshInClient: normalized.refreshInClient,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2359,7 +2365,9 @@ export class StudioProClient {
             module: normalized.module,
             variable: normalized.variable,
             withEvents: normalized.withEvents,
-            refreshInClient: normalized.refreshInClient
+            refreshInClient: normalized.refreshInClient,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -2403,7 +2411,9 @@ export class StudioProClient {
             microflow: normalized.microflow,
             module: normalized.module,
             variable: normalized.variable,
-            refreshInClient: normalized.refreshInClient
+            refreshInClient: normalized.refreshInClient,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2412,7 +2422,9 @@ export class StudioProClient {
             microflow: normalized.microflow,
             module: normalized.module,
             variable: normalized.variable,
-            refreshInClient: normalized.refreshInClient
+            refreshInClient: normalized.refreshInClient,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -2476,7 +2488,9 @@ export class StudioProClient {
             variable: normalized.variable,
             value: normalized.value,
             changeType: normalized.changeType,
-            commit: normalized.commit
+            commit: normalized.commit,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2489,7 +2503,9 @@ export class StudioProClient {
             variable: normalized.variable,
             value: normalized.value,
             changeType: normalized.changeType,
-            commit: normalized.commit
+            commit: normalized.commit,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -2553,7 +2569,9 @@ export class StudioProClient {
             variable: normalized.variable,
             value: normalized.value,
             changeType: normalized.changeType,
-            commit: normalized.commit
+            commit: normalized.commit,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -2566,7 +2584,9 @@ export class StudioProClient {
             variable: normalized.variable,
             value: normalized.value,
             changeType: normalized.changeType,
-            commit: normalized.commit
+            commit: normalized.commit,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -3487,7 +3507,9 @@ function normalizeMicroflowVariableActionOptions(options) {
         module: normalizedModule,
         variable: normalizedVariable,
         withEvents: options.withEvents ?? "false",
-        refreshInClient: options.refreshInClient ?? "false"
+        refreshInClient: options.refreshInClient ?? "false",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3502,7 +3524,9 @@ function normalizeMicroflowChangeAttributeOptions(options) {
         variable: options.variable ?? options.target,
         value: options.value,
         changeType: options.changeType ?? "Set",
-        commit: options.commit ?? "No"
+        commit: options.commit ?? "No",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3517,7 +3541,9 @@ function normalizeMicroflowChangeAssociationOptions(options) {
         variable: options.variable ?? options.target,
         value: options.value,
         changeType: options.changeType ?? "Set",
-        commit: options.commit ?? "No"
+        commit: options.commit ?? "No",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 

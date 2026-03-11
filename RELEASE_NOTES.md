@@ -1,5 +1,33 @@
 # Release Notes
 
+## 0.2.29
+
+Insert-before targeting expansion for object mutation microflow actions.
+
+- Enhanced extension routes:
+  - `/mendix-studio-automation/microflows/delete-object`
+  - `/mendix-studio-automation/microflows/commit-object`
+  - `/mendix-studio-automation/microflows/rollback-object`
+  - `/mendix-studio-automation/microflows/change-attribute`
+  - `/mendix-studio-automation/microflows/change-association`
+- Added optional query argument support:
+  - `insertBeforeActivity` (aliases: `insertBefore`, `beforeActivity`, `beforeCaption`)
+  - `insertBeforeIndex` (alias: `beforeIndex`)
+- Added Node/CLI propagation for:
+  - `add-microflow-delete-object`
+  - `add-microflow-commit-object`
+  - `add-microflow-rollback-object`
+  - `add-microflow-change-attribute`
+  - `add-microflow-change-association`
+- Insertion behavior:
+  - default remains insert after microflow start
+  - when `insertBeforeActivity` is supplied, insertion matches by caption/action type
+  - when `insertBeforeIndex` is supplied, insertion is index-based from `list-microflow-activities`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.28
 
 Filtered microflow activity finder command for faster index targeting and debugging.

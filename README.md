@@ -163,6 +163,11 @@ npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" -
 npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --refresh-in-client false
 npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No
 npm run add-microflow-change-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --variable "ClientDocumentObj" --value "$ClientObj" --change-type Set --commit No
+npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --insert-before-index 9
+npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --insert-before-activity "Retrieve"
+npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --insert-before-activity "Create object"
+npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No --insert-before-index 10
+npm run add-microflow-change-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --variable "ClientDocumentObj" --value "$ClientObj" --change-type Set --commit No --insert-before-activity "Commit"
 ```
 
 ### Clients Page Scaffold
@@ -291,6 +296,7 @@ Phase 2:
 - current `add-microflow-rollback-object` now inserts SDK-backed `Rollback object` activities through the hybrid extension route
 - current `add-microflow-change-attribute` now inserts SDK-backed `Change attribute` activities through the hybrid extension route
 - current `add-microflow-change-association` now inserts SDK-backed `Change association` activities through the hybrid extension route
+- current object mutation actions (`delete`, `commit`, `rollback`, `change-attribute`, `change-association`) now also support optional `--insert-before-activity` and `--insert-before-index`
 - current editor context-menu commands can traverse nested menu paths such as `Add > Activity`
 - current node-level editor context menus fall back to native right-click when `Shift+F10` opens the microflow properties dialog instead of a menu
 - current `click-editor-offset` provides a placement primitive for clicking relative to a visible page or microflow element

@@ -116,11 +116,11 @@ That keeps the extension root in the Mendix-documented shape:
   - add a `List intersect` activity in a target microflow
   - add a `List subtract` activity in a target microflow
   - add a `List equals` activity in a target microflow
-  - add a `Delete object` activity in a target microflow
-  - add a `Commit object` activity in a target microflow
-  - add a `Rollback object` activity in a target microflow
-  - add a `Change attribute` activity in a target microflow
-  - add a `Change association` activity in a target microflow
+  - add a `Delete object` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Commit object` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Rollback object` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Change attribute` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Change association` activity in a target microflow (optional insert-before targeting by caption/type or index)
 
 Remaining write operations are intentionally not implemented yet.
 
