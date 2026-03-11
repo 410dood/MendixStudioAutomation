@@ -55,6 +55,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-page-widget-properties": {
+            const result = await client.exportPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "compare-page-widget-properties": {
+            const result = await client.comparePageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "sync-page-widget-properties": {
+            const result = await client.syncPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "inspect-page-widget-properties": {
+            const result = await client.inspectPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "open-properties": {
             const result = await client.openProperties(options);
             formatOutput(result);
@@ -562,6 +582,10 @@ Commands:
   stop-local                  Stop a locally running app in Studio Pro
   show-responsive-web         Open the app in Studio Pro's responsive browser view
   create-page                 Create a Mendix page through the native Studio Pro wizard
+  export-page-widget-properties Export a page widget property plan to JSON
+  compare-page-widget-properties Compare a page widget against a saved property plan
+  sync-page-widget-properties Apply or preview a page widget property plan
+  inspect-page-widget-properties Inspect both fields and raw controls for a page widget
   open-properties             Open the properties dialog for a selected Studio Pro item
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan

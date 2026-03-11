@@ -84,6 +84,10 @@ npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --v
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"
+npm run export-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --output-file ".automation-state/structure-mode-properties.json" --finalize-dialog "Cancel"
+npm run compare-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --finalize-dialog "Cancel"
+npm run sync-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --dry-run true
+npm run inspect-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control-type Edit --limit 50 --finalize-dialog "Cancel"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-properties.json"
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"

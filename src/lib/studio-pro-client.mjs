@@ -232,6 +232,75 @@ export class StudioProClient {
         };
     }
 
+    async exportPageWidgetProperties(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.exportPropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async comparePageWidgetProperties(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.comparePropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async syncPageWidgetProperties(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.syncPropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async inspectPageWidgetProperties(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        const fieldsResult = await this.listPropertiesDialogFields({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: null
+        });
+
+        if (!fieldsResult?.ok) {
+            return {
+                ...fieldsResult,
+                action: "inspect-page-widget-properties"
+            };
+        }
+
+        const itemsResult = await this.listPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+
+        return {
+            ok: Boolean(fieldsResult?.ok) && Boolean(itemsResult?.ok),
+            action: "inspect-page-widget-properties",
+            page: normalized.page,
+            widget: normalized.widget,
+            scope: normalized.scope,
+            fieldsResult,
+            itemsResult
+        };
+    }
+
     async addNavigationShortcut(options = {}) {
         const normalized = normalizeNavigationShortcutOptions(options);
 
@@ -4535,6 +4604,20 @@ function normalizeCreateClientsPageOptions(options) {
         timeoutMs: numberOrDefault(options.timeoutMs, 15000),
         pageExplorerLimit: numberOrDefault(options.pageExplorerLimit, 200),
         capabilities: options.capabilities
+    };
+}
+
+function normalizePageWidgetPropertyOptions(options) {
+    const page = options.page ?? options.document ?? null;
+    const widget = options.widget ?? options.item ?? null;
+    const scope = options.scope ?? "editor";
+    const dryRun = toBoolean(options.dryRun, false);
+    const finalizeDialog = options.finalizeDialog ?? (dryRun ? "Cancel" : "OK");
+    return {
+        page,
+        widget,
+        scope,
+        finalizeDialog
     };
 }
 
