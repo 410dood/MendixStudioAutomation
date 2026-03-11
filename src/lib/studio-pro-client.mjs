@@ -488,6 +488,54 @@ export class StudioProClient {
         };
     }
 
+    async invokePropertiesDialogControl(options = {}) {
+        let openResult;
+        try {
+            openResult = await this.openProperties(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "invoke-properties-dialog-control",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        const dialogName = extractDialogWindowName(openResult);
+        if (!openResult?.ok || !dialogName) {
+            return {
+                ok: false,
+                action: "invoke-properties-dialog-control",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: openResult?.error ?? "Properties dialog did not open or did not report a dialog window name.",
+                openResult
+            };
+        }
+
+        const controlResult = await this.invokeDialogControl({
+            ...options,
+            dialog: dialogName
+        });
+
+        return {
+            ok: Boolean(openResult?.ok) && Boolean(controlResult?.ok),
+            action: "invoke-properties-dialog-control",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            dialog: dialogName,
+            openResult,
+            controlResult
+        };
+    }
+
     async getPropertiesDialogField(options = {}) {
         let openResult;
         try {

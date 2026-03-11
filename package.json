@@ -19,6 +19,7 @@
     "export-properties-dialog": "node src/cli.mjs export-properties-dialog",
     "compare-properties-dialog": "node src/cli.mjs compare-properties-dialog",
     "list-properties-dialog-fields": "node src/cli.mjs list-properties-dialog-fields",
+    "invoke-properties-dialog-control": "node src/cli.mjs invoke-properties-dialog-control",
     "get-properties-dialog-field": "node src/cli.mjs get-properties-dialog-field",
     "set-properties-dialog-fields": "node src/cli.mjs set-properties-dialog-fields",
     "set-properties-dialog-field": "node src/cli.mjs set-properties-dialog-field",

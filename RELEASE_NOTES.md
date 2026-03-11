@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.54
+
+Generic target-first properties control invocation.
+
+- Added `invoke-properties-dialog-control` to open a Studio Pro properties dialog from a page or microflow target and invoke a named button or control inside it.
+- This complements `--finalize-dialog` when a workflow needs a nonstandard button like `Apply` or another custom dialog action.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.53
 
 Properties dialog finalization support.
