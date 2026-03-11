@@ -116,6 +116,7 @@ node src/cli.mjs snapshot --title "Olari"
 
 - [Setup](docs/SETUP.md)
 - [User Manual](docs/USER_MANUAL.md)
+- [Hybrid Architecture](docs/HYBRID_ARCHITECTURE.md)
 - [Release Notes](RELEASE_NOTES.md)
 
 ## Roadmap
