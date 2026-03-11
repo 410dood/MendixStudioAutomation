@@ -1,5 +1,19 @@
 # Release Notes
 
+## 0.2.46
+
+Search fallback and ambiguity reporting for direct extension document open.
+
+- Enhanced `extension-open-document` so it now:
+  - falls back to extension document search when direct open by name fails
+  - applies the same exact-match selection rules as `open-item`
+  - returns structured candidate matches when the search is ambiguous
+  - verifies the editor tab and remembers it on success
+- Refactored shared extension search/open verification logic in the Node client
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.45
 
 Final-destination URL assertions for runtime verification.

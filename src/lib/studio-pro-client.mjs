@@ -598,9 +598,9 @@ export class StudioProClient {
     }
 
     async openExtensionDocument(options = {}) {
-        const result = await this.extensionClient.openDocument(options);
         const requestedName = options.name ?? options.item ?? options.page ?? options.microflow ?? null;
-        if (!result?.ok || !result?.payload?.opened || !requestedName) {
+        const result = await this.extensionClient.openDocument(options);
+        if (!result?.ok || !requestedName) {
             return {
                 ...result,
                 action: "extension-open-document",
@@ -609,19 +609,65 @@ export class StudioProClient {
             };
         }
 
-        const matchedTab = await waitForOpenTabByItemName(this, requestedName, options);
-        if (matchedTab) {
-            await writeLastKnownActiveTab(matchedTab);
+        if (result?.payload?.opened) {
+            return finalizeVerifiedExtensionOpen(this, result, requestedName, options, {
+                action: "extension-open-document",
+                attempts: 1
+            });
         }
 
-        return {
-            ...result,
+        const searchResult = await this.searchExtensionDocuments({
+            ...options,
+            query: requestedName,
+            module: options.module,
+            type: options.type,
+            limit: 10
+        });
+        const rawItems = getExtensionSearchItems(searchResult);
+        const selectedMatch = resolveExtensionSearchMatch(rawItems, requestedName, options.module, options.type);
+
+        if (!selectedMatch?.name) {
+            return {
+                ...result,
+                action: "extension-open-document",
+                error: rawItems.length === 0
+                    ? `No extension document search results matched '${requestedName}'.`
+                    : `Multiple extension document search results matched '${requestedName}'. Provide --module or --type to disambiguate.`,
+                requestedName,
+                module: options.module ?? null,
+                type: options.type ?? null,
+                count: rawItems.length,
+                matches: rawItems,
+                verifiedOpen: false,
+                attempts: 2
+            };
+        }
+
+        const fallbackResult = await this.extensionClient.openDocument({
+            ...options,
+            name: selectedMatch.name,
+            module: selectedMatch.moduleName ?? options.module,
+            type: selectedMatch.type ?? options.type
+        });
+
+        if (!fallbackResult?.ok || !fallbackResult?.payload?.opened) {
+            return {
+                ...fallbackResult,
+                action: "extension-open-document",
+                error: `The extension found '${selectedMatch.name}' but could not open it.`,
+                requestedName,
+                selectedDocument: selectedMatch,
+                verifiedOpen: false,
+                attempts: 2
+            };
+        }
+
+        return finalizeVerifiedExtensionOpen(this, fallbackResult, selectedMatch.name, options, {
             action: "extension-open-document",
             requestedName,
-            verifiedOpen: Boolean(matchedTab),
-            attempts: 1,
-            tab: matchedTab ?? null
-        };
+            attempts: 2,
+            selectedDocument: selectedMatch
+        });
     }
 
     async listMicroflowActivities(options = {}) {
@@ -3179,7 +3225,7 @@ async function tryOpenItemViaExtension(client, options) {
             return null;
         }
 
-        let openResult = await client.openExtensionDocument({
+        let openResult = await client.extensionClient.openDocument({
             ...options,
             name: options.item
         });
@@ -3192,33 +3238,8 @@ async function tryOpenItemViaExtension(client, options) {
                 type: options.type,
                 limit: 10
             });
-            const rawItems = Array.isArray(searchResult?.documents?.items)
-                ? searchResult.documents.items
-                : Array.isArray(searchResult?.items)
-                    ? searchResult.items
-                    : [];
-
-            const exactNameMatches = rawItems.filter(item =>
-                typeof item?.name === "string" &&
-                item.name.localeCompare(options.item, undefined, { sensitivity: "accent" }) === 0
-            );
-            const exactModuleMatches = exactNameMatches.filter(item =>
-                !options.module || item?.moduleName === options.module
-            );
-            const exactTypeMatches = exactModuleMatches.filter(item =>
-                !options.type || item?.type === options.type
-            );
-
-            let selectedMatch = null;
-            if (exactTypeMatches.length === 1) {
-                selectedMatch = exactTypeMatches[0];
-            } else if (exactModuleMatches.length === 1) {
-                selectedMatch = exactModuleMatches[0];
-            } else if (exactNameMatches.length === 1) {
-                selectedMatch = exactNameMatches[0];
-            } else if (rawItems.length === 1) {
-                selectedMatch = rawItems[0];
-            }
+            const rawItems = getExtensionSearchItems(searchResult);
+            const selectedMatch = resolveExtensionSearchMatch(rawItems, options.item, options.module, options.type);
 
             if (!selectedMatch?.name) {
                 return {
@@ -3237,7 +3258,7 @@ async function tryOpenItemViaExtension(client, options) {
                 };
             }
 
-            openResult = await client.openExtensionDocument({
+            openResult = await client.extensionClient.openDocument({
                 ...options,
                 name: selectedMatch.name,
                 module: selectedMatch.moduleName ?? options.module,
@@ -3257,43 +3278,80 @@ async function tryOpenItemViaExtension(client, options) {
                 };
             }
 
-            const matchedTabFromSearch = await waitForOpenTabByItemName(client, selectedMatch.name, options);
-            if (matchedTabFromSearch) {
-                await writeLastKnownActiveTab(matchedTabFromSearch);
-            }
-
-            return {
-                ok: true,
+            return finalizeVerifiedExtensionOpen(client, openResult, selectedMatch.name, options, {
                 method: "extensionSearchThenOpenDocument",
-                verifiedOpen: Boolean(matchedTabFromSearch),
                 attempts: 2,
-                tab: matchedTabFromSearch ?? null,
                 selectedDocument: selectedMatch,
                 extension: openResult.payload
-            };
+            });
         }
 
         if (!openResult?.payload?.opened) {
             return null;
         }
 
-        const matchedTab = await waitForOpenTabByItemName(client, options.item, options);
-        if (matchedTab) {
-            await writeLastKnownActiveTab(matchedTab);
-        }
-
-        return {
-            ok: true,
+        return finalizeVerifiedExtensionOpen(client, openResult, options.item, options, {
             method: "extensionOpenDocument",
-            verifiedOpen: Boolean(matchedTab),
             attempts: 1,
-            tab: matchedTab ?? null,
             extension: openResult.payload
-        };
+        });
     }
     catch {
         return null;
     }
+}
+
+function getExtensionSearchItems(searchResult) {
+    return Array.isArray(searchResult?.documents?.items)
+        ? searchResult.documents.items
+        : Array.isArray(searchResult?.items)
+            ? searchResult.items
+            : [];
+}
+
+function resolveExtensionSearchMatch(items, requestedName, moduleName, type) {
+    const exactNameMatches = items.filter(item =>
+        typeof item?.name === "string" &&
+        item.name.localeCompare(requestedName, undefined, { sensitivity: "accent" }) === 0
+    );
+    const exactModuleMatches = exactNameMatches.filter(item =>
+        !moduleName || item?.moduleName === moduleName
+    );
+    const exactTypeMatches = exactModuleMatches.filter(item =>
+        !type || item?.type === type
+    );
+
+    if (exactTypeMatches.length === 1) {
+        return exactTypeMatches[0];
+    }
+
+    if (exactModuleMatches.length === 1) {
+        return exactModuleMatches[0];
+    }
+
+    if (exactNameMatches.length === 1) {
+        return exactNameMatches[0];
+    }
+
+    if (items.length === 1) {
+        return items[0];
+    }
+
+    return null;
+}
+
+async function finalizeVerifiedExtensionOpen(client, result, requestedName, options, extras = {}) {
+    const matchedTab = await waitForOpenTabByItemName(client, requestedName, options);
+    if (matchedTab) {
+        await writeLastKnownActiveTab(matchedTab);
+    }
+
+    return {
+        ...result,
+        ...extras,
+        verifiedOpen: Boolean(matchedTab),
+        tab: matchedTab ?? null
+    };
 }
 
 function filterOpenTabs(items, options) {
