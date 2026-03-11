@@ -430,16 +430,34 @@ Change a list in a microflow through the extension API:
 npm run add-microflow-change-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --change-list-operation Add --value '$ClientDocumentObj'
 ```
 
+Insert the change-list activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-change-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --change-list-operation Add --value '$ClientDocumentObj' --insert-before-index 17
+```
+
 Sort a list in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-sort-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "SortedClientDocumentList" --sort-descending false
 ```
 
+Insert the sort-list activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-sort-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "SortedClientDocumentList" --sort-descending false --insert-before-activity "Retrieve"
+```
+
 Insert a reduce-aggregate activity in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-reduce-aggregate -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ReducedVersionTotal" --aggregate-expression '$currentValue + $currentObject/VersionNumber' --initial-expression "0" --reduce-type Decimal
+```
+
+Insert the reduce-aggregate activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-reduce-aggregate -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "ReducedVersionTotal" --aggregate-expression '$currentValue + $currentObject/VersionNumber' --initial-expression "0" --reduce-type Decimal --insert-before-activity "Create object"
 ```
 
 Insert a list-head activity in a microflow through the extension API:
@@ -663,9 +681,9 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - `add-microflow-aggregate-list` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-aggregate-by-attribute` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-aggregate-by-expression` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
-- `add-microflow-change-list` inserts `Change list` activities only at the start of the selected microflow.
-- `add-microflow-sort-list` inserts `Sort list` activities only at the start of the selected microflow.
-- `add-microflow-reduce-aggregate` inserts `Reduce aggregate` activities only at the start of the selected microflow.
+- `add-microflow-change-list` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-sort-list` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-reduce-aggregate` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-list-head` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-list-tail` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-list-contains` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.

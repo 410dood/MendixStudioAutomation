@@ -106,9 +106,9 @@ That keeps the extension root in the Mendix-documented shape:
   - add an `Aggregate list` activity in a target microflow (optional insert-before targeting by caption/type or index)
   - add an `Aggregate by attribute` activity in a target microflow (optional insert-before targeting by caption/type or index)
   - add an `Aggregate by expression` activity in a target microflow (optional insert-before targeting by caption/type or index)
-  - add a `Change list` activity in a target microflow
-  - add a `Sort list` activity in a target microflow
-  - add a `Reduce aggregate` activity in a target microflow
+  - add a `Change list` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Sort list` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Reduce aggregate` activity in a target microflow (optional insert-before targeting by caption/type or index)
   - add a `List head` activity in a target microflow (optional insert-before targeting by caption/type or index)
   - add a `List tail` activity in a target microflow (optional insert-before targeting by caption/type or index)
   - add a `List contains` activity in a target microflow (optional insert-before targeting by caption/type or index)

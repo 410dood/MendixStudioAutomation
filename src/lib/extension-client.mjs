@@ -826,7 +826,9 @@ export class HybridExtensionClient {
             module: options.module,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             changeListOperation: options.changeListOperation ?? options.operation ?? options.changeType,
-            value: options.value ?? options.expression ?? options.itemExpression
+            value: options.value ?? options.expression ?? options.itemExpression,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -858,7 +860,9 @@ export class HybridExtensionClient {
             attribute: options.attribute,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
-            sortDescending: options.sortDescending ?? options.descending
+            sortDescending: options.sortDescending ?? options.descending,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -890,7 +894,9 @@ export class HybridExtensionClient {
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
             aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
             initialExpression: options.initialExpression ?? options.initialValue ?? options.initial,
-            reduceType: options.reduceType ?? options.dataType ?? options.type
+            reduceType: options.reduceType ?? options.dataType ?? options.type,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {

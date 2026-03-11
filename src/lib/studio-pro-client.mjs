@@ -1713,7 +1713,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             changeListOperation: normalized.changeListOperation,
-            value: normalized.value
+            value: normalized.value,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1723,7 +1725,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             changeListOperation: normalized.changeListOperation,
-            value: normalized.value
+            value: normalized.value,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1778,7 +1782,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            sortDescending: normalized.sortDescending
+            sortDescending: normalized.sortDescending,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1790,7 +1796,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            sortDescending: normalized.sortDescending
+            sortDescending: normalized.sortDescending,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1853,7 +1861,9 @@ export class StudioProClient {
             outputVariableName: normalized.outputVariableName,
             aggregateExpression: normalized.aggregateExpression,
             initialExpression: normalized.initialExpression,
-            reduceType: normalized.reduceType
+            reduceType: normalized.reduceType,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1865,7 +1875,9 @@ export class StudioProClient {
             outputVariableName: normalized.outputVariableName,
             aggregateExpression: normalized.aggregateExpression,
             initialExpression: normalized.initialExpression,
-            reduceType: normalized.reduceType
+            reduceType: normalized.reduceType,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -3509,7 +3521,9 @@ function normalizeMicroflowChangeListOptions(options) {
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         changeListOperation: matchedOperation ?? normalizedOperation,
         isOperationValid: Boolean(matchedOperation),
-        value: options.value ?? options.expression ?? options.itemExpression
+        value: options.value ?? options.expression ?? options.itemExpression,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3523,7 +3537,9 @@ function normalizeMicroflowSortListOptions(options) {
         attribute: options.attribute,
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || "SortedList",
-        sortDescending: options.sortDescending ?? options.descending ?? "false"
+        sortDescending: options.sortDescending ?? options.descending ?? "false",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3537,7 +3553,9 @@ function normalizeMicroflowReduceAggregateOptions(options) {
         outputVariableName: options.outputVariableName || options.outputVariable || "ReducedAggregate",
         aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
         initialExpression: options.initialExpression ?? options.initialValue ?? options.initial,
-        reduceType: options.reduceType ?? options.dataType ?? options.type ?? "Decimal"
+        reduceType: options.reduceType ?? options.dataType ?? options.type ?? "Decimal",
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 

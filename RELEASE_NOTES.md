@@ -1,5 +1,29 @@
 # Release Notes
 
+## 0.2.35
+
+Insert-before targeting for change/sort/reduce microflow operations.
+
+- Enhanced extension routes:
+  - `/mendix-studio-automation/microflows/change-list`
+  - `/mendix-studio-automation/microflows/sort-list`
+  - `/mendix-studio-automation/microflows/reduce-aggregate`
+- Added optional query argument support:
+  - `insertBeforeActivity` (aliases: `insertBefore`, `beforeActivity`, `beforeCaption`)
+  - `insertBeforeIndex` (alias: `beforeIndex`)
+- Added Node/CLI propagation for:
+  - `add-microflow-change-list`
+  - `add-microflow-sort-list`
+  - `add-microflow-reduce-aggregate`
+- Insertion behavior:
+  - default remains insert after microflow start
+  - when `insertBeforeActivity` is supplied, insertion matches by caption/action type
+  - when `insertBeforeIndex` is supplied, insertion is index-based from `list-microflow-activities`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.34
 
 Insert-before targeting for aggregate microflow operations.

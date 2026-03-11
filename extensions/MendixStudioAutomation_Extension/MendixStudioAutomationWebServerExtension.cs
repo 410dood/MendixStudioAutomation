@@ -3111,6 +3111,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var rawOperation = request.QueryString["changeListOperation"] ?? request.QueryString["operation"] ?? request.QueryString["changeType"];
         var rawValueExpression = request.QueryString["value"] ?? request.QueryString["expression"] ?? request.QueryString["itemExpression"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (!TryParseChangeListActionOperation(rawOperation, out var changeListOperation))
         {
@@ -3210,15 +3215,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 listVariable,
                 expression);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Change list activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Change list activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3232,6 +3247,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 listVariable,
                 changeListOperation = changeListOperation.ToString(),
                 expression = expressionInput,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/change-list",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -3265,6 +3285,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
         var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
         var sortDescending = TryParseBool(request.QueryString["sortDescending"] ?? request.QueryString["descending"], false);
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -3364,15 +3389,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 output,
                 [sorting]);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Sort list activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Sort list activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3389,6 +3424,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 listVariable = sourceList,
                 outputVariableName = output,
                 sortDescending,
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/sort-list",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
@@ -3422,6 +3462,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         var aggregateExpressionText = request.QueryString["aggregateExpression"] ?? request.QueryString["expression"] ?? request.QueryString["value"];
         var initialExpressionText = request.QueryString["initialExpression"] ?? request.QueryString["initialValue"] ?? request.QueryString["initial"];
         var reduceTypeText = request.QueryString["reduceType"] ?? request.QueryString["dataType"] ?? request.QueryString["type"];
+        var insertBeforeActivity = request.QueryString["insertBeforeActivity"]
+            ?? request.QueryString["insertBefore"]
+            ?? request.QueryString["beforeActivity"]
+            ?? request.QueryString["beforeCaption"];
+        var insertBeforeIndex = request.QueryString["insertBeforeIndex"] ?? request.QueryString["beforeIndex"];
 
         if (string.IsNullOrWhiteSpace(microflowName))
         {
@@ -3528,15 +3573,25 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 initialExpression,
                 reduceDataType);
 
-            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            var inserted = TryInsertMicroflowActivity(
+                targetMicroflow,
+                activity,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                out var insertionMode,
+                out var insertedBeforeCaption,
+                out var insertedBeforeActionType,
+                out var insertionError);
             if (!inserted)
             {
                 return WriteJsonAsync(response, new
                 {
                     ok = false,
-                    error = "The API could not insert a Reduce aggregate activity at the start of the microflow.",
+                    error = insertionError ?? "The API could not insert a Reduce aggregate activity into the microflow.",
                     microflow = microflowName,
-                    module = targetMicroflowModule
+                    module = targetMicroflowModule,
+                    insertBeforeActivity,
+                    insertBeforeIndex
                 }, HttpStatusCode.Conflict, cancellationToken);
             }
 
@@ -3552,6 +3607,11 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 aggregateExpression = aggregateExpressionText.Trim(),
                 initialExpression = initialExpressionText.Trim(),
                 reduceType = reduceTypeText?.Trim() ?? "Decimal",
+                insertionMode,
+                insertBeforeActivity,
+                insertBeforeIndex,
+                insertedBeforeCaption,
+                insertedBeforeActionType,
                 route = "microflows/reduce-aggregate",
                 inserted
             }, HttpStatusCode.OK, cancellationToken);
