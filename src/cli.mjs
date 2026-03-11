@@ -115,6 +115,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "list-dialog-fields": {
+            const result = await client.listDialogFields(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-dialog-control": {
             const result = await client.invokeDialogControl(options);
             formatOutput(result);
@@ -464,6 +469,7 @@ Commands:
   list-scope-elements         List visible elements inside a scoped Studio Pro surface
   invoke-scope-element-action Click or invoke a scoped Studio Pro element by runtime id
   list-dialog-items           List visible named controls inside a Studio Pro dialog
+  list-dialog-fields          List visible dialog labels that resolve to field/value pairs
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
   get-dialog-field            Read a native Studio Pro dialog field by its visible label
   set-dialog-field            Set a native Studio Pro dialog field by its visible label
@@ -563,6 +569,7 @@ Options:
   --timeout-ms <n>            Wait timeout in milliseconds
   --poll-ms <n>               Wait poll interval in milliseconds
   --dialog <name>             Open Studio Pro dialog window name
+  --label-contains <text>     Filter list-dialog-fields results to labels containing text
   --near-name <name>          Sort/filter scope elements around a visible named element
   --radius <n>                Optional max pixel distance from --near-name
   --control <name>            Visible control name inside a Studio Pro dialog

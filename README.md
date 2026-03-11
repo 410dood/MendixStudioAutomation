@@ -120,6 +120,7 @@ npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "cont
 npm run select-toolbox-item -- --item "Text"
 npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
+npm run list-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --control-type CheckBox
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
 npm run get-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --control-type Edit --verify-value-contains "container"
@@ -292,6 +293,7 @@ Phase 2:
 - current `insert-widget` records native accept attempts (`Select` button, `Enter`, double-click) plus before/after Page Explorer snapshots for debugging
 - current `insert-widget` is now producing confirmed Page Explorer mutations on `Client_ClinicalDocument_V3`, including live insertions under `container39` and `container38`
 - current dialog inspection is sufficient to read local-run blockers such as Studio Pro `Information` dialogs
+- current `list-dialog-fields` can enumerate dialog labels as resolved field/value pairs instead of raw control dumps
 - current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
 - current `get-dialog-field` can inspect native dialog field values and toggle state by visible label
 - current dialog/listed automation elements now expose `textValue` when a native control supports `ValuePattern`

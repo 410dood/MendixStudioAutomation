@@ -57,6 +57,7 @@
     "list-scope-elements": "node src/cli.mjs list-scope-elements",
     "invoke-scope-element-action": "node src/cli.mjs invoke-scope-element-action",
     "list-dialog-items": "node src/cli.mjs list-dialog-items",
+    "list-dialog-fields": "node src/cli.mjs list-dialog-fields",
     "invoke-dialog-control": "node src/cli.mjs invoke-dialog-control",
     "get-dialog-field": "node src/cli.mjs get-dialog-field",
     "set-dialog-field": "node src/cli.mjs set-dialog-field",

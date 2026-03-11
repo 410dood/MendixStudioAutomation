@@ -411,6 +411,10 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/List-StudioProDialogItems.ps1", normalizeDialogItemOptions(options));
     }
 
+    async listDialogFields(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProDialogFields.ps1", normalizeDialogFieldListOptions(options));
+    }
+
     async invokeDialogControl(options = {}) {
         return runPowerShellScript("scripts/automation/Invoke-StudioProDialogControl.ps1", normalizeDialogControlOptions(options));
     }
@@ -4046,6 +4050,17 @@ function normalizeDialogFieldOptions(options) {
         Value: options.value ?? "",
         ControlType: options.controlType,
         DelayMs: numberOrDefault(options.delayMs, 250)
+    };
+}
+
+function normalizeDialogFieldListOptions(options) {
+    return {
+        ProcessId: options.processId,
+        WindowTitlePattern: options.title,
+        Dialog: options.dialog,
+        ControlType: options.controlType,
+        LabelContains: options.labelContains,
+        Limit: numberOrDefault(options.limit, 200)
     };
 }
 

@@ -115,6 +115,7 @@ Use `find` to inspect what Studio Pro is exposing through UI Automation before b
 ```powershell
 npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
+npm run list-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --control-type CheckBox
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Text"
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
@@ -128,6 +129,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 ```
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
+`list-dialog-fields` is the higher-level inspection command when you want label/value pairs instead of a raw control inventory.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.
 `set-dialog-field` is currently experimental and is best treated as a targeted helper while the dialog-field heuristics are still being widened. It currently supports `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` fields, and checkbox/toggle values accept `true/false`, `yes/no`, `on/off`, and `1/0`. Successful writes now also report the observed post-write text/toggle state. Use `--verify-value`, `--verify-value-contains`, or `--verify-toggle-state` when the command should fail if the dialog did not actually land on the expected value/state.
