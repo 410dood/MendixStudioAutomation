@@ -1,5 +1,18 @@
 # Release Notes
 
+## 0.2.39
+
+Generic response-header assertions for local runtime validation.
+
+- Enhanced `run-local-verify` with optional header assertions:
+  - `verifyHeader` / `expectedHeader` in `Name=substring` form
+  - multiple header rules can be supplied in one argument separated by `;;`
+- Verification output now includes:
+  - observed response `headers`
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.38
 
 Richer page-level HTTP validation for local runtime checks.

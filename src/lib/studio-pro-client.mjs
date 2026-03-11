@@ -56,6 +56,7 @@ export class StudioProClient {
         const expectedLocation = options.verifyLocation ?? options.expectedLocation ?? null;
         const expectedTitle = options.verifyTitle ?? options.expectedTitle ?? null;
         const expectedContentType = options.verifyContentType ?? options.expectedContentType ?? null;
+        const expectedHeaders = parseExpectedHeaders(options.verifyHeader ?? options.expectedHeader ?? options.verifyHeaders ?? options.expectedHeaders);
         const verify = await waitForHttpReachable(url, {
             timeoutMs,
             pollMs,
@@ -63,7 +64,8 @@ export class StudioProClient {
             expectedText,
             expectedLocation,
             expectedTitle,
-            expectedContentType
+            expectedContentType,
+            expectedHeaders
         });
 
         return {
@@ -78,6 +80,7 @@ export class StudioProClient {
             expectedLocation,
             expectedTitle,
             expectedContentType,
+            expectedHeaders,
             runResult,
             verify
         };
@@ -3880,6 +3883,7 @@ async function waitForHttpReachable(url, options = {}) {
     const expectedContentType = typeof options.expectedContentType === "string" && options.expectedContentType.length > 0
         ? options.expectedContentType
         : null;
+    const expectedHeaders = Array.isArray(options.expectedHeaders) ? options.expectedHeaders : [];
     const startedAt = Date.now();
     let attempts = 0;
     let lastStatus = null;
@@ -3887,6 +3891,7 @@ async function waitForHttpReachable(url, options = {}) {
     let lastContentType = null;
     let lastTitle = null;
     let lastBodySnippet = null;
+    let lastHeaders = null;
     let lastError = null;
 
     while (Date.now() - startedAt <= timeoutMs) {
@@ -3899,6 +3904,7 @@ async function waitForHttpReachable(url, options = {}) {
             lastStatus = response.status;
             lastLocation = response.headers.get("location");
             lastContentType = response.headers.get("content-type");
+            lastHeaders = Object.fromEntries(response.headers.entries());
             const shouldReadBody = Boolean(expectedText || expectedTitle);
             const bodyText = shouldReadBody ? await response.text() : null;
             lastBodySnippet = bodyText ? bodyText.slice(0, 240) : null;
@@ -3915,8 +3921,12 @@ async function waitForHttpReachable(url, options = {}) {
             const contentTypeOk = expectedContentType
                 ? Boolean(lastContentType && lastContentType.toLowerCase().includes(expectedContentType.toLowerCase()))
                 : true;
+            const headersOk = expectedHeaders.every(headerExpectation => {
+                const actualValue = lastHeaders?.[headerExpectation.name.toLowerCase()] ?? null;
+                return Boolean(actualValue && actualValue.toLowerCase().includes(headerExpectation.contains.toLowerCase()));
+            });
 
-            if (statusOk && textOk && locationOk && titleOk && contentTypeOk) {
+            if (statusOk && textOk && locationOk && titleOk && contentTypeOk && headersOk) {
                 return {
                     ok: true,
                     url,
@@ -3930,6 +3940,7 @@ async function waitForHttpReachable(url, options = {}) {
                     expectedLocation,
                     expectedTitle,
                     expectedContentType,
+                    expectedHeaders,
                     elapsedMs: Date.now() - startedAt
                 };
             }
@@ -3946,6 +3957,14 @@ async function waitForHttpReachable(url, options = {}) {
                 lastError = `HTML title did not contain expected value '${expectedTitle}'.`;
             } else if (!contentTypeOk) {
                 lastError = `Content-Type did not contain expected value '${expectedContentType}'.`;
+            } else if (!headersOk) {
+                const failedHeader = expectedHeaders.find(headerExpectation => {
+                    const actualValue = lastHeaders?.[headerExpectation.name.toLowerCase()] ?? null;
+                    return !(actualValue && actualValue.toLowerCase().includes(headerExpectation.contains.toLowerCase()));
+                });
+                if (failedHeader) {
+                    lastError = `Header '${failedHeader.name}' did not contain expected value '${failedHeader.contains}'.`;
+                }
             }
         } catch (error) {
             lastError = error instanceof Error ? error.message : String(error);
@@ -3962,12 +3981,14 @@ async function waitForHttpReachable(url, options = {}) {
         location: lastLocation,
         contentType: lastContentType,
         title: lastTitle,
+        headers: lastHeaders,
         responseSnippet: lastBodySnippet,
         expectedStatus: expectedStatusCodes,
         expectedText,
         expectedLocation,
         expectedTitle,
         expectedContentType,
+        expectedHeaders,
         elapsedMs: Date.now() - startedAt,
         error: lastError ?? `Timed out waiting for ${url} to become reachable.`
     };
@@ -4018,4 +4039,33 @@ function extractHtmlTitle(bodyText) {
 
     const match = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(bodyText);
     return match?.[1]?.trim() || null;
+}
+
+function parseExpectedHeaders(raw) {
+    if (!raw && raw !== 0) {
+        return [];
+    }
+
+    const values = Array.isArray(raw) ? raw : String(raw).split(";;");
+    return values
+        .map(entry => String(entry).trim())
+        .filter(Boolean)
+        .map(entry => {
+            const separatorIndex = entry.indexOf("=");
+            if (separatorIndex <= 0) {
+                return null;
+            }
+
+            const name = entry.slice(0, separatorIndex).trim();
+            const contains = entry.slice(separatorIndex + 1).trim();
+            if (!name || !contains) {
+                return null;
+            }
+
+            return {
+                name,
+                contains
+            };
+        })
+        .filter(Boolean);
 }
