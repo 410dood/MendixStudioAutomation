@@ -62,6 +62,12 @@ Read the context directly from the in-Studio extension:
 npm run extension-context
 ```
 
+Open a document directly through the in-Studio extension and verify its tab opens:
+
+```powershell
+npm run extension-open-document -- --name "ClinicalDocument_ShowPage" --module Az_ClientManagement
+```
+
 Prefer the extension context and fall back to UI automation if the extension is not active:
 
 ```powershell
@@ -665,7 +671,7 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.
-- `active-context` is a best-effort parser based on the open tab title. It is useful for command routing, but it is not yet a full Mendix document classifier.
+- `active-context` combines UI automation tab state with extension-reported active-document metadata when the extension is available. Without the extension, it falls back to tab-based inference.
 - `select-tab` and `close-tab` accept the full tab title, the document name, or a unique partial match across open tabs.
 - `--module` can be used with open-tab commands to disambiguate tabs that share the same document name.
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
@@ -705,6 +711,7 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.
 - `run-local-verify` now supports `--verify-status`, `--verify-text`, `--verify-location`, `--verify-title`, `--verify-content-type`, and `--verify-header`, plus `--verify-only` to skip sending `F5`; it still validates HTTP responses only (not full browser UX behavior).
 - the hybrid extension currently reports active app and document context, but not selected-element identity or Mendix error count yet.
+- `extension-open-document` now waits for a matching editor tab and updates remembered active-tab state when the open succeeds.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 
 ## Non-Goal

@@ -97,7 +97,7 @@ export const operationCatalog = {
         },
         {
             id: "studio.getActiveContext",
-            description: "Parse the active editor tab into a best-effort document and module context.",
+            description: "Resolve active document and module context by combining UI automation tab state with in-Studio extension context when available.",
             status: "implemented"
         },
         {
@@ -122,7 +122,7 @@ export const operationCatalog = {
         },
         {
             id: "extension.openDocument",
-            description: "Open a project document through the in-Studio Mendix extension.",
+            description: "Open a project document through the in-Studio Mendix extension and verify the editor tab becomes available.",
             status: "implemented-first-pass"
         },
         {

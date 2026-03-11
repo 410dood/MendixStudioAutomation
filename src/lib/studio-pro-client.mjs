@@ -589,7 +589,30 @@ export class StudioProClient {
     }
 
     async openExtensionDocument(options = {}) {
-        return this.extensionClient.openDocument(options);
+        const result = await this.extensionClient.openDocument(options);
+        const requestedName = options.name ?? options.item ?? options.page ?? options.microflow ?? null;
+        if (!result?.ok || !result?.payload?.opened || !requestedName) {
+            return {
+                ...result,
+                action: "extension-open-document",
+                verifiedOpen: false,
+                attempts: 1
+            };
+        }
+
+        const matchedTab = await waitForOpenTabByItemName(this, requestedName, options);
+        if (matchedTab) {
+            await writeLastKnownActiveTab(matchedTab);
+        }
+
+        return {
+            ...result,
+            action: "extension-open-document",
+            requestedName,
+            verifiedOpen: Boolean(matchedTab),
+            attempts: 1,
+            tab: matchedTab ?? null
+        };
     }
 
     async listMicroflowActivities(options = {}) {

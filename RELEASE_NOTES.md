@@ -1,5 +1,18 @@
 # Release Notes
 
+## 0.2.40
+
+Verified extension-backed document opening.
+
+- Enhanced `extension-open-document` so it now:
+  - waits for a matching editor tab after the extension opens the document
+  - updates remembered active-tab state for follow-up page and microflow commands
+  - returns `verifiedOpen`, `attempts`, and `tab` metadata
+- Updated operation catalog wording for hybrid active-context resolution
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.39
 
 Generic response-header assertions for local runtime validation.
