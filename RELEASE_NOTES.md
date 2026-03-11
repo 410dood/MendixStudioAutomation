@@ -1,5 +1,27 @@
 # Release Notes
 
+## 0.2.13
+
+Sample-pattern integration milestone (`ExtensionAPI-Samples` aligned to Studio Pro `10.24.14`).
+
+- Added menu/context-menu and modal webview patterns to the extension:
+  - new `ContextMenuExtension<IDocument>` entry on microflow documents for quick create-object workflows
+  - new modal webview quick action dialog for create-object insertion
+- Added new extension routes:
+  - `/mendix-studio-automation/ui/quick-create-object`
+  - `/mendix-studio-automation/ui/quick-create-object/open`
+- Added extension capability:
+  - `ui.quickCreateObjectDialog`
+- Added Node/CLI support:
+  - `open-quick-create-object-dialog`
+  - `npm run open-quick-create-object-dialog`
+- Updated operation catalog with:
+  - `ui.quickCreateObjectDialog`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.12
 
 Hybrid write-path expansion for association list operations.

@@ -33,6 +33,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - trigger first-pass local run and responsive web shortcuts from Studio Pro
 - create pages through Studio Pro's native `New Document` and `Create Page` wizards
 - query an in-Studio hybrid extension over a supported local webserver route
+- open an in-Studio quick create-object modal dialog (menu, context menu, or CLI trigger)
 - track and summarize automation knowledge gaps locally for prioritization
 - add opened pages to the web navigation profile via the hybrid extension route
 - insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Retrieve from database`, `Retrieve by association`, `Filter by association`, `Find by association`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
@@ -91,6 +92,7 @@ npm run extension-context
 npm run extension-capabilities
 npm run extension-search-documents -- --query ClinicalDocument --module Az_ClientManagement --limit 10
 npm run extension-open-document -- --name "ClinicalDocument_ShowPage" --module Az_ClientManagement
+npm run open-quick-create-object-dialog -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "CreatedObject"
 npm run record-knowledge-gap -- --requested-capability "page.insertWidget" --observed-issue "Intermittent selector drift in Select Widget dialog" --impact "Blocks repeatable page automation" --context "Client_ClinicalDocument_V3"
 npm run list-knowledge-gaps -- --status open --limit 20
 npm run summarize-knowledge-gaps
@@ -209,6 +211,8 @@ Phase 2:
 - current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
 - current `extension-status`, `extension-context`, and `hybrid-context` can discover and query the in-Studio hybrid extension when its `runtime/endpoint.json` file exists
 - current hybrid extension project is a real Mendix `WebServerExtension` plus `MenuExtension`, not a placeholder stub
+- current hybrid extension also provides a `ContextMenuExtension<IDocument>` for microflow document actions
+- current `open-quick-create-object-dialog` opens a modal webview dialog to stage/create a `Create object` action with prefilled context
 - current `select-widget` can target both the editor surface and a named alternate surface like `pageExplorer`
 - current `select-widget` is validated against real page-designer labels on `Client_ClinicalDocument_V3`
 - current `select-explorer-item` targets exact visible Page Explorer rows from the Page Explorer dock container and is validated against `container34`

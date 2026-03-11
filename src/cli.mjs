@@ -200,6 +200,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "open-quick-create-object-dialog": {
+            const result = await client.openQuickCreateObjectDialog(options);
+            formatOutput(result);
+            return;
+        }
         case "add-navigation-shortcut": {
             const result = await client.addNavigationShortcut(options);
             formatOutput(result);
@@ -366,6 +371,7 @@ Commands:
   extension-capabilities      Read the feature capabilities exposed by the in-Studio hybrid extension
   extension-search-documents  Search project documents through the in-Studio hybrid extension
   extension-open-document     Open a project document through the in-Studio hybrid extension
+  open-quick-create-object-dialog Open the in-Studio quick create-object modal dialog
   add-navigation-shortcut     Add a document to the web navigation profile through the extension
   add-microflow-create-object Add a microflow Create object activity through the extension
   add-microflow-create-list   Add a microflow Create list activity through the extension

@@ -13,6 +13,8 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/health`
   - `/mendix-studio-automation/context`
   - `/mendix-studio-automation/capabilities`
+  - `/mendix-studio-automation/ui/quick-create-object`
+  - `/mendix-studio-automation/ui/quick-create-object/open`
   - `/mendix-studio-automation/documents/search`
   - `/mendix-studio-automation/documents/open`
   - `/mendix-studio-automation/navigation/populate`
@@ -30,6 +32,8 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
 - tracks the active Studio Pro document through `ActiveDocumentChanged`
 - writes a runtime discovery file to `runtime/endpoint.json`
 - adds a small `Mendix Studio Automation` menu in Studio Pro for manual verification
+- adds a microflow `ContextMenuExtension<IDocument>` entry for quick create-object workflows
+- includes a modal webview quick-create-object dialog pattern based on Mendix sample guidance
 
 ## Build
 
@@ -70,6 +74,7 @@ That keeps the extension root in the Mendix-documented shape:
 - selected element inspection is not implemented yet
 - error-count reporting is not implemented yet
 - write operations now include a limited, targeted microflow mutation path:
+  - launch an in-Studio quick create-object dialog through menu/context menu/web route
   - create a `Create object` activity in a target microflow
   - create a `Create list` activity in a target microflow
   - add a `Retrieve from database` activity in a target microflow

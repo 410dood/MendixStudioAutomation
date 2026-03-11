@@ -161,6 +161,35 @@ export class HybridExtensionClient {
         };
     }
 
+    async openQuickCreateObjectDialog(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "ui/quick-create-object/open", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            outputVariableName: options.outputVariableName ?? options.outputVariable
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -583,8 +612,10 @@ async function resolveEndpointDiscovery(options) {
         endpoints: {
             healthUrl: parsed.healthUrl,
             contextUrl: parsed.contextUrl,
-            capabilitiesUrl: parsed.capabilitiesUrl
+                capabilitiesUrl: parsed.capabilitiesUrl
                 ?? `${(parsed.baseUrl ?? "").replace(/\/$/, "")}/mendix-studio-automation/capabilities`,
+                quickCreateObjectDialogUrl: parsed.quickCreateObjectDialogUrl,
+                quickCreateObjectDialogOpenUrl: parsed.quickCreateObjectDialogOpenUrl,
                 navigationPopulateUrl: parsed.navigationPopulateUrl,
                 microflowCreateObjectUrl: parsed.microflowCreateObjectUrl,
                 microflowCreateListUrl: parsed.microflowCreateListUrl,

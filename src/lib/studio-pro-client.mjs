@@ -544,6 +544,43 @@ export class StudioProClient {
         return this.extensionClient.openDocument(options);
     }
 
+    async openQuickCreateObjectDialog(options = {}) {
+        const normalized = normalizeOpenQuickCreateObjectDialogOptions(options);
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "open-quick-create-object-dialog",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "ui.quickCreateObjectDialog"))) {
+            return {
+                ok: false,
+                action: "open-quick-create-object-dialog",
+                error: "Extension capabilities do not include ui.quickCreateObjectDialog."
+            };
+        }
+
+        const result = await this.extensionClient.openQuickCreateObjectDialog({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "open-quick-create-object-dialog",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
     async addMicroflowCreateObject(options = {}) {
         const normalized = normalizeAddMicroflowCreateObjectOptions(options);
         if (!normalized.microflow) {
@@ -1850,6 +1887,17 @@ function normalizeAddMicroflowCreateObjectOptions(options) {
         commit: options.commit || "No",
         refreshInClient: options.refreshInClient ?? "false",
         initialValues: options.initialValues
+    };
+}
+
+function normalizeOpenQuickCreateObjectDialogOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity || "Document.ClientDocument",
+        outputVariableName: options.outputVariableName || "CreatedObject"
     };
 }
 

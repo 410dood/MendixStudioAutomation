@@ -121,6 +121,11 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "ui.quickCreateObjectDialog",
+            description: "Open an in-Studio modal dialog to insert a Create object action into a microflow.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "hybrid.getContext",
             description: "Prefer the in-Studio extension context and fall back to UI automation context.",
             status: "implemented-first-pass"

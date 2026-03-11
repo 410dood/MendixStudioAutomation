@@ -38,6 +38,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
     private readonly IMicroflowExpressionService _microflowExpressionService;
     private readonly IVersionControlService _versionControlService;
     private readonly INavigationManagerService _navigationManagerService;
+    private readonly QuickMicroflowActionDialogController _quickMicroflowActionDialogController;
     private IEventSubscription? _activeDocumentSubscription;
 
     [ImportingConstructor]
@@ -49,7 +50,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         IMicroflowActivitiesService microflowActivitiesService,
         IMicroflowExpressionService microflowExpressionService,
         IVersionControlService versionControlService,
-        INavigationManagerService navigationManagerService)
+        INavigationManagerService navigationManagerService,
+        QuickMicroflowActionDialogController quickMicroflowActionDialogController)
     {
         _logService = logService;
         _extensionFileService = extensionFileService;
@@ -59,6 +61,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         _microflowExpressionService = microflowExpressionService;
         _versionControlService = versionControlService;
         _navigationManagerService = navigationManagerService;
+        _quickMicroflowActionDialogController = quickMicroflowActionDialogController;
         _logService.Info("[MendixStudioAutomation] WebServerExtension constructed.");
     }
 
@@ -70,6 +73,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/health", HandleHealthAsync);
         webServer.AddRoute($"{RoutePrefix}/context", HandleContextAsync);
         webServer.AddRoute($"{RoutePrefix}/capabilities", HandleCapabilitiesAsync);
+        webServer.AddRoute($"{RoutePrefix}/ui/quick-create-object", HandleQuickCreateObjectDialogPageAsync);
+        webServer.AddRoute($"{RoutePrefix}/ui/quick-create-object/open", HandleOpenQuickCreateObjectDialogAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/search", HandleSearchDocumentsAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/open", HandleOpenDocumentAsync);
         webServer.AddRoute($"{RoutePrefix}/navigation/populate", HandlePopulateNavigationAsync);
@@ -125,6 +130,63 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         return WriteJsonAsync(response, payload, HttpStatusCode.OK, cancellationToken);
     }
 
+    private async Task HandleQuickCreateObjectDialogPageAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        var body = Encoding.UTF8.GetBytes(GetQuickCreateObjectDialogHtml());
+        response.StatusCode = (int)HttpStatusCode.OK;
+        response.ContentType = "text/html; charset=utf-8";
+        response.ContentLength64 = body.Length;
+        await response.OutputStream.WriteAsync(body, cancellationToken);
+        response.OutputStream.Close();
+    }
+
+    private Task HandleOpenQuickCreateObjectDialogAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp is null || WebServerBaseUrl is null)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active app or webserver context is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"];
+        var moduleName = request.QueryString["module"];
+        var entityName = request.QueryString["entity"] ?? "Document.ClientDocument";
+        var outputVariableName = request.QueryString["outputVariableName"] ?? "CreatedObject";
+
+        try
+        {
+            _quickMicroflowActionDialogController.ShowDialog(
+                CurrentApp,
+                WebServerBaseUrl,
+                initialMicroflowName: microflowName,
+                initialModuleName: moduleName,
+                initialEntityName: entityName,
+                initialOutputVariableName: outputVariableName);
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                route = "ui/quick-create-object/open",
+                microflow = microflowName,
+                module = moduleName,
+                entity = entityName,
+                outputVariableName
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to open quick create object dialog.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private StudioContextSnapshot BuildContextSnapshot()
     {
         var currentApp = CurrentApp;
@@ -154,6 +216,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "document.active.read",
             "documents.search",
             "documents.open",
+            "ui.quickCreateObjectDialog",
             "navigation.populate",
             "microflow.createObject",
             "microflow.createList",
@@ -2248,6 +2311,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 contextUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/context"),
                 healthUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/health"),
                 capabilitiesUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/capabilities"),
+                quickCreateObjectDialogUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/ui/quick-create-object"),
+                quickCreateObjectDialogOpenUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/ui/quick-create-object/open"),
                 navigationPopulateUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/navigation/populate"),
                 microflowCreateObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-object"),
                 microflowCreateListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-list"),
@@ -2317,6 +2382,99 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
 
         return new Uri(baseUrl, path.TrimStart('/')).ToString();
+    }
+
+    private static string GetQuickCreateObjectDialogHtml()
+    {
+        return """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Quick Create Object</title>
+  <style>
+    body { font-family: Segoe UI, sans-serif; margin: 12px; }
+    label { display: block; font-size: 12px; margin: 8px 0 4px 0; color: #444; }
+    input, select { width: 100%; box-sizing: border-box; padding: 6px; }
+    .actions { margin-top: 14px; display: flex; gap: 8px; justify-content: flex-end; }
+    button { padding: 6px 10px; }
+    .hint { font-size: 12px; color: #666; margin-top: 6px; }
+  </style>
+  <script>
+    function sendToHost(payload) {
+      const json = JSON.stringify(payload);
+      if (window.chrome && window.chrome.webview) {
+        window.chrome.webview.postMessage(json);
+      } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.studioPro) {
+        window.webkit.messageHandlers.studioPro.postMessage(json);
+      }
+    }
+
+    function readInitialValue(name, fallbackValue) {
+      const params = new URLSearchParams(window.location.search);
+      const value = params.get(name);
+      return value && value.trim().length > 0 ? value : fallbackValue;
+    }
+
+    function init() {
+      document.getElementById("microflow").value = readInitialValue("microflow", "");
+      document.getElementById("module").value = readInitialValue("module", "");
+      document.getElementById("entity").value = readInitialValue("entity", "Document.ClientDocument");
+      document.getElementById("outputVariableName").value = readInitialValue("outputVariableName", "CreatedObject");
+      document.getElementById("commit").value = readInitialValue("commit", "No");
+    }
+
+    function createObject() {
+      sendToHost({
+        action: "createObject",
+        microflow: document.getElementById("microflow").value,
+        module: document.getElementById("module").value,
+        entity: document.getElementById("entity").value,
+        outputVariableName: document.getElementById("outputVariableName").value,
+        commit: document.getElementById("commit").value,
+        refreshInClient: document.getElementById("refreshInClient").checked
+      });
+    }
+
+    function cancelDialog() {
+      sendToHost({ action: "cancel" });
+    }
+  </script>
+</head>
+<body onload="init()">
+  <label for="microflow">Microflow name</label>
+  <input id="microflow" type="text" />
+
+  <label for="module">Module name (optional, for disambiguation)</label>
+  <input id="module" type="text" />
+
+  <label for="entity">Entity (Entity or Module.Entity)</label>
+  <input id="entity" type="text" />
+
+  <label for="outputVariableName">Output variable name</label>
+  <input id="outputVariableName" type="text" />
+
+  <label for="commit">Commit mode</label>
+  <select id="commit">
+    <option value="No" selected>No</option>
+    <option value="Yes">Yes</option>
+    <option value="YesWithoutEvents">YesWithoutEvents</option>
+  </select>
+
+  <label>
+    <input id="refreshInClient" type="checkbox" />
+    Refresh in client
+  </label>
+
+  <div class="hint">This inserts a Create object activity at the start of the selected microflow.</div>
+
+  <div class="actions">
+    <button onclick="cancelDialog()">Cancel</button>
+    <button onclick="createObject()">Insert Create Object</button>
+  </div>
+</body>
+</html>
+""";
     }
 
     private static async Task WriteJsonAsync(
