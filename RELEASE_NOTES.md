@@ -34,6 +34,7 @@ Included in this release:
 - first-pass `insert-widget` flow with `--dry-run`
 - `insert-widget` now reaches the native `Select Widget` dialog from Page Explorer targets
 - `insert-widget` now disambiguates duplicate widget names in the `Select Widget` dialog by testing whether the `Select` button becomes enabled
+- `insert-widget` now records accept-strategy attempts and before/after Page Explorer snapshots for mutation debugging
 - `open-properties` is now validated against editor-surface targets that open `Edit Template Grid 'templateGrid1'`
 - `open-properties` is now validated against `pageExplorer` targets such as `container34`
 - page-side widget selection is now validated against live page-designer controls and page-explorer rows

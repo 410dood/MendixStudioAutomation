@@ -1193,8 +1193,11 @@ function Get-ControlTypePriority {
         "DataItem" { return 2 }
         "Text" { return 3 }
         "Button" { return 4 }
-        "MenuItem" { return 5 }
-        "CheckBox" { return 6 }
+        "Edit" { return 5 }
+        "ComboBox" { return 6 }
+        "CheckBox" { return 7 }
+        "RadioButton" { return 8 }
+        "MenuItem" { return 9 }
         default { return 20 }
     }
 }
@@ -1541,7 +1544,7 @@ function Find-DialogNamedElements {
         [int]$Limit = 200
     )
 
-    $controlTypes = @("DataItem", "ListItem", "TreeItem", "Button", "Text", "Edit", "MenuItem")
+    $controlTypes = @("DataItem", "ListItem", "TreeItem", "Button", "Text", "Edit", "ComboBox", "CheckBox", "RadioButton", "MenuItem")
     $matches = @()
     foreach ($controlType in $controlTypes) {
         $matches += @(Find-MatchingElements -Root $Dialog -Depth 15 -MaxResults 500 -Name $Name -ControlType $controlType)
@@ -1893,6 +1896,45 @@ function Invoke-WidgetDialogButton {
         @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1
 
     return Select-AutomationMatch -Root $Dialog -Match $match -DelayMs $DelayMs
+}
+
+function Invoke-WidgetDialogAccept {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [hashtable]$WidgetSelection,
+        [ValidateSet("button", "enter", "doubleClick")]
+        [string]$Strategy = "button",
+        [int]$DelayMs = 250
+    )
+
+    if (-not $Dialog) {
+        throw "A native Select Widget dialog is required."
+    }
+
+    switch ($Strategy) {
+        "button" {
+            return Invoke-WidgetDialogButton -Dialog $Dialog -ButtonName "Select" -DelayMs $DelayMs
+        }
+        "enter" {
+            Send-KeysToForegroundWindow -Keys "{ENTER}" -DelayMs $DelayMs
+            return @{
+                method = "sendKeysEnter"
+                target = if ($WidgetSelection) { $WidgetSelection.target } else { $null }
+            }
+        }
+        "doubleClick" {
+            if (-not $WidgetSelection -or -not $WidgetSelection.target) {
+                throw "A selected widget row is required for the doubleClick accept strategy."
+            }
+
+            $method = Invoke-BoundsDoubleClick -Bounds $WidgetSelection.target.boundingRectangle
+            Start-Sleep -Milliseconds $DelayMs
+            return @{
+                method = $method
+                target = $WidgetSelection.target
+            }
+        }
+    }
 }
 
 function Get-StudioProDialogSnapshot {

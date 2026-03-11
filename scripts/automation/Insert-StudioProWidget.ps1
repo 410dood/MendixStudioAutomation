@@ -10,6 +10,58 @@ param(
 
 . "$PSScriptRoot\StudioPro.Automation.Common.ps1"
 
+function Get-PageExplorerSnapshot {
+    param(
+        [int]$ProcessId,
+        [string]$WindowTitlePattern,
+        [string]$Page,
+        [int]$Limit = 40
+    )
+
+    try {
+        $context = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Item $Page -Scope "pageExplorer" -DelayMs 150
+        $items = @(Get-VisibleTextMatches -Root $context.Attached.Element -Scope "pageExplorer" -Item $Page -Limit $Limit | Where-Object {
+            $_.name
+        })
+    } catch {
+        return $null
+    }
+
+    return @{
+        count = $items.Length
+        names = @($items | ForEach-Object { $_.name })
+    }
+}
+
+function Test-PageExplorerSnapshotChanged {
+    param(
+        [hashtable]$Before,
+        [hashtable]$After
+    )
+
+    if (-not $Before -or -not $After) {
+        return $false
+    }
+
+    if ($Before.count -ne $After.count) {
+        return $true
+    }
+
+    $beforeNames = @($Before.names)
+    $afterNames = @($After.names)
+    if ($beforeNames.Length -ne $afterNames.Length) {
+        return $true
+    }
+
+    for ($index = 0; $index -lt $beforeNames.Length; $index++) {
+        if ($beforeNames[$index] -ne $afterNames[$index]) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 if (-not $Page) {
     throw "A page name is required."
 }
@@ -43,6 +95,8 @@ $dragDetails = $null
 $dialogStrategy = $null
 $dialogError = $null
 $postDialog = $null
+$pageExplorerBefore = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
+$pageExplorerAfter = $pageExplorerBefore
 if (-not $DryRun) {
     try {
         $dialogContext = Open-AddWidgetDialogForPageExplorerItem `
@@ -57,9 +111,41 @@ if (-not $DryRun) {
             throw "Could not find a '$Widget' row in the native Select Widget dialog."
         }
 
-        $selectButton = Invoke-WidgetDialogButton -Dialog $dialogContext.NativeDialog -ButtonName "Select" -DelayMs ($DelayMs + 100)
-        if (-not $selectButton) {
-            throw "Could not find the Select button in the native Select Widget dialog."
+        $acceptAttempts = @()
+        foreach ($acceptStrategy in @("button", "enter", "doubleClick")) {
+            $acceptSelection = Invoke-WidgetDialogAccept -Dialog $dialogContext.NativeDialog -WidgetSelection $widgetSelection -Strategy $acceptStrategy -DelayMs ($DelayMs + 100)
+            $postDialogCandidate = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(900, ($DelayMs * 3))) -PollMs 150 -Limit 30
+            $pageExplorerAfterCandidate = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
+            $pageExplorerChanged = Test-PageExplorerSnapshotChanged -Before $pageExplorerBefore -After $pageExplorerAfterCandidate
+
+            $acceptAttempts += @(
+                @{
+                    strategy = $acceptStrategy
+                    acceptSelection = $acceptSelection
+                    postDialog = $postDialogCandidate
+                    pageExplorerAfter = $pageExplorerAfterCandidate
+                    pageExplorerChanged = $pageExplorerChanged
+                }
+            )
+
+            if ($pageExplorerChanged -or $postDialogCandidate) {
+                $postDialog = $postDialogCandidate
+                $pageExplorerAfter = $pageExplorerAfterCandidate
+                break
+            }
+
+            if ($acceptStrategy -ne "doubleClick") {
+                $dialogContext = Open-AddWidgetDialogForPageExplorerItem `
+                    -ProcessId $ProcessId `
+                    -WindowTitlePattern $WindowTitlePattern `
+                    -Page $Page `
+                    -Target $Target `
+                    -DelayMs $DelayMs
+                $widgetSelection = Select-WidgetDialogItemByName -Dialog $dialogContext.NativeDialog -Widget $Widget -DelayMs ($DelayMs + 50)
+                if (-not $widgetSelection) {
+                    throw "Could not re-select a '$Widget' row in the native Select Widget dialog."
+                }
+            }
         }
 
         $dialogStrategy = @{
@@ -76,11 +162,14 @@ if (-not $DryRun) {
             menuSelection = $dialogContext.MenuSelection
             dialogWindow = $dialogContext.DialogWindow
             widgetSelection = $widgetSelection
-            selectButton = $selectButton
+            acceptAttempts = $acceptAttempts
         }
 
         $method = "contextMenuDialog"
-        $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(1200, ($DelayMs * 4))) -PollMs 150 -Limit 30
+        if (-not $postDialog) {
+            $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(1200, ($DelayMs * 4))) -PollMs 150 -Limit 30
+            $pageExplorerAfter = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
+        }
     } catch {
         $dialogError = $_.Exception.Message
 
@@ -97,6 +186,7 @@ if (-not $DryRun) {
 
         $method = $dragDetails.method
         $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(1200, ($DelayMs * 4))) -PollMs 150 -Limit 30
+        $pageExplorerAfter = Get-PageExplorerSnapshot -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Page $Page -Limit 40
     }
 }
 
@@ -117,6 +207,9 @@ $payload = @{
     dialogStrategy = $dialogStrategy
     dialogError = $dialogError
     postDialog = $postDialog
+    pageExplorerBefore = $pageExplorerBefore
+    pageExplorerAfter = $pageExplorerAfter
+    pageExplorerChanged = (Test-PageExplorerSnapshotChanged -Before $pageExplorerBefore -After $pageExplorerAfter)
 }
 
 $payload | ConvertTo-Json -Depth 20
