@@ -78,6 +78,7 @@ npm run run-local-verify -- --url "http://localhost:8080" --verify-timeout-ms 12
 npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-text "Mendix"
 npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-content-type "text/html" --verify-title "Olari"
 npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-header "set-cookie=mendix;;content-type=text/html"
+npm run run-local-verify -- --url "http://localhost:8080" --verify-follow-redirects true --verify-status 200 --verify-title "Olari"
 npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-status 200
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"

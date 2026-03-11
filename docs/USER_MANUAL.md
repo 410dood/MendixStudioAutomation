@@ -39,6 +39,7 @@ npm run run-local-verify -- --url "http://localhost:8080" --verify-timeout-ms 12
 npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-text "Mendix"
 npm run run-local-verify -- --url "http://localhost:8080" --verify-status 200 --verify-content-type "text/html" --verify-title "Olari"
 npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-header "set-cookie=mendix;;content-type=text/html"
+npm run run-local-verify -- --url "http://localhost:8080" --verify-follow-redirects true --verify-status 200 --verify-title "Olari"
 npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-status 200
 npm run stop-local
 npm run show-responsive-web
@@ -710,7 +711,7 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.
-- `run-local-verify` now supports `--verify-status`, `--verify-text`, `--verify-location`, `--verify-title`, `--verify-content-type`, and `--verify-header`, plus `--verify-only` to skip sending `F5`; it still validates HTTP responses only (not full browser UX behavior).
+- `run-local-verify` now supports `--verify-status`, `--verify-text`, `--verify-location`, `--verify-title`, `--verify-content-type`, `--verify-header`, and `--verify-follow-redirects`, plus `--verify-only` to skip sending `F5`; it still validates HTTP responses only (not full browser UX behavior).
 - the hybrid extension currently reports active app and document context, but not selected-element identity or Mendix error count yet.
 - `extension-open-document` now waits for a matching editor tab and updates remembered active-tab state when the open succeeds.
 - `open-item` now uses extension-backed document search as a fallback when direct extension open by name does not succeed and there is a unique or exact search hit.

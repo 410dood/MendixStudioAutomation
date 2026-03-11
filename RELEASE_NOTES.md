@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.2.43
+
+Optional redirect-following for local runtime verification.
+
+- Enhanced `run-local-verify` with:
+  - `verifyFollowRedirects` / `followRedirects`
+  - `finalUrl` in verification output
+- This allows local validation against the destination page after redirects instead of only the initial response.
+- Updated CLI help and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.42
 
 More accurate active-context source reporting.

@@ -543,6 +543,7 @@ Options:
   --verify-title <text>       Required substring in HTML <title> for run-local-verify
   --verify-content-type <t>   Required substring in HTTP Content-Type for run-local-verify
   --verify-header <rule>      Header assertion for run-local-verify in Name=substring form; separate multiple with ';;'
+  --verify-follow-redirects <bool> Follow redirects before evaluating run-local-verify assertions
   --verify-only <bool>        Skip F5 and only perform run-local-verify HTTP checks
   --page-name <name>          Page name for create-page
   --scope <name>              UI scope (editor/pageExplorer/toolbox) or comma-separated rag-search sources

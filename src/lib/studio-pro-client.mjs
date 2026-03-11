@@ -57,6 +57,7 @@ export class StudioProClient {
         const expectedTitle = options.verifyTitle ?? options.expectedTitle ?? null;
         const expectedContentType = options.verifyContentType ?? options.expectedContentType ?? null;
         const expectedHeaders = parseExpectedHeaders(options.verifyHeader ?? options.expectedHeader ?? options.verifyHeaders ?? options.expectedHeaders);
+        const followRedirects = toBoolean(options.verifyFollowRedirects ?? options.followRedirects, false);
         const verify = await waitForHttpReachable(url, {
             timeoutMs,
             pollMs,
@@ -65,7 +66,8 @@ export class StudioProClient {
             expectedLocation,
             expectedTitle,
             expectedContentType,
-            expectedHeaders
+            expectedHeaders,
+            followRedirects
         });
 
         return {
@@ -81,6 +83,7 @@ export class StudioProClient {
             expectedTitle,
             expectedContentType,
             expectedHeaders,
+            followRedirects,
             runResult,
             verify
         };
@@ -3962,9 +3965,11 @@ async function waitForHttpReachable(url, options = {}) {
         ? options.expectedContentType
         : null;
     const expectedHeaders = Array.isArray(options.expectedHeaders) ? options.expectedHeaders : [];
+    const followRedirects = toBoolean(options.followRedirects, false);
     const startedAt = Date.now();
     let attempts = 0;
     let lastStatus = null;
+    let lastUrl = url;
     let lastLocation = null;
     let lastContentType = null;
     let lastTitle = null;
@@ -3977,9 +3982,10 @@ async function waitForHttpReachable(url, options = {}) {
         try {
             const response = await fetch(url, {
                 method: "GET",
-                redirect: "manual"
+                redirect: followRedirects ? "follow" : "manual"
             });
             lastStatus = response.status;
+            lastUrl = response.url || url;
             lastLocation = response.headers.get("location");
             lastContentType = response.headers.get("content-type");
             lastHeaders = Object.fromEntries(response.headers.entries());
@@ -4008,6 +4014,7 @@ async function waitForHttpReachable(url, options = {}) {
                 return {
                     ok: true,
                     url,
+                    finalUrl: lastUrl,
                     attempts,
                     status: response.status,
                     location: lastLocation,
@@ -4019,6 +4026,7 @@ async function waitForHttpReachable(url, options = {}) {
                     expectedTitle,
                     expectedContentType,
                     expectedHeaders,
+                    followRedirects,
                     elapsedMs: Date.now() - startedAt
                 };
             }
@@ -4054,6 +4062,7 @@ async function waitForHttpReachable(url, options = {}) {
     return {
         ok: false,
         url,
+        finalUrl: lastUrl,
         attempts,
         status: lastStatus,
         location: lastLocation,
@@ -4067,6 +4076,7 @@ async function waitForHttpReachable(url, options = {}) {
         expectedTitle,
         expectedContentType,
         expectedHeaders,
+        followRedirects,
         elapsedMs: Date.now() - startedAt,
         error: lastError ?? `Timed out waiting for ${url} to become reachable.`
     };
