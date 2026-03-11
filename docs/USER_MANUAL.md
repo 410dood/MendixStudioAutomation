@@ -67,9 +67,10 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 ```powershell
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Parameters (8)" --scope editor
+npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer
 ```
 
-This currently works best for editor-surface targets that already respond to Studio Pro's `Ctrl+,` properties shortcut.
+This is now validated both for editor-surface targets and for `pageExplorer` rows that expose `Properties` on the context menu.
 
 ### Open assets
 
@@ -190,7 +191,7 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `run-local`, `stop-local`, and `show-responsive-web` currently verify that the correct Studio Pro shortcuts were sent, but they do not yet verify runtime readiness or browser content.
-- `open-properties` currently works better from the editor surface than from `pageExplorer`.
+- `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 
 ## Non-Goal
 

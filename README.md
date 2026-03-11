@@ -127,6 +127,7 @@ Phase 2:
 - current dialog commands are validated against native Studio Pro dialogs such as `Select Widget` and `Edit Template Grid 'templateGrid1'`
 - current run/browser commands drive Studio Pro shortcuts for `F5`, `Shift+F5`, and `F9`
 - current `open-properties` is validated from editor-surface targets like `Structure mode` and `Parameters (8)` on `Client_ClinicalDocument_V3`
+- current `open-properties` is also validated from `pageExplorer` targets like `container34` on `Client_ClinicalDocument_V3`
 - operation recorder and selector stabilization
 
 ## Explicit Non-Goal

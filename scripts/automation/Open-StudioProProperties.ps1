@@ -22,6 +22,11 @@ $match = $null
 switch ($Scope) {
     "pageExplorer" {
         $match = Select-PageExplorerItemByName -Root $attached.Element -Item $Item
+        if (-not $match) {
+            Start-Sleep -Milliseconds 200
+            $attached = (Get-StudioProWindowElement -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern)
+            $match = Select-PageExplorerItemByName -Root $attached.Element -Item $Item
+        }
     }
     "toolbox" {
         $match = Select-ToolboxItemByName -Root $attached.Element -Item $Item
@@ -37,8 +42,36 @@ if (-not $match) {
 
 $selection = Select-AutomationMatch -Root $attached.Element -Match $match -DelayMs $DelayMs
 Set-StudioProForegroundWindow -Process $attached.Process
-Send-KeysToForegroundWindow -Keys "^," -DelayMs ($DelayMs + 100)
-$dialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs 2500 -PollMs 150 -Limit 30
+
+$dialog = $null
+if ($Scope -eq "pageExplorer") {
+    Send-KeysToForegroundWindow -Keys "+{F10}" -DelayMs ($DelayMs + 100)
+    $menuSnapshot = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs 800 -PollMs 100 -Limit 20
+    if ($menuSnapshot -and $menuSnapshot.window.name -ne $attached.Process.MainWindowTitle) {
+        $propertiesItem = @($menuSnapshot.items | Where-Object { $_.name -eq "Properties" -and $_.controlType -eq "MenuItem" } | Select-Object -First 1)
+        if ($propertiesItem.Length -gt 0) {
+            $propertiesSelection = Select-AutomationMatch -Root (Resolve-NativeWindowByName -Root $attached.Element -Name $menuSnapshot.window.name -Depth 15) -Match $propertiesItem[0] -DelayMs ($DelayMs + 100)
+            $dialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs 2500 -PollMs 150 -Limit 30
+            if ($dialog) {
+                $selection = @{
+                    method = $selection.method
+                    supportsSelectionItem = $selection.supportsSelectionItem
+                    supportsInvoke = $selection.supportsInvoke
+                    isSelected = $selection.isSelected
+                    target = $selection.target
+                    propertiesMenuSelection = $propertiesSelection
+                }
+            }
+        } else {
+            Send-KeysToForegroundWindow -Keys "{ESC}" -DelayMs 100
+        }
+    }
+}
+
+if (-not $dialog) {
+    Send-KeysToForegroundWindow -Keys "^," -DelayMs ($DelayMs + 100)
+    $dialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs 2500 -PollMs 150 -Limit 30
+}
 
 $payload = @{
     ok = $true

@@ -35,6 +35,7 @@ Included in this release:
 - `insert-widget` now reaches the native `Select Widget` dialog from Page Explorer targets
 - `insert-widget` now disambiguates duplicate widget names in the `Select Widget` dialog by testing whether the `Select` button becomes enabled
 - `open-properties` is now validated against editor-surface targets that open `Edit Template Grid 'templateGrid1'`
+- `open-properties` is now validated against `pageExplorer` targets such as `container34`
 - page-side widget selection is now validated against live page-designer controls and page-explorer rows
 - first-pass microflow commands:
   - `select-microflow-node`
@@ -58,5 +59,5 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` can now open the native widget picker dialog, but the final page-model mutation is not yet reliable enough to treat as complete authoring.
 - run and responsive-browser commands currently verify shortcut delivery, not full runtime/browser readiness.
-- `open-properties` is strongest on editor-surface targets right now; `pageExplorer` property opening still needs more hardening.
+- `open-properties` is currently strongest on the page designer and `pageExplorer`; other scopes may still need more hardening.
 - unopened documents that Studio Pro does not resolve through `Go to` now fail explicitly instead of returning misleading editor results.
