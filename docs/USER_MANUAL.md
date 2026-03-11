@@ -334,10 +334,22 @@ Filter a list by association in a microflow through the extension API:
 npm run add-microflow-filter-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FilteredClientDocumentList" --filter-expression "$ClientObj"
 ```
 
+Insert the filter-by-association activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-filter-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FilteredClientDocumentList" --filter-expression "$ClientObj" --insert-before-index 14
+```
+
 Find a list item by association in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-find-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FoundClientDocument" --find-expression "$ClientObj"
+```
+
+Insert the find-by-association activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-find-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FoundClientDocument" --find-expression "$ClientObj" --insert-before-activity "Retrieve"
 ```
 
 Filter a list by attribute in a microflow through the extension API:
@@ -346,16 +358,34 @@ Filter a list by attribute in a microflow through the extension API:
 npm run add-microflow-filter-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "DraftClientDocuments" --filter-expression "Draft"
 ```
 
+Insert the filter-by-attribute activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-filter-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "DraftClientDocuments" --filter-expression "Draft" --insert-before-activity "Create object"
+```
+
 Find a list item by attribute in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-find-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "FirstDraftClientDocument" --find-expression "Draft"
 ```
 
+Insert the find-by-attribute activity before a known activity index from `list-microflow-activities`:
+
+```powershell
+npm run add-microflow-find-by-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --list-variable "ClientDocumentList" --output-variable-name "FirstDraftClientDocument" --find-expression "Draft" --insert-before-index 15
+```
+
 Find a list item by expression in a microflow through the extension API:
 
 ```powershell
 npm run add-microflow-find-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstMatchingDocument" --find-expression '$currentObject/Status = ''Draft'''
+```
+
+Insert the find-by-expression activity before a matching activity caption/type:
+
+```powershell
+npm run add-microflow-find-by-expression -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --list-variable "ClientDocumentList" --output-variable-name "FirstMatchingDocument" --find-expression '$currentObject/Status = ''Draft''' --insert-before-activity "Retrieve"
 ```
 
 Aggregate a list in a microflow through the extension API:
@@ -607,11 +637,11 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - `add-microflow-retrieve-association` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `find-microflow-activities` filters `list-microflow-activities` results by `--query`, `--action-type`, and `--variable`.
 - `rag-search` is lexical ranking over local docs/source; it is not an embedding/vector database.
-- `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.
-- `add-microflow-find-by-association` inserts `Find by association` activities only at the start of the selected microflow.
-- `add-microflow-filter-by-attribute` inserts `Filter by attribute` activities only at the start of the selected microflow.
-- `add-microflow-find-by-attribute` inserts `Find by attribute` activities only at the start of the selected microflow.
-- `add-microflow-find-by-expression` inserts `Find by expression` activities only at the start of the selected microflow.
+- `add-microflow-filter-by-association` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-find-by-association` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-filter-by-attribute` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-find-by-attribute` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
+- `add-microflow-find-by-expression` supports insert-after-start by default and optional `--insert-before-activity` or `--insert-before-index` targeting.
 - `add-microflow-aggregate-list` inserts `Aggregate list` activities only at the start of the selected microflow.
 - `add-microflow-aggregate-by-attribute` inserts `Aggregate by attribute` activities only at the start of the selected microflow.
 - `add-microflow-aggregate-by-expression` inserts `Aggregate by expression` activities only at the start of the selected microflow.

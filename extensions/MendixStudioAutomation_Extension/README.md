@@ -98,11 +98,11 @@ That keeps the extension root in the Mendix-documented shape:
   - add a `Call microflow` activity in a target microflow (optional insert-before targeting by caption/type or index)
   - add a `Retrieve from database` activity in a target microflow (with optional XPath, sort, range expressions, and insert-before targeting by caption/type or index)
   - add a `Retrieve by association` activity in a target microflow (optional insert-before targeting by caption/type or index)
-  - add a `Filter by association` activity in a target microflow
-  - add a `Find by association` activity in a target microflow
-  - add a `Filter by attribute` activity in a target microflow
-  - add a `Find by attribute` activity in a target microflow
-  - add a `Find by expression` activity in a target microflow
+  - add a `Filter by association` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Find by association` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Filter by attribute` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Find by attribute` activity in a target microflow (optional insert-before targeting by caption/type or index)
+  - add a `Find by expression` activity in a target microflow (optional insert-before targeting by caption/type or index)
   - add an `Aggregate list` activity in a target microflow
   - add an `Aggregate by attribute` activity in a target microflow
   - add an `Aggregate by expression` activity in a target microflow

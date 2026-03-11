@@ -1133,7 +1133,9 @@ export class StudioProClient {
             association: normalized.association,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            filterExpression: normalized.expression
+            filterExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1145,7 +1147,9 @@ export class StudioProClient {
             association: normalized.association,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            filterExpression: normalized.expression
+            filterExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1208,7 +1212,9 @@ export class StudioProClient {
             association: normalized.association,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            findExpression: normalized.expression
+            findExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1220,7 +1226,9 @@ export class StudioProClient {
             association: normalized.association,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            findExpression: normalized.expression
+            findExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1283,7 +1291,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            filterExpression: normalized.expression
+            filterExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1295,7 +1305,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            filterExpression: normalized.expression
+            filterExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1358,7 +1370,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            findExpression: normalized.expression
+            findExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1370,7 +1384,9 @@ export class StudioProClient {
             attribute: normalized.attribute,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            findExpression: normalized.expression
+            findExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -1423,7 +1439,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            findExpression: normalized.expression
+            findExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         });
 
         return {
@@ -1433,7 +1451,9 @@ export class StudioProClient {
             module: normalized.module,
             listVariable: normalized.listVariable,
             outputVariableName: normalized.outputVariableName,
-            findExpression: normalized.expression
+            findExpression: normalized.expression,
+            insertBeforeActivity: normalized.insertBeforeActivity,
+            insertBeforeIndex: normalized.insertBeforeIndex
         };
     }
 
@@ -3381,7 +3401,9 @@ function normalizeMicroflowAssociationListExpressionOptions(options, defaultOutp
         association: options.association,
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
-        expression: options.filterExpression ?? options.findExpression ?? options.expression ?? options.value
+        expression: options.filterExpression ?? options.findExpression ?? options.expression ?? options.value,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3395,7 +3417,9 @@ function normalizeMicroflowAttributeListExpressionOptions(options, defaultOutput
         attribute: options.attribute,
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
-        expression: options.filterExpression ?? options.findExpression ?? options.expression ?? options.value
+        expression: options.filterExpression ?? options.findExpression ?? options.expression ?? options.value,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 
@@ -3407,7 +3431,9 @@ function normalizeMicroflowListExpressionOptions(options, defaultOutputVariableN
         module: options.module,
         listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
-        expression: options.findExpression ?? options.filterExpression ?? options.expression ?? options.value
+        expression: options.findExpression ?? options.filterExpression ?? options.expression ?? options.value,
+        insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+        insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
     };
 }
 

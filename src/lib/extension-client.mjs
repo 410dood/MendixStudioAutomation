@@ -561,7 +561,9 @@ export class HybridExtensionClient {
             association: options.association,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
-            filterExpression: options.filterExpression ?? options.expression ?? options.value
+            filterExpression: options.filterExpression ?? options.expression ?? options.value,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -593,7 +595,9 @@ export class HybridExtensionClient {
             association: options.association,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
-            findExpression: options.findExpression ?? options.expression ?? options.value
+            findExpression: options.findExpression ?? options.expression ?? options.value,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -625,7 +629,9 @@ export class HybridExtensionClient {
             attribute: options.attribute,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
-            filterExpression: options.filterExpression ?? options.expression ?? options.value
+            filterExpression: options.filterExpression ?? options.expression ?? options.value,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -657,7 +663,9 @@ export class HybridExtensionClient {
             attribute: options.attribute,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
-            findExpression: options.findExpression ?? options.expression ?? options.value
+            findExpression: options.findExpression ?? options.expression ?? options.value,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
@@ -687,7 +695,9 @@ export class HybridExtensionClient {
             module: options.module,
             listVariable: options.listVariable ?? options.list ?? options.sourceList,
             outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
-            findExpression: options.findExpression ?? options.expression ?? options.value
+            findExpression: options.findExpression ?? options.expression ?? options.value,
+            insertBeforeActivity: options.insertBeforeActivity ?? options.insertBefore ?? options.beforeActivity ?? options.beforeCaption,
+            insertBeforeIndex: options.insertBeforeIndex ?? options.beforeIndex
         }), options.timeoutMs);
 
         return {
