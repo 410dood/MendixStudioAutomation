@@ -88,6 +88,7 @@ npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure
 npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-properties.json"
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control-type Edit
+npm run list-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --limit 50
 npm run invoke-properties-dialog-control -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control "Apply" --control-type Button
 npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --control-type Edit
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"

@@ -75,6 +75,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "list-properties-dialog-items": {
+            const result = await client.listPropertiesDialogItems(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-properties-dialog-control": {
             const result = await client.invokePropertiesDialogControl(options);
             formatOutput(result);
@@ -521,6 +526,7 @@ Commands:
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
   list-properties-dialog-fields Open a properties dialog and list resolved field/value pairs
+  list-properties-dialog-items Open a properties dialog and list raw visible controls
   invoke-properties-dialog-control Open a properties dialog and invoke a named control inside it
   get-properties-dialog-field Open a properties dialog and read one labeled field
   set-properties-dialog-fields Open a properties dialog and apply batch field edits

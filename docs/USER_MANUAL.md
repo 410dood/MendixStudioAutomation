@@ -49,6 +49,7 @@ npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure
 npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-properties.json"
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control-type Edit
+npm run list-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --limit 50
 npm run invoke-properties-dialog-control -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control "Apply" --control-type Button
 npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --control-type Edit
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
@@ -150,6 +151,7 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `export-properties-dialog` composes `open-properties` with `export-dialog-fields`, so a page/widget/explorer target can emit a reviewable JSON field plan in one command.
 `compare-properties-dialog` composes `open-properties` with `compare-dialog-fields`, so a target can be checked against a saved plan without manually naming the transient dialog window.
 `list-properties-dialog-fields` composes `open-properties` with `list-dialog-fields`, so field discovery can start from a real page/widget/explorer target.
+`list-properties-dialog-items` composes `open-properties` with `list-dialog-items`, so you can inspect the raw dialog controls when field heuristics are not enough.
 `invoke-properties-dialog-control` composes `open-properties` with `invoke-dialog-control`, so nonstandard dialog buttons can be triggered from the same target-first workflow.
 `get-properties-dialog-field` composes `open-properties` with `get-dialog-field`, so single-field reads can target a page/widget/explorer surface directly.
 `set-properties-dialog-fields` composes `open-properties` with `set-dialog-fields`, so batch property edits can also avoid hard-coded dialog captions.

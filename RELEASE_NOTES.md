@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.55
+
+Target-first raw properties dialog inspection.
+
+- Added `list-properties-dialog-items` to open a Studio Pro properties dialog from a page or microflow target and enumerate raw visible controls.
+- This complements `list-properties-dialog-fields` when label-to-field resolution is not sufficient for reverse-engineering a dialog.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.54
 
 Generic target-first properties control invocation.
