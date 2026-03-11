@@ -161,6 +161,32 @@ export class HybridExtensionClient {
         };
     }
 
+    async openDocumentById(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "documents/open-by-id", {
+            documentId: options.documentId ?? options.id
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async listMicroflowActivities(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {

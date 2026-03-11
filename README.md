@@ -271,6 +271,7 @@ Phase 2:
 - current `extension-open-document` now also falls back to extension-backed search, returns structured ambiguity details, and verifies the opened tab
 - current `open-item` now falls back to extension-backed document search and opens a unique or exact search match when direct extension open by name fails
 - current `open-item` now returns structured ambiguity details from the extension search path instead of silently dropping to generic UI automation
+- current extension search-based document opens now reopen by stable document ID when available instead of relying on the name a second time
 - current `active-context` now reports whether extension metadata actually contributed to the resolved context instead of assuming any extension response improved it
 - current `list-microflow-activities` returns activity/action metadata for a target microflow, including available variable names
 - current `find-microflow-activities` filters microflow activity metadata by query text, action type, and variable name

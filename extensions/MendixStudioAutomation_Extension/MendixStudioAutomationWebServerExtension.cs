@@ -79,6 +79,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/ui/quick-create-object/open", HandleOpenQuickCreateObjectDialogAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/search", HandleSearchDocumentsAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/open", HandleOpenDocumentAsync);
+        webServer.AddRoute($"{RoutePrefix}/documents/open-by-id", HandleOpenDocumentByIdAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/list-activities", HandleListMicroflowActivitiesAsync);
         webServer.AddRoute($"{RoutePrefix}/navigation/populate", HandlePopulateNavigationAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-object", HandleCreateMicroflowObjectAsync);
@@ -236,6 +237,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "document.active.read",
             "documents.search",
             "documents.open",
+            "documents.openById",
             "microflow.listActivities",
             "ui.quickCreateObjectDialog",
             "navigation.populate",
@@ -370,6 +372,49 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             type,
             opened,
             match = matches[0]
+        }, opened ? HttpStatusCode.OK : HttpStatusCode.InternalServerError, cancellationToken);
+    }
+
+    private Task HandleOpenDocumentByIdAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        var documentId = request.QueryString["documentId"] ?? request.QueryString["id"];
+        if (string.IsNullOrWhiteSpace(documentId))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'documentId' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        var document = ResolveDocument(documentId);
+        if (document is null)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"No document with id '{documentId}' could be resolved from the project model.",
+                documentId
+            }, HttpStatusCode.NotFound, cancellationToken);
+        }
+
+        var descriptor = CreateDocumentDescriptor(document);
+        var opened = _dockingWindowService.TryOpenEditor(document, null!);
+        if (opened)
+        {
+            UpdateStateFromUnit(
+                document,
+                fallbackDocumentName: descriptor.Name,
+                fallbackDocumentType: descriptor.Type,
+                selectionSource: "extension-open-document-by-id");
+        }
+
+        return WriteJsonAsync(response, new
+        {
+            ok = opened,
+            documentId,
+            opened,
+            match = descriptor
         }, opened ? HttpStatusCode.OK : HttpStatusCode.InternalServerError, cancellationToken);
     }
 
@@ -5236,6 +5281,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 contextUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/context"),
                 healthUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/health"),
                 capabilitiesUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/capabilities"),
+                openDocumentByIdUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/documents/open-by-id"),
                 quickCreateObjectDialogUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/ui/quick-create-object"),
                 quickCreateObjectDialogOpenUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/ui/quick-create-object/open"),
                 microflowListActivitiesUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-activities"),
@@ -5503,6 +5549,15 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
 
         return null;
+    }
+
+    private static DocumentDescriptor CreateDocumentDescriptor(IAbstractUnit document)
+    {
+        return new DocumentDescriptor(
+            document.Id,
+            ResolveDocumentName(document) ?? document.Id,
+            ResolveDocumentType(document) ?? "Unknown",
+            ResolveModuleName(document));
     }
 
     private bool TryInsertMicroflowActivity(

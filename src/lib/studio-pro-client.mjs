@@ -643,12 +643,17 @@ export class StudioProClient {
             };
         }
 
-        const fallbackResult = await this.extensionClient.openDocument({
-            ...options,
-            name: selectedMatch.name,
-            module: selectedMatch.moduleName ?? options.module,
-            type: selectedMatch.type ?? options.type
-        });
+        const fallbackResult = selectedMatch.id
+            ? await this.extensionClient.openDocumentById({
+                ...options,
+                documentId: selectedMatch.id
+            })
+            : await this.extensionClient.openDocument({
+                ...options,
+                name: selectedMatch.name,
+                module: selectedMatch.moduleName ?? options.module,
+                type: selectedMatch.type ?? options.type
+            });
 
         if (!fallbackResult?.ok || !fallbackResult?.payload?.opened) {
             return {
@@ -3258,12 +3263,17 @@ async function tryOpenItemViaExtension(client, options) {
                 };
             }
 
-            openResult = await client.extensionClient.openDocument({
-                ...options,
-                name: selectedMatch.name,
-                module: selectedMatch.moduleName ?? options.module,
-                type: selectedMatch.type ?? options.type
-            });
+            openResult = selectedMatch.id
+                ? await client.extensionClient.openDocumentById({
+                    ...options,
+                    documentId: selectedMatch.id
+                })
+                : await client.extensionClient.openDocument({
+                    ...options,
+                    name: selectedMatch.name,
+                    module: selectedMatch.moduleName ?? options.module,
+                    type: selectedMatch.type ?? options.type
+                });
 
             if (!openResult?.payload?.opened) {
                 return {

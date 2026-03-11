@@ -1,5 +1,18 @@
 # Release Notes
 
+## 0.2.47
+
+Deterministic ID-based document open after extension search.
+
+- Added extension route:
+  - `/mendix-studio-automation/documents/open-by-id`
+- Added extension capability:
+  - `documents.openById`
+- Search-based document open flows now prefer the stable document ID returned by extension search results instead of reopening by name.
+- Updated runtime endpoint metadata and docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.46
 
 Search fallback and ambiguity reporting for direct extension document open.
