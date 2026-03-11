@@ -61,6 +61,8 @@ List the currently open page and microflow tabs:
 
 ```powershell
 npm run list-open-tabs
+npm run list-open-tabs -- --kind microflow
+npm run list-open-tabs -- --module Az_ClientManagement
 ```
 
 Report the best-known active tab:
@@ -78,7 +80,14 @@ npm run active-context
 Activate one directly:
 
 ```powershell
-npm run select-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]"
+npm run select-tab -- --tab "Client_ClinicalDocument_V3" --module "Az_ClientManagement"
+```
+
+Prepare closing one without executing the close:
+
+```powershell
+npm run close-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]" --dry-run
+npm run close-tab -- --dry-run
 ```
 
 ### Page authoring helpers
@@ -86,20 +95,21 @@ npm run select-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]"
 Select visible designer text:
 
 ```powershell
-npm run select-widget -- --page "Client_ClinicalDocument_V4" --widget "Olari_Popup_Default"
+npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Page is empty" --surface pageExplorer
 ```
 
 Select visible Page Explorer rows:
 
 ```powershell
-npm run select-explorer-item -- --page "Client_ClinicalDocument_V4" --item "container34"
-npm run select-explorer-item -- --page "Client_ClinicalDocument_V4" --item "SNIP_PopupSubHeader_Program_StageTemplate"
+npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "Page is empty"
+npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
 ```
 
 Select a Toolbox item:
 
 ```powershell
-npm run select-toolbox-item -- --item "Deeply Nested List/Data View"
+npm run select-toolbox-item -- --item "Create object"
+npm run list-toolbox-items -- --microflow "ClinicalDocument_ShowPage"
 ```
 
 Prepare a widget insertion without changing the page:
@@ -115,13 +125,13 @@ Remove `--dry-run` only when you want to execute the current first-pass insertio
 Select a visible microflow node label:
 
 ```powershell
-npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "Call microflow"
+npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "DocumentType"
 ```
 
 Prepare a microflow action insertion:
 
 ```powershell
-npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Call microflow" --action-name "Show page" --dry-run
+npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 ```
 
 As with page insertion, keep `--dry-run` on until the selector path is confirmed.
@@ -138,12 +148,16 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 ## Known Limits
 
 - Some Studio Pro panes expose rows as text, some as data rows, and some as custom WPF controls.
+- The Toolbox pane is now discovered from its own dock container, which is substantially more reliable than the earlier whole-window scan.
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.
 - `active-context` is a best-effort parser based on the open tab title. It is useful for command routing, but it is not yet a full Mendix document classifier.
+- `select-tab` and `close-tab` accept the full tab title, the document name, or a unique partial match across open tabs.
+- `--module` can be used with open-tab commands to disambiguate tabs that share the same document name.
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
+- Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 
 ## Non-Goal
 

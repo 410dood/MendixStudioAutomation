@@ -14,15 +14,9 @@ if (-not $Widget) {
 }
 
 $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-$openMethod = $null
-if ($Page) {
-    $openMethod = Open-OrSelectStudioProItem -Process $attached.Process -Root $attached.Element -Item $Page -DelayMs $DelayMs
-    Start-Sleep -Milliseconds ($DelayMs + 150)
-    $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-}
-
-Set-StudioProForegroundWindow -Process $attached.Process
-$bestMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $Widget -Surface $Surface
+$context = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Item $Page -Scope $Surface -DelayMs $DelayMs
+$attached = $context.Attached
+$bestMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $Widget -Surface $Surface -Item $Page
 if (-not $bestMatch) {
     throw "Could not find a visible '$Widget' element on the requested surface."
 }
@@ -41,7 +35,8 @@ $payload = @{
     widget = $Widget
     surface = $Surface
     method = $method
-    openMethod = $openMethod
+    openMethod = $context.OpenMethod
+    tab = $context.Tab
     target = Convert-AutomationElement -Element $nativeTarget
 }
 

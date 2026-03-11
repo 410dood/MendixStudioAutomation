@@ -16,13 +16,9 @@ if (-not $Node) {
     throw "A microflow node name is required."
 }
 
-$attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-$openMethod = Open-OrSelectStudioProItem -Process $attached.Process -Root $attached.Element -Item $Microflow -DelayMs $DelayMs
-Start-Sleep -Milliseconds ($DelayMs + 150)
-
-$attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-Set-StudioProForegroundWindow -Process $attached.Process
-$bestMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $Node -Surface "editor"
+$context = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Item $Microflow -Scope "editor" -DelayMs $DelayMs
+$attached = $context.Attached
+$bestMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $Node -Surface "editor" -Item $Microflow
 if (-not $bestMatch) {
     throw "Could not find a visible microflow node named '$Node'."
 }
@@ -35,7 +31,8 @@ $payload = @{
     microflow = $Microflow
     node = $Node
     method = $method
-    openMethod = $openMethod
+    openMethod = $context.OpenMethod
+    tab = $context.Tab
     target = $bestMatch
 }
 

@@ -24,6 +24,7 @@
     "active-tab": "node src/cli.mjs active-tab",
     "active-context": "node src/cli.mjs active-context",
     "select-tab": "node src/cli.mjs select-tab",
+    "close-tab": "node src/cli.mjs close-tab",
     "operations": "node src/cli.mjs operations",
     "insert-widget": "node src/cli.mjs insert-widget",
     "select-microflow-node": "node src/cli.mjs select-microflow-node",

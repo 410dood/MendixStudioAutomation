@@ -492,6 +492,233 @@ function Activate-DockTabByName {
     return $match
 }
 
+function Get-DockContainerByName {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Name
+    )
+
+    $match = Get-DockTabMatch -Root $Root -Name $Name
+    if (-not $match) {
+        return $null
+    }
+
+    $nativeTab = Resolve-NativeElementByRuntimeId -Root $Root -ExpectedRuntimeId $match.runtimeId -Depth 12
+    if (-not $nativeTab) {
+        return $null
+    }
+
+    $walker = [System.Windows.Automation.TreeWalker]::ControlViewWalker
+    return $walker.GetParent($nativeTab)
+}
+
+function Get-OpenEditorContainerByItem {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Item
+    )
+
+    if (-not $Item) {
+        return $null
+    }
+
+    $tab = Find-OpenEditorTabForItem -Root $Root -Item $Item
+    if (-not $tab) {
+        return $null
+    }
+
+    $nativeTab = Resolve-NativeElementByRuntimeId -Root $Root -ExpectedRuntimeId $tab.runtimeId -Depth 12
+    if (-not $nativeTab) {
+        return $null
+    }
+
+    $walker = [System.Windows.Automation.TreeWalker]::ControlViewWalker
+    return $walker.GetParent($nativeTab)
+}
+
+function Get-OpenEditorContentBoundsByItem {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Item
+    )
+
+    $container = Get-OpenEditorContainerByItem -Root $Root -Item $Item
+    $tab = Find-OpenEditorTabForItem -Root $Root -Item $Item
+    if (-not $container -or -not $tab) {
+        return $null
+    }
+
+    $containerBounds = (Convert-AutomationElement -Element $container).boundingRectangle
+    if ($null -eq $containerBounds.left -or $null -eq $containerBounds.top -or $null -eq $containerBounds.right -or $null -eq $containerBounds.bottom) {
+        return $null
+    }
+
+    return @{
+        left = $containerBounds.left
+        top = $tab.boundingRectangle.bottom + 4
+        right = $containerBounds.right
+        bottom = $containerBounds.bottom
+    }
+}
+
+function Wait-ForOpenEditorTabByItem {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Item,
+        [int]$TimeoutMs = 4000,
+        [int]$PollMs = 250
+    )
+
+    if (-not $Item) {
+        return $null
+    }
+
+    $deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMs)
+    do {
+        $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+        $tab = Find-OpenEditorTabForItem -Root $attached.Element -Item $Item
+        if ($tab) {
+            return @{
+                Attached = $attached
+                Tab = $tab
+            }
+        }
+
+        Start-Sleep -Milliseconds $PollMs
+    } while ([DateTime]::UtcNow -lt $deadline)
+
+    return $null
+}
+
+function Open-OrSelectStudioProItemAndAttach {
+    param(
+        [System.Diagnostics.Process]$Process,
+        [System.Windows.Automation.AutomationElement]$Root,
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Item = "",
+        [int]$DelayMs = 250,
+        [int]$TimeoutMs = 4000
+    )
+
+    $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+    if (-not $Item) {
+        return @{
+            Attached = $attached
+            OpenMethod = $null
+            Tab = Get-ActiveEditorTab -Root $attached.Element
+        }
+    }
+
+    $openMethod = Open-OrSelectStudioProItem -Process $Process -Root $Root -Item $Item -DelayMs $DelayMs
+    Start-Sleep -Milliseconds ($DelayMs + 150)
+
+    $waitResult = Wait-ForOpenEditorTabByItem -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern -Item $Item -TimeoutMs $TimeoutMs
+    if ($waitResult) {
+        $attached = $waitResult.Attached
+        $tab = $waitResult.Tab
+    } else {
+        $attached = Get-StudioProWindowElement -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern
+        $tab = Find-OpenEditorTabForItem -Root $attached.Element -Item $Item
+    }
+
+    if ($tab) {
+        Invoke-BoundsClick -Bounds $tab.boundingRectangle | Out-Null
+        Start-Sleep -Milliseconds $DelayMs
+        $attached = Get-StudioProWindowElement -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern
+    }
+
+    return @{
+        Attached = $attached
+        OpenMethod = $openMethod
+        Tab = $tab
+    }
+}
+
+function Focus-StudioProScope {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Scope = "editor",
+        [int]$DelayMs = 250
+    )
+
+    switch ($Scope) {
+        "appExplorer" {
+            Activate-DockTabByName -Root $Root -Name "App Explorer" -DelayMs $DelayMs | Out-Null
+            return
+        }
+        "pageExplorer" {
+            Activate-DockTabByName -Root $Root -Name "Page Explorer" -DelayMs $DelayMs | Out-Null
+            return
+        }
+        "toolbox" {
+            Activate-DockTabByName -Root $Root -Name "Toolbox" -DelayMs $DelayMs | Out-Null
+            return
+        }
+        "properties" {
+            Activate-DockTabByName -Root $Root -Name "Properties" -DelayMs $DelayMs | Out-Null
+            return
+        }
+        default {
+            $bounds = Get-ScopeBounds -Root $Root -Scope "editor"
+            if ($null -eq $bounds.left -or $null -eq $bounds.top -or $null -eq $bounds.right -or $null -eq $bounds.bottom) {
+                return
+            }
+
+            $width = $bounds.right - $bounds.left
+            $height = $bounds.bottom - $bounds.top
+            if ($width -le 20 -or $height -le 20) {
+                return
+            }
+
+            Invoke-BoundsClick -Bounds @{
+                left = $bounds.left + 8
+                top = $bounds.top + 8
+                width = $width - 16
+                height = $height - 16
+            } | Out-Null
+            Start-Sleep -Milliseconds $DelayMs
+            return
+        }
+    }
+}
+
+function Enter-StudioProScope {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Item = "",
+        [string]$Scope = "editor",
+        [int]$DelayMs = 250
+    )
+
+    $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+    $openMethod = $null
+    $tab = $null
+
+    if ($Item) {
+        $context = Open-OrSelectStudioProItemAndAttach -Process $attached.Process -Root $attached.Element -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -Item $Item -DelayMs $DelayMs
+        $attached = $context.Attached
+        $openMethod = $context.OpenMethod
+        $tab = $context.Tab
+        if (-not $tab) {
+            throw "Could not confirm that Studio Pro opened '$Item'."
+        }
+    }
+
+    Set-StudioProForegroundWindow -Process $attached.Process
+    Focus-StudioProScope -Root $attached.Element -Scope $Scope -DelayMs $DelayMs
+    $attached = Get-StudioProWindowElement -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern
+
+    return @{
+        Attached = $attached
+        OpenMethod = $openMethod
+        Tab = $tab
+        Scope = $Scope
+    }
+}
+
 function Get-ScopeBounds {
     param(
         [System.Windows.Automation.AutomationElement]$Root,
@@ -528,28 +755,9 @@ function Get-ScopeBounds {
         }
     }
 
-    $documentTabs = @()
-    $rightTabs = @()
-    $leftTabs = @()
-    foreach ($tab in $topTabs) {
-        if ($tab.name -match "\[[^\]]+\]") {
-            $documentTabs += $tab
-        }
-
-        if ($tab.name -in @("Properties", "Toolbox", "Marketplace", "Integration", "Connector", "Maia")) {
-            $rightTabs += $tab
-        }
-
-        if ($tab.name -in @("App Explorer", "Page Explorer", "Variables")) {
-            $leftTabs += $tab
-        }
-    }
-
-    $topContentTop = if ($topTabs.Count -gt 0) {
-        (($topTabs | Sort-Object @{ Expression = { $_.boundingRectangle.bottom } } -Descending | Select-Object -First 1).boundingRectangle.bottom) + 4
-    } else {
-        $rootBounds.top
-    }
+    $documentTabs = @($topTabs | Where-Object { $_.name -match "\[[^\]]+\]" })
+    $leftTabs = @($topTabs | Where-Object { $_.name -in @("App Explorer", "Page Explorer", "Variables") })
+    $rightTabs = @($topTabs | Where-Object { $_.name -in @("Properties", "Toolbox", "Marketplace", "Integration", "Connector", "Maia") })
 
     $bottomBoundary = if ($bottomTabs.Count -gt 0) {
         (($bottomTabs | Sort-Object @{ Expression = { $_.boundingRectangle.top } } | Select-Object -First 1).boundingRectangle.top) - 8
@@ -557,16 +765,16 @@ function Get-ScopeBounds {
         $rootBounds.bottom
     }
 
-    $leftBoundary = if ($leftTabs.Count -gt 0) {
+    $leftDockLeft = if ($leftTabs.Count -gt 0) {
         ($leftTabs | Sort-Object @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1).boundingRectangle.left
     } else {
         $rootBounds.left
     }
 
-    $editorLeft = if ($documentTabs.Count -gt 0) {
-        ($documentTabs | Sort-Object @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1).boundingRectangle.left
+    $leftDockRight = if ($leftTabs.Count -gt 0) {
+        ($leftTabs | Sort-Object @{ Expression = { $_.boundingRectangle.right } } -Descending | Select-Object -First 1).boundingRectangle.right
     } else {
-        $leftBoundary + 820
+        $rootBounds.left + 320
     }
 
     $rightDockLeft = if ($rightTabs.Count -gt 0) {
@@ -575,21 +783,52 @@ function Get-ScopeBounds {
         $rootBounds.right
     }
 
-    $leftDockRight = [math]::Min($editorLeft - 8, $rightDockLeft - 8)
+    $editorLeft = if ($documentTabs.Count -gt 0) {
+        [math]::Min(
+            ($documentTabs | Sort-Object @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1).boundingRectangle.left,
+            $leftDockRight + 8
+        )
+    } else {
+        $leftDockRight + 8
+    }
+
+    $editorRight = if ($rightDockLeft -gt ($editorLeft + 40)) {
+        $rightDockLeft - 8
+    } else {
+        $rootBounds.right - 8
+    }
+
+    $leftDockTop = if ($leftTabs.Count -gt 0) {
+        (($leftTabs | Sort-Object @{ Expression = { $_.boundingRectangle.bottom } } -Descending | Select-Object -First 1).boundingRectangle.bottom) + 4
+    } else {
+        $rootBounds.top
+    }
+
+    $rightDockTop = if ($rightTabs.Count -gt 0) {
+        (($rightTabs | Sort-Object @{ Expression = { $_.boundingRectangle.bottom } } -Descending | Select-Object -First 1).boundingRectangle.bottom) + 4
+    } else {
+        $rootBounds.top
+    }
+
+    $editorTop = if ($documentTabs.Count -gt 0) {
+        (($documentTabs | Sort-Object @{ Expression = { $_.boundingRectangle.bottom } } -Descending | Select-Object -First 1).boundingRectangle.bottom) + 4
+    } else {
+        [math]::Min($leftDockTop, $rightDockTop)
+    }
 
     switch ($Scope) {
         "appExplorer" {
             return @{
-                left = $leftBoundary
-                top = $topContentTop
+                left = $leftDockLeft
+                top = $leftDockTop
                 right = $leftDockRight
                 bottom = $bottomBoundary
             }
         }
         "pageExplorer" {
             return @{
-                left = $leftBoundary
-                top = $topContentTop
+                left = $leftDockLeft
+                top = $leftDockTop
                 right = $leftDockRight
                 bottom = $bottomBoundary
             }
@@ -597,7 +836,7 @@ function Get-ScopeBounds {
         "toolbox" {
             return @{
                 left = $rightDockLeft
-                top = $topContentTop
+                top = $rightDockTop
                 right = $rootBounds.right
                 bottom = $bottomBoundary
             }
@@ -605,7 +844,7 @@ function Get-ScopeBounds {
         "properties" {
             return @{
                 left = $rightDockLeft
-                top = $topContentTop
+                top = $rightDockTop
                 right = $rootBounds.right
                 bottom = $bottomBoundary
             }
@@ -613,8 +852,8 @@ function Get-ScopeBounds {
         default {
             return @{
                 left = $editorLeft
-                top = $topContentTop
-                right = $rightDockLeft - 8
+                top = $editorTop
+                right = $editorRight
                 bottom = $bottomBoundary
             }
         }
@@ -735,21 +974,16 @@ function Find-BestVisibleNamedElement {
     param(
         [System.Windows.Automation.AutomationElement]$Root,
         [string]$Name,
-        [string]$Surface = "editor"
+        [string]$Surface = "editor",
+        [string]$Item = ""
     )
 
-    $matches = @(Find-MatchingElements -Root $Root -Depth 15 -MaxResults 50 -Name $Name)
-    $candidates = @($matches | Where-Object {
+    $scopeName = if ($Surface -eq "any") { "editor" } else { $Surface }
+    $candidates = @(Get-VisibleNamedElementsInScope -Root $Root -Scope $scopeName -Name $Name -Item $Item -Limit 50 | Where-Object {
         $_.name -eq $Name -and
-        -not $_.isOffscreen -and
         $_.boundingRectangle.top -ne $null -and
-        $_.boundingRectangle.left -ne $null -and
-        $_.boundingRectangle.top -ge 380
+        $_.boundingRectangle.left -ne $null
     })
-
-    if ($Surface -eq "editor") {
-        $candidates = @($candidates | Where-Object { $_.boundingRectangle.left -ge 900 })
-    }
 
     if (-not $candidates -or $candidates.Length -eq 0) {
         return $null
@@ -761,6 +995,139 @@ function Find-BestVisibleNamedElement {
         @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1
 
     return $preferred
+}
+
+function Get-ControlTypePriority {
+    param(
+        [string]$ControlType
+    )
+
+    switch ($ControlType) {
+        "TreeItem" { return 0 }
+        "ListItem" { return 1 }
+        "DataItem" { return 2 }
+        "Text" { return 3 }
+        "Button" { return 4 }
+        "MenuItem" { return 5 }
+        "CheckBox" { return 6 }
+        default { return 20 }
+    }
+}
+
+function Get-ScopeSearchRoot {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Scope = "editor",
+        [string]$Item = ""
+    )
+
+    switch ($Scope) {
+        "appExplorer" {
+            $container = Get-DockContainerByName -Root $Root -Name "App Explorer"
+            if ($container) { return $container }
+            return $Root
+        }
+        "pageExplorer" {
+            $container = Get-DockContainerByName -Root $Root -Name "Page Explorer"
+            if ($container) { return $container }
+            return $Root
+        }
+        "toolbox" {
+            $container = Get-DockContainerByName -Root $Root -Name "Toolbox"
+            if ($container) { return $container }
+            return $Root
+        }
+        "properties" {
+            $container = Get-DockContainerByName -Root $Root -Name "Properties"
+            if ($container) { return $container }
+            return $Root
+        }
+        default {
+            $container = Get-OpenEditorContainerByItem -Root $Root -Item $Item
+            if ($container) { return $container }
+            return $Root
+        }
+    }
+}
+
+function Get-VisibleNamedElementsInScope {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Scope = "editor",
+        [string]$Name = "",
+        [string]$Item = "",
+        [int]$Limit = 200
+    )
+
+    $searchRoot = Get-ScopeSearchRoot -Root $Root -Scope $Scope -Item $Item
+    $scopeBounds = if ($Scope -eq "editor" -and $Item) {
+        $editorBounds = Get-OpenEditorContentBoundsByItem -Root $Root -Item $Item
+        if ($editorBounds) { $editorBounds } else { (Convert-AutomationElement -Element $searchRoot).boundingRectangle }
+    } elseif ($searchRoot -ne $Root) {
+        (Convert-AutomationElement -Element $searchRoot).boundingRectangle
+    } else {
+        Get-ScopeBounds -Root $Root -Scope $Scope
+    }
+    $rootBounds = (Convert-AutomationElement -Element $searchRoot).boundingRectangle
+    $controlTypes = if ($Scope -eq "editor") {
+        @("Text", "Button", "Edit", "Hyperlink", "ListItem", "TreeItem", "DataItem")
+    } else {
+        @("TreeItem", "ListItem", "DataItem", "Text", "Button", "MenuItem", "CheckBox")
+    }
+
+    $matches = @()
+    foreach ($controlType in $controlTypes) {
+        $matches += @(Find-MatchingElements -Root $searchRoot -Depth 25 -MaxResults 1000 -Name $Name -ControlType $controlType)
+    }
+
+    $results = @()
+    $seen = @{}
+    foreach ($match in ($matches | Where-Object {
+        $_ -and
+        $_.name -and
+        -not $_.isOffscreen -and
+        (Test-RectangleWithinBounds -Bounds $_.boundingRectangle -Container $rootBounds) -and
+        (Test-RectangleWithinBounds -Bounds $_.boundingRectangle -Container $scopeBounds)
+    } | Sort-Object `
+        @{ Expression = { Get-ControlTypePriority -ControlType $_.controlType } }, `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } })) {
+        $key = "{0}|{1}|{2}|{3}" -f $match.name, $match.controlType, $match.boundingRectangle.left, $match.boundingRectangle.top
+        if ($seen.ContainsKey($key)) {
+            continue
+        }
+
+        $seen[$key] = $true
+        $results += $match
+        if ($results.Length -ge $Limit) {
+            break
+        }
+    }
+
+    return @($results)
+}
+
+function Find-VisibleNamedElementInScope {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$Scope = "editor",
+        [string]$Name,
+        [string]$Item = ""
+    )
+
+    if (-not $Name) {
+        return $null
+    }
+
+    $matches = @(Get-VisibleNamedElementsInScope -Root $Root -Scope $Scope -Name $Name -Item $Item -Limit 50)
+    if ($matches.Length -eq 0) {
+        return $null
+    }
+
+    return ($matches | Sort-Object `
+        @{ Expression = { Get-ControlTypePriority -ControlType $_.controlType } }, `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1)
 }
 
 function Get-StudioProPopupWindows {
@@ -846,21 +1213,7 @@ function Select-PageExplorerItemByName {
         [string]$Item
     )
 
-    $scopeBounds = Get-ScopeBounds -Root $Root -Scope "pageExplorer"
-    $texts = @(Find-MatchingElements -Root $Root -Depth 20 -MaxResults 400 -ControlType "Text")
-    $matches = @($texts | Where-Object {
-        $_.name -eq $Item -and
-        -not $_.isOffscreen -and
-        (Test-RectangleWithinBounds -Bounds $_.boundingRectangle -Container $scopeBounds)
-    })
-
-    if ($matches.Length -eq 0) {
-        return $null
-    }
-
-    return ($matches | Sort-Object `
-        @{ Expression = { $_.boundingRectangle.left } }, `
-        @{ Expression = { $_.boundingRectangle.top } } | Select-Object -First 1)
+    return Find-VisibleNamedElementInScope -Root $Root -Scope "pageExplorer" -Name $Item
 }
 
 function Select-AppExplorerItemByName {
@@ -869,21 +1222,7 @@ function Select-AppExplorerItemByName {
         [string]$Item
     )
 
-    $scopeBounds = Get-ScopeBounds -Root $Root -Scope "appExplorer"
-    $texts = @(Find-MatchingElements -Root $Root -Depth 20 -MaxResults 400 -ControlType "Text")
-    $matches = @($texts | Where-Object {
-        $_.name -eq $Item -and
-        -not $_.isOffscreen -and
-        (Test-RectangleWithinBounds -Bounds $_.boundingRectangle -Container $scopeBounds)
-    })
-
-    if ($matches.Length -eq 0) {
-        return $null
-    }
-
-    return ($matches | Sort-Object `
-        @{ Expression = { $_.boundingRectangle.left } }, `
-        @{ Expression = { $_.boundingRectangle.top } } | Select-Object -First 1)
+    return Find-VisibleNamedElementInScope -Root $Root -Scope "appExplorer" -Name $Item
 }
 
 function Select-ToolboxItemByName {
@@ -892,65 +1231,18 @@ function Select-ToolboxItemByName {
         [string]$Item
     )
 
-    $scopeBounds = Get-ScopeBounds -Root $Root -Scope "toolbox"
-    $texts = @(Find-MatchingElements -Root $Root -Depth 25 -MaxResults 500 -ControlType "Text")
-    $matches = @($texts | Where-Object {
-        $_.name -eq $Item -and
-        -not $_.isOffscreen -and
-        (Test-RectangleWithinBounds -Bounds $_.boundingRectangle -Container $scopeBounds)
-    })
-
-    if ($matches.Length -eq 0) {
-        return $null
-    }
-
-    return ($matches | Sort-Object `
-        @{ Expression = { $_.boundingRectangle.top } }, `
-        @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1)
+    return Find-VisibleNamedElementInScope -Root $Root -Scope "toolbox" -Name $Item
 }
 
 function Get-VisibleTextMatches {
     param(
         [System.Windows.Automation.AutomationElement]$Root,
         [string]$Scope = "editor",
+        [string]$Item = "",
         [int]$Limit = 200
     )
 
-    $rootBounds = (Convert-AutomationElement -Element $Root).boundingRectangle
-    $scopeBounds = Get-ScopeBounds -Root $Root -Scope $Scope
-    $matches = @()
-    foreach ($text in (Find-MatchingElements -Root $Root -Depth 25 -MaxResults 1000 -ControlType "Text")) {
-        if ($null -eq $text -or -not $text.name -or $text.isOffscreen) {
-            continue
-        }
-
-        $bounds = $text.boundingRectangle
-        if (-not (Test-RectangleWithinBounds -Bounds $bounds -Container $rootBounds)) {
-            continue
-        }
-
-        if (-not (Test-RectangleWithinBounds -Bounds $bounds -Container $scopeBounds)) {
-            continue
-        }
-
-        $matches += $text
-    }
-
-    $deduped = @{}
-    $results = @()
-    foreach ($match in ($matches | Sort-Object @{ Expression = { $_.boundingRectangle.top } }, @{ Expression = { $_.boundingRectangle.left } })) {
-        $key = "{0}|{1}|{2}" -f $match.name, $match.boundingRectangle.left, $match.boundingRectangle.top
-        if (-not $deduped.ContainsKey($key)) {
-            $deduped[$key] = $true
-            $results += $match
-        }
-
-        if ($results.Length -ge $Limit) {
-            break
-        }
-    }
-
-    return @($results)
+    return @(Get-VisibleNamedElementsInScope -Root $Root -Scope $Scope -Item $Item -Limit $Limit)
 }
 
 function Resolve-NativeElementByRuntimeId {

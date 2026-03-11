@@ -1,36 +1,29 @@
 param(
     [int]$ProcessId = 0,
     [string]$WindowTitlePattern = "",
+    [string]$Item = "",
+    [string]$Page = "",
+    [string]$Microflow = "",
     [string]$Scope = "editor",
     [int]$Limit = 200
 )
 
 . "$PSScriptRoot\StudioPro.Automation.Common.ps1"
 
-$attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+$contextItem = if ($Item) { $Item } elseif ($Page) { $Page } elseif ($Microflow) { $Microflow } else { "" }
+$context = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Item $contextItem -Scope $Scope
+$attached = $context.Attached
 
-switch ($Scope) {
-    "appExplorer" {
-        Activate-DockTabByName -Root $attached.Element -Name "App Explorer" | Out-Null
-        $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-    }
-    "pageExplorer" {
-        Activate-DockTabByName -Root $attached.Element -Name "Page Explorer" | Out-Null
-        $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-    }
-    "toolbox" {
-        Activate-DockTabByName -Root $attached.Element -Name "Toolbox" | Out-Null
-        $attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-    }
-}
-
-$matches = @(Get-VisibleTextMatches -Root $attached.Element -Scope $Scope -Limit $Limit)
+$matches = @(Get-VisibleTextMatches -Root $attached.Element -Scope $Scope -Item $contextItem -Limit $Limit)
 
 $payload = @{
     ok = $true
     scope = $Scope
+    item = $contextItem
     count = $matches.Length
     items = $matches
+    openMethod = $context.OpenMethod
+    tab = $context.Tab
     process = @{
         id = $attached.Process.Id
         name = $attached.Process.ProcessName

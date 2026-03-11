@@ -42,18 +42,24 @@ npm run wait-ready -- --timeout-ms 5000
 If those work, try a safe selection-only command:
 
 ```powershell
-npm run select-toolbox-item -- --item "Deeply Nested List/Data View"
+npm run select-toolbox-item -- --item "Create object"
+npm run list-toolbox-items -- --microflow "ClinicalDocument_ShowPage" --limit 8
 ```
 
 You can also confirm that open document tabs are discoverable:
 
 ```powershell
 npm run list-open-tabs
+npm run list-open-tabs -- --kind microflow
+npm run list-open-tabs -- --module Az_ClientManagement
 npm run active-tab
 npm run active-context
+npm run close-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]" --dry-run
+npm run close-tab -- --dry-run
 ```
 
 If a page or microflow is already open, `open-item` will now reuse that tab before falling back to Studio Pro's `Go to` dialog.
+If a page or microflow command cannot confirm that Studio Pro actually opened the requested document, it now fails explicitly instead of scraping the wrong window state.
 
 ## Safety Model
 

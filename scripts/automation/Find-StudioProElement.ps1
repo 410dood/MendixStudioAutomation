@@ -30,8 +30,8 @@ $payload = @{
         name = $attached.Process.ProcessName
         mainWindowTitle = $attached.Process.MainWindowTitle
     }
-    count = $matches.Length
-    matches = $matches
+    count = @($matches).Length
+    matches = @($matches)
 }
 
 $payload | ConvertTo-Json -Depth 20

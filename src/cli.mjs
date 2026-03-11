@@ -100,6 +100,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "close-tab": {
+            const result = await client.closeTab(options);
+            formatOutput(result);
+            return;
+        }
         case "insert-widget": {
             const result = await client.insertWidget(options);
             formatOutput(result);
@@ -151,6 +156,7 @@ Commands:
   active-tab                  Get the currently active open editor tab
   active-context              Parse the active tab into document/module context
   select-tab                  Activate an open Studio Pro editor tab
+  close-tab                   Close a specific open Studio Pro editor tab
   insert-widget              Prepare or execute first-pass widget insertion
   select-microflow-node      Select a visible microflow node label
   insert-action              Prepare or execute first-pass microflow action insertion
@@ -179,7 +185,9 @@ Options:
   --microflow <name>          Microflow to open before node/action operations
   --action-name <name>        Toolbox action name for microflow insertion
   --node <name>               Visible microflow node label to select
-  --tab <name>                Open Studio Pro editor tab name to activate
+  --tab <name>                Open Studio Pro editor tab name to activate or close
+  --kind <name>               Filter open tabs by kind, e.g. microflow or page-or-document
+  --module <name>             Filter or disambiguate by Mendix module name
 `);
 }
 

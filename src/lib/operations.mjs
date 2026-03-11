@@ -23,12 +23,12 @@ export const operationCatalog = {
         {
             id: "toolbox.selectItem",
             description: "Select an exact visible Toolbox item.",
-            status: "implemented-first-pass"
+            status: "implemented-validated"
         },
         {
             id: "studio.listVisibleLabels",
             description: "List visible labels from key Studio Pro panes and editor surfaces.",
-            status: "implemented-first-pass"
+            status: "implemented-validated"
         },
         {
             id: "studio.listOpenTabs",
@@ -51,6 +51,11 @@ export const operationCatalog = {
             status: "implemented"
         },
         {
+            id: "studio.closeTab",
+            description: "Close a specific open page or microflow editor tab.",
+            status: "implemented"
+        },
+        {
             id: "page.selectExplorerItem",
             description: "Select an exact visible Page Explorer row for the active page.",
             status: "implemented-first-pass"
@@ -68,7 +73,7 @@ export const operationCatalog = {
         {
             id: "microflow.insertAction",
             description: "Insert an activity on the active microflow canvas.",
-            status: "implemented-first-pass"
+            status: "implemented-dry-run-validated"
         },
         {
             id: "microflow.connectNodes",
@@ -78,7 +83,7 @@ export const operationCatalog = {
         {
             id: "microflow.selectNode",
             description: "Select a visible microflow node or activity label on the editor surface.",
-            status: "implemented-first-pass"
+            status: "implemented-validated"
         }
     ]
 };

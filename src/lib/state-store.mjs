@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const stateDir = resolve(process.cwd(), ".automation-state");
@@ -24,4 +24,12 @@ export async function writeLastKnownActiveTab(tab) {
         tab
     };
     await writeFile(activeTabStatePath, JSON.stringify(payload, null, 2));
+}
+
+export async function clearLastKnownActiveTab() {
+    try {
+        await rm(activeTabStatePath, { force: true });
+    } catch (error) {
+        return;
+    }
 }

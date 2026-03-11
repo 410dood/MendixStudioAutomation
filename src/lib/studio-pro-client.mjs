@@ -1,5 +1,5 @@
 import { runPowerShellScript } from "./powershell.mjs";
-import { readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
+import { clearLastKnownActiveTab, readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
 
 export class StudioProClient {
     async snapshot(options = {}) {
@@ -15,14 +15,46 @@ export class StudioProClient {
     }
 
     async openItem(options = {}) {
-        const result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizeOpenItemOptions(options));
+        const normalizedOptions = normalizeOpenItemOptions(options);
+        let result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizedOptions);
         await rememberActiveTabFromPayload(result);
-        return result;
+
+        if (result?.method !== "goTo" || !options.item) {
+            return {
+                ...result,
+                verifiedOpen: Boolean(result?.tab?.name),
+                attempts: 1
+            };
+        }
+
+        let matchedTab = await waitForOpenTabByItemName(this, options.item, options);
+        let attempts = 1;
+
+        if (!matchedTab) {
+            result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizedOptions);
+            attempts = 2;
+            matchedTab = await waitForOpenTabByItemName(this, options.item, options);
+        }
+
+        if (matchedTab) {
+            await writeLastKnownActiveTab(matchedTab);
+        }
+
+        return {
+            ...result,
+            tab: matchedTab ?? result.tab ?? null,
+            verifiedOpen: Boolean(matchedTab),
+            attempts
+        };
     }
 
     async selectWidget(options = {}) {
-        const result = await runPowerShellScript("scripts/automation/Select-StudioProPageWidget.ps1", normalizeSelectWidgetOptions(options));
+        const resolvedOptions = await resolvePageOption(this, options, { required: false });
+        const result = await runPowerShellScript("scripts/automation/Select-StudioProPageWidget.ps1", normalizeSelectWidgetOptions(resolvedOptions));
         await rememberActiveTabFromPayload(result?.openMethod);
+        if (result?.openMethod?.method === "goTo" && resolvedOptions.page) {
+            await rememberActiveTabByItemName(this, resolvedOptions.page, options);
+        }
         return result;
     }
 
@@ -39,8 +71,12 @@ export class StudioProClient {
     }
 
     async selectExplorerItem(options = {}) {
-        const result = await runPowerShellScript("scripts/automation/Select-StudioProExplorerItem.ps1", normalizeSelectExplorerItemOptions(options));
+        const resolvedOptions = await resolvePageOption(this, options, { required: false });
+        const result = await runPowerShellScript("scripts/automation/Select-StudioProExplorerItem.ps1", normalizeSelectExplorerItemOptions(resolvedOptions));
         await rememberActiveTabFromPayload(result?.openMethod);
+        if (result?.openMethod?.method === "goTo" && resolvedOptions.page) {
+            await rememberActiveTabByItemName(this, resolvedOptions.page, options);
+        }
         return result;
     }
 
@@ -49,39 +85,62 @@ export class StudioProClient {
     }
 
     async listAppExplorerItems(options = {}) {
-        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
-            ...normalizeProcessOptions(options),
-            Scope: "appExplorer",
-            Limit: numberOrDefault(options.limit, 200)
-        });
+        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(options, "appExplorer"));
     }
 
     async listPageExplorerItems(options = {}) {
-        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
-            ...normalizeProcessOptions(options),
-            Scope: "pageExplorer",
-            Limit: numberOrDefault(options.limit, 200)
-        });
+        const resolvedOptions = await resolvePageOption(this, options, { required: false });
+        const result = await runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(resolvedOptions, "pageExplorer"));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        await rememberActiveTabFromPayload(result);
+        if (result?.openMethod?.method === "goTo" && resolvedOptions.page) {
+            await rememberActiveTabByItemName(this, resolvedOptions.page, options);
+        }
+        return result;
     }
 
     async listToolboxItems(options = {}) {
-        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
-            ...normalizeProcessOptions(options),
-            Scope: "toolbox",
-            Limit: numberOrDefault(options.limit, 200)
-        });
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(resolvedOptions, "toolbox"));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        await rememberActiveTabFromPayload(result);
+        if (result?.openMethod?.method === "goTo") {
+            await rememberActiveTabByItemName(this, resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item, options);
+        }
+        return result;
     }
 
     async listEditorLabels(options = {}) {
-        return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", {
-            ...normalizeProcessOptions(options),
-            Scope: "editor",
-            Limit: numberOrDefault(options.limit, 200)
-        });
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(resolvedOptions, "editor"));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        await rememberActiveTabFromPayload(result);
+        if (result?.openMethod?.method === "goTo") {
+            await rememberActiveTabByItemName(this, resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item, options);
+        }
+        return result;
     }
 
     async listOpenTabs(options = {}) {
-        return runPowerShellScript("scripts/automation/List-StudioProOpenTabs.ps1", normalizeProcessOptions(options));
+        const result = await runPowerShellScript("scripts/automation/List-StudioProOpenTabs.ps1", normalizeProcessOptions(options));
+        const remembered = await readLastKnownActiveTab();
+        const rememberedName = remembered?.tab?.name ?? null;
+        const items = Array.isArray(result?.items)
+            ? result.items.map(tab => ({
+                ...tab,
+                context: parseStudioProTabContext(tab.name),
+                isActive: tab.isSelected === true || (rememberedName ? tab.name === rememberedName : false),
+                activeSource: tab.isSelected === true ? "uia" : (rememberedName && tab.name === rememberedName ? "lastKnown" : null)
+            }))
+            : [];
+
+        const filtered = filterOpenTabs(items, options);
+
+        return {
+            ...result,
+            items: filtered,
+            count: filtered.length
+        };
     }
 
     async getActiveTab(options = {}) {
@@ -125,30 +184,66 @@ export class StudioProClient {
     }
 
     async selectTab(options = {}) {
+        const resolvedOptions = await resolveOpenTabOption(this, options, { required: true, allowActive: false });
         const result = await runPowerShellScript("scripts/automation/Select-StudioProTab.ps1", {
             ...normalizeProcessOptions(options),
-            Tab: options.tab,
+            Tab: resolvedOptions.tab,
             DelayMs: numberOrDefault(options.delayMs, 250)
         });
         await rememberActiveTabFromPayload(result);
-        return result;
+        return {
+            ...result,
+            tabResolvedFrom: resolvedOptions.tabResolvedFrom ?? null
+        };
+    }
+
+    async closeTab(options = {}) {
+        const resolvedOptions = await resolveTabOption(this, options, { required: true });
+        const result = await runPowerShellScript("scripts/automation/Close-StudioProTab.ps1", {
+            ...normalizeProcessOptions(options),
+            Tab: resolvedOptions.tab,
+            DelayMs: numberOrDefault(options.delayMs, 250),
+            DryRun: Boolean(options.dryRun)
+        });
+        if (!options.dryRun) {
+            const remembered = await readLastKnownActiveTab();
+            if (remembered?.tab?.name === resolvedOptions.tab) {
+                await clearLastKnownActiveTab();
+            }
+        }
+        return {
+            ...result,
+            tabResolvedFrom: resolvedOptions.tabResolvedFrom ?? null
+        };
     }
 
     async insertWidget(options = {}) {
-        const result = await runPowerShellScript("scripts/automation/Insert-StudioProWidget.ps1", normalizeInsertWidgetOptions(options));
+        const resolvedOptions = await resolvePageOption(this, options, { required: true });
+        const result = await runPowerShellScript("scripts/automation/Insert-StudioProWidget.ps1", normalizeInsertWidgetOptions(resolvedOptions));
         await rememberActiveTabFromPayload(result?.openMethod);
+        if (result?.openMethod?.method === "goTo" && resolvedOptions.page) {
+            await rememberActiveTabByItemName(this, resolvedOptions.page, options);
+        }
         return result;
     }
 
     async selectMicroflowNode(options = {}) {
-        const result = await runPowerShellScript("scripts/automation/Select-StudioProMicroflowNode.ps1", normalizeSelectMicroflowNodeOptions(options));
+        const resolvedOptions = await resolveMicroflowOption(this, options, { required: true });
+        const result = await runPowerShellScript("scripts/automation/Select-StudioProMicroflowNode.ps1", normalizeSelectMicroflowNodeOptions(resolvedOptions));
         await rememberActiveTabFromPayload(result?.openMethod);
+        if (result?.openMethod?.method === "goTo" && resolvedOptions.microflow) {
+            await rememberActiveTabByItemName(this, resolvedOptions.microflow, options);
+        }
         return result;
     }
 
     async insertAction(options = {}) {
-        const result = await runPowerShellScript("scripts/automation/Insert-StudioProMicroflowAction.ps1", normalizeInsertActionOptions(options));
+        const resolvedOptions = await resolveMicroflowOption(this, options, { required: true });
+        const result = await runPowerShellScript("scripts/automation/Insert-StudioProMicroflowAction.ps1", normalizeInsertActionOptions(resolvedOptions));
         await rememberActiveTabFromPayload(result?.openMethod);
+        if (result?.openMethod?.method === "goTo" && resolvedOptions.microflow) {
+            await rememberActiveTabByItemName(this, resolvedOptions.microflow, options);
+        }
         return result;
     }
 }
@@ -165,8 +260,214 @@ async function rememberActiveTabFromPayload(payload) {
     }
 }
 
+async function rememberActiveTabByItemName(client, itemName, options) {
+    if (!itemName) {
+        return;
+    }
+
+    const openTabs = await client.listOpenTabs(options);
+    if (!Array.isArray(openTabs?.items)) {
+        return;
+    }
+
+    const exact = openTabs.items.find(tab => tab?.name === itemName);
+    const moduleQualified = openTabs.items.find(tab => typeof tab?.name === "string" && tab.name.startsWith(`${itemName} [`));
+    const partial = openTabs.items.find(tab => typeof tab?.name === "string" && tab.name.includes(itemName));
+    const match = exact ?? moduleQualified ?? partial ?? null;
+
+    if (match) {
+        await writeLastKnownActiveTab(match);
+    }
+}
+
+async function waitForOpenTabByItemName(client, itemName, options, timeoutMs = 3500, pollMs = 350) {
+    const deadline = Date.now() + timeoutMs;
+    do {
+        const openTabs = await client.listOpenTabs(options);
+        if (Array.isArray(openTabs?.items)) {
+            const exact = openTabs.items.find(tab => tab?.name === itemName);
+            const moduleQualified = openTabs.items.find(tab => typeof tab?.name === "string" && tab.name.startsWith(`${itemName} [`));
+            const partial = openTabs.items.find(tab => typeof tab?.name === "string" && tab.name.includes(itemName));
+            const match = exact ?? moduleQualified ?? partial ?? null;
+            if (match) {
+                return match;
+            }
+        }
+
+        await sleep(pollMs);
+    } while (Date.now() < deadline);
+
+    return null;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function isTabShape(value) {
     return Boolean(value && typeof value === "object" && value.controlType === "TabItem" && value.name);
+}
+
+async function resolvePageOption(client, options, { required }) {
+    if (options.page) {
+        return options;
+    }
+
+    const active = await client.getActiveContext(options);
+    if (active?.context?.kind === "page-or-document" && active.context.documentName) {
+        return {
+            ...options,
+            page: active.context.documentName,
+            pageResolvedFrom: "activeContext"
+        };
+    }
+
+    if (!required) {
+        return options;
+    }
+
+    throw new Error("A page is required, or the active tab must be a page-like editor.");
+}
+
+async function resolveMicroflowOption(client, options, { required }) {
+    if (options.microflow) {
+        return options;
+    }
+
+    const active = await client.getActiveContext(options);
+    if (active?.context?.kind === "microflow" && active.context.documentName) {
+        return {
+            ...options,
+            microflow: active.context.documentName,
+            microflowResolvedFrom: "activeContext"
+        };
+    }
+
+    if (!required) {
+        return options;
+    }
+
+    throw new Error("A microflow is required, or the active tab must be a microflow editor.");
+}
+
+async function resolveTabOption(client, options, { required }) {
+    if (options.tab) {
+        return resolveOpenTabOption(client, options, { required, allowActive: false });
+    }
+
+    const active = await client.getActiveContext(options);
+    if (active?.activeTab?.name) {
+        return {
+            ...options,
+            tab: active.activeTab.name,
+            tabResolvedFrom: "activeContext"
+        };
+    }
+
+    if (!required) {
+        return options;
+    }
+
+    throw new Error("A tab is required, or the automation must know the active editor tab.");
+}
+
+async function resolveContextItemOption(client, options) {
+    if (options.item || options.page || options.microflow) {
+        return options;
+    }
+
+    const active = await client.getActiveContext(options);
+    if (!active?.context?.documentName) {
+        return options;
+    }
+
+    if (active.context.kind === "microflow") {
+        return {
+            ...options,
+            microflow: active.context.documentName,
+            contextResolvedFrom: "activeContext"
+        };
+    }
+
+    if (active.context.kind === "page-or-document" || active.context.kind === "snippet") {
+        return {
+            ...options,
+            page: active.context.documentName,
+            contextResolvedFrom: "activeContext"
+        };
+    }
+
+    return {
+        ...options,
+        item: active.context.documentName,
+        contextResolvedFrom: "activeContext"
+    };
+}
+
+async function resolveOpenTabOption(client, options, { required, allowActive }) {
+    const openTabs = await client.listOpenTabs(options);
+    const items = Array.isArray(openTabs?.items) ? openTabs.items : [];
+
+    if (!options.tab) {
+        if (allowActive) {
+            const active = await client.getActiveContext(options);
+            if (active?.activeTab?.name) {
+                return {
+                    ...options,
+                    tab: active.activeTab.name,
+                    tabResolvedFrom: "activeContext"
+                };
+            }
+        }
+
+        if (!required) {
+            return options;
+        }
+
+        throw new Error("A tab is required.");
+    }
+
+    const query = options.tab;
+    const exactName = items.find(tab => tab?.name === query);
+    if (exactName) {
+        return {
+            ...options,
+            tab: exactName.name,
+            tabResolvedFrom: "exactName"
+        };
+    }
+
+    const exactDocument = items.find(tab => tab?.context?.documentName === query);
+    if (exactDocument) {
+        return {
+            ...options,
+            tab: exactDocument.name,
+            tabResolvedFrom: "documentName"
+        };
+    }
+
+    const partialMatches = items.filter(tab =>
+        typeof tab?.name === "string" &&
+        (tab.name.includes(query) || tab.context?.documentName?.includes(query))
+    );
+
+    if (partialMatches.length === 1) {
+        return {
+            ...options,
+            tab: partialMatches[0].name,
+            tabResolvedFrom: "partialName"
+        };
+    }
+
+    if (partialMatches.length > 1) {
+        throw new Error(`Tab query '${query}' matched multiple open tabs: ${partialMatches.map(tab => tab.name).join(", ")}`);
+    }
+
+    if (!required) {
+        return options;
+    }
+
+    throw new Error(`Could not find an open tab matching '${query}'.`);
 }
 
 function parseStudioProTabContext(tabName) {
@@ -180,6 +481,20 @@ function parseStudioProTabContext(tabName) {
         moduleName,
         kind: inferStudioProDocumentKind(documentName)
     };
+}
+
+function filterOpenTabs(items, options) {
+    return items.filter(tab => {
+        if (options.kind && tab.context?.kind !== options.kind) {
+            return false;
+        }
+
+        if (options.module && tab.context?.moduleName !== options.module) {
+            return false;
+        }
+
+        return true;
+    });
 }
 
 function inferStudioProDocumentKind(documentName) {
@@ -266,6 +581,17 @@ function normalizeProcessOptions(options) {
     return {
         ProcessId: options.processId,
         WindowTitlePattern: options.title
+    };
+}
+
+function normalizeVisibleTextOptions(options, scope) {
+    return {
+        ...normalizeProcessOptions(options),
+        Item: options.item,
+        Page: options.page,
+        Microflow: options.microflow,
+        Scope: scope,
+        Limit: numberOrDefault(options.limit, 200)
     };
 }
 

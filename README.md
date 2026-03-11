@@ -34,10 +34,13 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - report the best-known active editor tab
 - parse the active editor tab into document/module context
 - activate an already open editor tab directly
+- prepare or execute closing a specific open editor tab
 - select an `App Explorer` row by exact visible name
 - select a `Page Explorer` row by exact visible name
 - select an exact visible `Toolbox` item by name
 - list visible labels from App Explorer, Page Explorer, Toolbox, and the active editor
+- scope page/toolbox/editor discovery to the active Studio Pro dock container instead of scanning the whole window
+- fail fast when a page or microflow command cannot confirm that Studio Pro actually opened the requested document
 - prepare or execute first-pass widget insertion through Page Explorer + Toolbox
 - select a visible microflow node/action label
 - prepare or execute first-pass microflow action insertion through the Toolbox
@@ -53,23 +56,27 @@ npm run find -- --name "App Explorer"
 npm run find -- --control-type TreeItem --name "Document"
 npm run click -- --runtime-id "42.333896.3.1"
 npm run open-item -- --item "Client_ClinicalDocument_V4"
-npm run select-widget -- --page "Client_ClinicalDocument_V4" --widget "Olari_Popup_Default"
+npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Page is empty" --surface pageExplorer
 npm run popup-status
 npm run wait-ready -- --timeout-ms 60000
 npm run list-open-tabs
+npm run list-open-tabs -- --kind microflow
+npm run list-open-tabs -- --module Az_ClientManagement
 npm run active-tab
 npm run active-context
-npm run select-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]"
+npm run select-tab -- --tab "Client_ClinicalDocument_V3" --module "Az_ClientManagement"
+npm run close-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]" --dry-run
+npm run close-tab -- --dry-run
 npm run select-app-explorer-item -- --item "Client_ClinicalDocument_V3"
-npm run select-explorer-item -- --page "Client_ClinicalDocument_V4" --item "SNIP_PopupSubHeader_Program_StageTemplate"
-npm run select-toolbox-item -- --item "Deeply Nested List/Data View"
+npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "Page is empty"
+npm run select-toolbox-item -- --item "Create object"
 npm run list-app-explorer-items
-npm run list-page-explorer-items
-npm run list-toolbox-items
-npm run list-editor-labels
+npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
+npm run list-toolbox-items -- --microflow "ClinicalDocument_ShowPage"
+npm run list-editor-labels -- --microflow "ClinicalDocument_ShowPage"
 npm run insert-widget -- --page "Client_ClinicalDocument_V4" --target "container34" --widget "Deeply Nested List/Data View" --dry-run
-npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "Call microflow"
-npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Call microflow" --action-name "Show page" --dry-run
+npm run select-microflow-node -- --microflow "ClinicalDocument_ShowPage" --node "DocumentType"
+npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "DocumentType" --action-name "Create object" --dry-run
 ```
 
 You can also target the active Studio Pro window by title:
@@ -96,11 +103,12 @@ Phase 2:
 - higher-level operations: open page, open microflow, expand module, open toolbox category
 - current `open-item`, `select-widget`, `select-explorer-item`, `insert-widget`, `select-microflow-node`, and `insert-action` now prefer an already open matching editor tab before falling back to `Go to`
 - current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
-- current `select-widget` targets visible named elements on the active page editor; deeper Page Explorer tree selection still needs refinement
-- current `select-explorer-item` targets exact visible row names from the Page Explorer grid
-- current `select-toolbox-item` targets exact visible text items from the Toolbox pane
+- current `select-widget` can target both the editor surface and a named alternate surface like `pageExplorer`
+- current `select-explorer-item` targets exact visible Page Explorer rows from the Page Explorer dock container
+- current `select-toolbox-item` targets exact visible Toolbox items from the Toolbox dock container
 - current `insert-widget` supports a dry-run verification mode and an execution mode based on toolbox double-click insertion
-- current `insert-action` follows the same pattern for microflow actions
+- current `select-microflow-node` uses the active microflow editor container instead of the whole window
+- current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - operation recorder and selector stabilization
 
 ## Explicit Non-Goal
@@ -116,4 +124,5 @@ Phase 3:
 
 - Studio Pro must already be open on the same Windows desktop session.
 - UI Automation trees vary across Mendix versions and screen states, so selectors must be refined against the real app.
+- Commands that specify a page or microflow now error if the target could not be confirmed as an open Studio Pro editor tab. This avoids scraping the `Go to` dialog by accident.
 - The first goal is dependable control primitives, not yet full end-to-end authoring.

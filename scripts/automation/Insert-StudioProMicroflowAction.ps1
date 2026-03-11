@@ -22,13 +22,9 @@ if (-not $ActionName) {
     throw "A toolbox action name is required."
 }
 
-$attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-$openMethod = Open-OrSelectStudioProItem -Process $attached.Process -Root $attached.Element -Item $Microflow -DelayMs $DelayMs
-Start-Sleep -Milliseconds ($DelayMs + 150)
-
-$attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-Set-StudioProForegroundWindow -Process $attached.Process
-$targetMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $Target -Surface "editor"
+$microflowContext = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Item $Microflow -Scope "editor" -DelayMs $DelayMs
+$attached = $microflowContext.Attached
+$targetMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $Target -Surface "editor" -Item $Microflow
 if (-not $targetMatch) {
     throw "Could not find a visible microflow node named '$Target'."
 }
@@ -36,21 +32,8 @@ if (-not $targetMatch) {
 Invoke-BoundsClick -Bounds $targetMatch.boundingRectangle | Out-Null
 Start-Sleep -Milliseconds $DelayMs
 
-$attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
-$toolboxMatches = Find-MatchingElements -Root $attached.Element -Depth 10 -MaxResults 10 -Name "Toolbox" -ControlType "TabItem"
-if ($toolboxMatches.Length -eq 0) {
-    throw "Could not find the Toolbox tab."
-}
-
-$toolboxTab = Resolve-NativeElementByRuntimeId -Root $attached.Element -ExpectedRuntimeId $toolboxMatches[0].runtimeId -Depth 10
-if (-not $toolboxTab) {
-    throw "Could not resolve the native Toolbox tab."
-}
-
-Invoke-ElementAction -Element $toolboxTab -Action "click" | Out-Null
-Start-Sleep -Milliseconds $DelayMs
-
-$attached = Get-StudioProWindowElement -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern
+$toolboxContext = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Scope "toolbox" -DelayMs $DelayMs
+$attached = $toolboxContext.Attached
 $actionMatch = Select-ToolboxItemByName -Root $attached.Element -Item $ActionName
 if (-not $actionMatch) {
     throw "Could not find a visible Toolbox action named '$ActionName'."
@@ -70,7 +53,8 @@ $payload = @{
     actionName = $ActionName
     dryRun = [bool]$DryRun
     method = $method
-    openMethod = $openMethod
+    openMethod = $microflowContext.OpenMethod
+    tab = $microflowContext.Tab
     resolvedTarget = $targetMatch
     resolvedAction = $actionMatch
 }
