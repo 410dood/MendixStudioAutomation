@@ -253,6 +253,12 @@ Commit a scoped variable in a microflow through the extension API:
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
 ```
 
+Rollback a scoped variable in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --refresh-in-client false
+```
+
 Change an attribute on a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -314,6 +320,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `add-microflow-retrieve-database` inserts `Retrieve from database` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
+- `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.
 - `add-microflow-change-attribute` inserts `Change attribute` activities only at the start of the selected microflow.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.

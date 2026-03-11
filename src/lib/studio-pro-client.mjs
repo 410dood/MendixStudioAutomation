@@ -817,6 +817,59 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowRollbackObject(options = {}) {
+        const normalized = normalizeMicroflowVariableActionOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-rollback-object",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.variable) {
+            return {
+                ok: false,
+                action: "add-microflow-rollback-object",
+                error: "A --variable argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-rollback-object",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.rollbackObject"))) {
+            return {
+                ok: false,
+                action: "add-microflow-rollback-object",
+                error: "Extension capabilities do not include microflow.rollbackObject."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowRollbackObject({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            variable: normalized.variable,
+            refreshInClient: normalized.refreshInClient
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-rollback-object",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            variable: normalized.variable,
+            refreshInClient: normalized.refreshInClient
+        };
+    }
+
     async addMicroflowChangeAttribute(options = {}) {
         const normalized = normalizeMicroflowChangeAttributeOptions(options);
         if (!normalized.microflow) {

@@ -196,6 +196,11 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.rollbackObject",
+            description: "Insert a Rollback object activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.changeAttribute",
             description: "Insert a Change attribute activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"

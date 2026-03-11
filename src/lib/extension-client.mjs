@@ -219,6 +219,35 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowRollbackObject(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/rollback-object", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            variable: options.variable,
+            refreshInClient: options.refreshInClient
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowChangeAttribute(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -434,6 +463,7 @@ async function resolveEndpointDiscovery(options) {
                 microflowRetrieveDatabaseUrl: parsed.microflowRetrieveDatabaseUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
+                microflowRollbackObjectUrl: parsed.microflowRollbackObjectUrl,
                 microflowChangeAttributeUrl: parsed.microflowChangeAttributeUrl,
                 baseUrl: parsed.baseUrl,
                 routePrefix: parsed.routePrefix

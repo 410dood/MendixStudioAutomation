@@ -1,5 +1,29 @@
 # Release Notes
 
+## 0.2.9
+
+Hybrid write-path expansion for microflow rollback actions.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/rollback-object`
+- Added Studio Pro client support for:
+  - inserting a `Rollback object` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm script:
+  - `add-microflow-rollback-object`
+  - `npm run add-microflow-rollback-object`
+- Added options to support rollback insertion:
+  - `--variable`
+  - `--refresh-in-client`
+  - `--microflow`
+  - `--module`
+- Updated operation catalog with:
+  - `microflow.rollbackObject`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+- Kept commit-related behavior unchanged (review-first workflow; no version-control commits).
+
 ## 0.2.8
 
 Hybrid write-path expansion for microflow database retrieval.

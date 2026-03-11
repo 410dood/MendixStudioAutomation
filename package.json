@@ -21,6 +21,7 @@
     "add-microflow-retrieve-database": "node src/cli.mjs add-microflow-retrieve-database",
     "add-microflow-delete-object": "node src/cli.mjs add-microflow-delete-object",
     "add-microflow-commit-object": "node src/cli.mjs add-microflow-commit-object",
+    "add-microflow-rollback-object": "node src/cli.mjs add-microflow-rollback-object",
     "add-microflow-change-attribute": "node src/cli.mjs add-microflow-change-attribute",
     "open-properties": "node src/cli.mjs open-properties",
     "open-item": "node src/cli.mjs open-item",

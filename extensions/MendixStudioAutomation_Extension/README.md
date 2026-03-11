@@ -21,6 +21,7 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/microflows/retrieve-database`
   - `/mendix-studio-automation/microflows/delete-object`
   - `/mendix-studio-automation/microflows/commit-object`
+  - `/mendix-studio-automation/microflows/rollback-object`
   - `/mendix-studio-automation/microflows/change-attribute`
 - tracks the active Studio Pro document through `ActiveDocumentChanged`
 - writes a runtime discovery file to `runtime/endpoint.json`
@@ -70,6 +71,7 @@ That keeps the extension root in the Mendix-documented shape:
   - add a `Retrieve from database` activity in a target microflow
   - add a `Delete object` activity in a target microflow
   - add a `Commit object` activity in a target microflow
+  - add a `Rollback object` activity in a target microflow
   - add a `Change attribute` activity in a target microflow
 
 Remaining write operations are intentionally not implemented yet.
