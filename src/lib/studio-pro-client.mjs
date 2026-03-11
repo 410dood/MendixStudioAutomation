@@ -561,14 +561,17 @@ export class StudioProClient {
         const tab = result?.activeTab ?? null;
         const uiContext = tab ? parseStudioProTabContext(tab.name) : null;
         const extension = await safeGetExtensionContext(this, options);
-        const context = mergeActiveContexts(uiContext, extension?.context ?? null);
+        const extensionContext = extension?.context ?? null;
+        const extensionContributed = Boolean(extensionContext?.activeDocument?.documentName || extensionContext?.activeDocument?.documentType);
+        const context = mergeActiveContexts(uiContext, extensionContext);
 
         return {
             ...result,
             context,
             uiContext,
-            extensionContext: extension?.context ?? null,
-            contextSource: extension?.context ? "extension+uia" : "uia"
+            extensionContext,
+            contextSource: extensionContributed ? "extension+uia" : "uia",
+            extensionContributed
         };
     }
 

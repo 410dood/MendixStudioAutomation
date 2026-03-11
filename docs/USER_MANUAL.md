@@ -672,6 +672,7 @@ npm run rag-search -- --query "insert-before-index create-object" --scope "READM
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.
 - `active-context` combines UI automation tab state with extension-reported active-document metadata when the extension is available. Without the extension, it falls back to tab-based inference.
+- `active-context` now also reports whether the extension actually contributed document metadata via `extensionContributed`.
 - `select-tab` and `close-tab` accept the full tab title, the document name, or a unique partial match across open tabs.
 - `--module` can be used with open-tab commands to disambiguate tabs that share the same document name.
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.

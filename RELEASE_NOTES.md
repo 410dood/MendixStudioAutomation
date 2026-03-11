@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.2.42
+
+More accurate active-context source reporting.
+
+- Enhanced `active-context` to distinguish:
+  - when extension metadata actually contributed to the resolved document context
+  - when the result is effectively still UI-automation-only
+- Added `extensionContributed` to active-context output
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.41
 
 Extension-backed search fallback for document opening.
