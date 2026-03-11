@@ -290,7 +290,7 @@ Phase 2:
 - current `insert-widget` is now producing confirmed Page Explorer mutations on `Client_ClinicalDocument_V3`, including live insertions under `container39` and `container38`
 - current dialog inspection is sufficient to read local-run blockers such as Studio Pro `Information` dialogs
 - current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
-- current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit` and `ComboBox` controls
+- current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit`, `ComboBox`, `CheckBox`, and `ToggleButton` controls
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - current `insert-action` now records before/after microflow-editor snapshots and any post-action dialog so failed action-insert gestures are diagnosable instead of opaque

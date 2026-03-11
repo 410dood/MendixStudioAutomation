@@ -1652,7 +1652,7 @@ function Find-DialogFieldByLabel {
     $candidateTypes = if ($ControlType) {
         @($ControlType)
     } else {
-        @("Edit", "ComboBox")
+        @("Edit", "ComboBox", "CheckBox", "ToggleButton")
     }
 
     $allCandidates = @()
@@ -1703,6 +1703,24 @@ function Set-ClipboardTextValue {
     [System.Windows.Forms.Clipboard]::SetText($Value)
 }
 
+function ConvertTo-DialogBooleanValue {
+    param(
+        [string]$Value
+    )
+
+    if ($null -eq $Value) {
+        throw "A boolean dialog field value is required."
+    }
+
+    switch -Regex ($Value.Trim().ToLowerInvariant()) {
+        "^(true|1|yes|y|on|checked)$" { return $true }
+        "^(false|0|no|n|off|unchecked)$" { return $false }
+        default {
+            throw "The value '$Value' is not a supported boolean dialog field value. Use true/false, yes/no, on/off, or 1/0."
+        }
+    }
+}
+
 function Set-DialogFieldValue {
     param(
         [System.Windows.Automation.AutomationElement]$Dialog,
@@ -1731,16 +1749,56 @@ function Set-DialogFieldValue {
 
     $method = $selection.method
     if ($nativeField) {
-        $valuePattern = $null
-        if ($nativeField.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$valuePattern)) {
-            $valuePattern.SetValue($Value)
-            Start-Sleep -Milliseconds $DelayMs
-            $method = "valuePattern"
+        $fieldControlType = [string]$FieldMatch.field.controlType
+        if ($fieldControlType -in @("CheckBox", "ToggleButton")) {
+            $targetState = ConvertTo-DialogBooleanValue -Value $Value
+            $togglePattern = $null
+            if ($nativeField.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern, [ref]$togglePattern)) {
+                $currentState = $togglePattern.Current.ToggleState
+                if ($currentState -eq [System.Windows.Automation.ToggleState]::Indeterminate) {
+                    throw "The dialog field '$($FieldMatch.label.name)' is indeterminate and cannot be set safely."
+                }
+
+                $isChecked = $currentState -eq [System.Windows.Automation.ToggleState]::On
+                if ($isChecked -ne $targetState) {
+                    $togglePattern.Toggle()
+                    Start-Sleep -Milliseconds $DelayMs
+                }
+
+                $method = "togglePattern"
+            } else {
+                $invokePattern = $null
+                if (-not $nativeField.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$invokePattern)) {
+                    throw "The dialog field '$($FieldMatch.label.name)' does not support TogglePattern or InvokePattern."
+                }
+
+                $legacyPattern = $null
+                if ($nativeField.TryGetCurrentPattern([System.Windows.Automation.LegacyIAccessiblePattern]::Pattern, [ref]$legacyPattern)) {
+                    $legacyState = [int]$legacyPattern.Current.State
+                    $isChecked = ($legacyState -band 0x10) -ne 0
+                    if ($isChecked -ne $targetState) {
+                        $invokePattern.Invoke()
+                        Start-Sleep -Milliseconds $DelayMs
+                    }
+                    $method = "invokePatternLegacyState"
+                } else {
+                    $invokePattern.Invoke()
+                    Start-Sleep -Milliseconds $DelayMs
+                    $method = "invokePatternBlindToggle"
+                }
+            }
         } else {
-            Set-ClipboardTextValue -Value $Value
-            Send-KeysToForegroundWindow -Keys "^a" -DelayMs 80
-            Send-KeysToForegroundWindow -Keys "^v" -DelayMs $DelayMs
-            $method = "clipboardPaste"
+            $valuePattern = $null
+            if ($nativeField.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$valuePattern)) {
+                $valuePattern.SetValue($Value)
+                Start-Sleep -Milliseconds $DelayMs
+                $method = "valuePattern"
+            } else {
+                Set-ClipboardTextValue -Value $Value
+                Send-KeysToForegroundWindow -Keys "^a" -DelayMs 80
+                Send-KeysToForegroundWindow -Keys "^v" -DelayMs $DelayMs
+                $method = "clipboardPaste"
+            }
         }
     }
 

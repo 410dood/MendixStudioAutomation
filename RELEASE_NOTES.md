@@ -1132,6 +1132,7 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
 - `create-page` is currently strongest when the desired template is already visible in the right-hand template panel. Left-side template-category switching in the wizard still needs more hardening.
+- `set-dialog-field` now supports `CheckBox` and `ToggleButton` controls in native Studio Pro dialogs, including boolean value normalization for `true/false`, `yes/no`, `on/off`, and `1/0`.
 - `set-dialog-field` is present but still experimental; it needs more validation across a wider range of Studio Pro property dialogs.
 - the current real `insert-action` gesture is still not inserting a visible activity on `ClinicalDocument_ShowPage`; current instrumentation shows it can open the parent microflow properties dialog instead.
 - the current `Add > Activity` menu path is stable on `ClinicalDocument_ShowPage`, but it still does not produce a confirmed visible activity mutation by itself or after the current placement-click experiment.
