@@ -46,6 +46,15 @@ export class StudioProClient {
         });
     }
 
+    async createPage(options = {}) {
+        const result = await runPowerShellScript("scripts/automation/Create-StudioProPage.ps1", normalizeCreatePageOptions(options));
+        await rememberActiveTabFromPayload(result);
+        if (options.pageName) {
+            await rememberActiveTabByItemName(this, options.pageName, options);
+        }
+        return result;
+    }
+
     async openProperties(options = {}) {
         const resolvedOptions = await resolveContextItemOption(this, options);
         const result = await runPowerShellScript("scripts/automation/Open-StudioProProperties.ps1", {
@@ -730,6 +739,18 @@ function normalizeSendKeysOptions(options) {
         Scope: options.scope,
         Keys: options.keys,
         DelayMs: numberOrDefault(options.delayMs, 250)
+    };
+}
+
+function normalizeCreatePageOptions(options) {
+    return {
+        ProcessId: options.processId,
+        WindowTitlePattern: options.title,
+        Module: options.module,
+        PageName: options.pageName ?? options.name,
+        Template: options.template,
+        DelayMs: numberOrDefault(options.delayMs, 250),
+        TimeoutMs: numberOrDefault(options.timeoutMs, 15000)
     };
 }
 

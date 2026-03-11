@@ -12,6 +12,7 @@ Included in this release:
 - popup inspection and wait-until-ready commands
 - generic Studio Pro key-chord sending
 - first-pass shortcuts for local run, stop, and responsive web
+- first-pass native page creation through Studio Pro `New Document` and `Create Page`
 - first-pass native properties-dialog opening from selected editor targets
 - document opening through Studio Pro `Go to`
 - open-editor tab listing and direct tab activation
@@ -37,6 +38,7 @@ Included in this release:
 - `insert-widget` now disambiguates duplicate widget names in the `Select Widget` dialog by testing whether the `Select` button becomes enabled
 - `insert-widget` now records accept-strategy attempts and before/after Page Explorer snapshots for mutation debugging
 - `insert-widget` is now validated for real Page Explorer mutations on visible page containers such as `container39` and `container38`
+- `create-page` is now validated against the default right-hand page-template flow and can create pages such as `Clients`, `Clients_Auto2`, and `Clients_Auto3` in `Az_ClientManagement`
 - dialog-control invocation now reports whether the dialog actually closed
 - local-run validation can now surface and inspect Studio Pro `Information` dialogs when deployment is blocked
 - `open-properties` is now validated against editor-surface targets that open `Edit Template Grid 'templateGrid1'`
@@ -69,6 +71,7 @@ Known limitations:
 - page explorer can still report Studio Pro's empty-state placeholder for some page tabs; the command now reports that cleanly instead of scraping unrelated panes.
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
+- `create-page` is currently strongest when the desired template is already visible in the right-hand template panel. Left-side template-category switching in the wizard still needs more hardening.
 - `set-dialog-field` is present but still experimental; it needs more validation across a wider range of Studio Pro property dialogs.
 - the current real `insert-action` gesture is still not inserting a visible activity on `ClinicalDocument_ShowPage`; current instrumentation shows it can open the parent microflow properties dialog instead.
 - the current `Add > Activity` menu path is stable on `ClinicalDocument_ShowPage`, but it still does not produce a confirmed visible activity mutation by itself or after the current placement-click experiment.

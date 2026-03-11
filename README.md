@@ -31,6 +31,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - select a visible named widget or page element on the active designer surface
 - send arbitrary key chords to Studio Pro or the active editor context
 - trigger first-pass local run and responsive web shortcuts from Studio Pro
+- create pages through Studio Pro's native `New Document` and `Create Page` wizards
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -68,6 +69,7 @@ npm run click -- --runtime-id "42.333896.3.1"
 npm run send-keys -- --page "Client_ClinicalDocument_V3" --scope editor --keys "^,"
 npm run run-local
 npm run show-responsive-web
+npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
@@ -127,6 +129,8 @@ Phase 2:
 
 - higher-level operations: open page, open microflow, expand module, open toolbox category
 - current `open-item`, `select-widget`, `select-explorer-item`, `insert-widget`, `select-microflow-node`, and `insert-action` now prefer an already open matching editor tab before falling back to `Go to`
+- current `create-page` drives the native `New Document` and `Create Page` dialogs and is validated for creating pages like `Clients`, `Clients_Auto2`, and `Clients_Auto3` in `Az_ClientManagement`
+- current `create-page` selects the first visible right-hand page template card by default and is validated against the default `Dashboard Action Center` template flow
 - current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
 - current `select-widget` can target both the editor surface and a named alternate surface like `pageExplorer`
 - current `select-widget` is validated against real page-designer labels on `Client_ClinicalDocument_V3`
@@ -165,4 +169,5 @@ Phase 3:
 - Studio Pro must already be open on the same Windows desktop session.
 - UI Automation trees vary across Mendix versions and screen states, so selectors must be refined against the real app.
 - Commands that specify a page or microflow now error if the target could not be confirmed as an open Studio Pro editor tab. This avoids scraping the `Go to` dialog by accident.
+- `create-page` is currently strongest when using the default visible template cards on the right side of the Create Page wizard. Left-pane template-category switching still needs more hardening.
 - The first goal is dependable control primitives, not yet full end-to-end authoring.

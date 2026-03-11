@@ -45,6 +45,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "create-page": {
+            const result = await client.createPage(options);
+            formatOutput(result);
+            return;
+        }
         case "open-properties": {
             const result = await client.openProperties(options);
             formatOutput(result);
@@ -220,6 +225,7 @@ Commands:
   run-local                   Run the current app locally in Studio Pro
   stop-local                  Stop a locally running app in Studio Pro
   show-responsive-web         Open the app in Studio Pro's responsive browser view
+  create-page                 Create a Mendix page through the native Studio Pro wizard
   open-properties             Open the properties dialog for a selected Studio Pro item
   open-item                   Open a Studio Pro document by name with Ctrl+G
   select-widget               Select a visible named widget or page element
@@ -264,8 +270,10 @@ Options:
   --runtime-id <a.b.c>        Runtime id returned by find/snapshot
   --max-results <n>           Max matches returned by find
   --keys <value>              Studio Pro key chord for send-keys, e.g. "{F5}" or "^,"
+  --page-name <name>          Page name for create-page
   --scope <name>              editor, pageExplorer, toolbox, or another named scope
   --item <name>               Document, page, snippet, microflow, or entity name to open
+  --template <name>           Visible template name for create-page
   --page <name>               Page to open before selecting a widget
   --widget <name>             Visible widget or element name to select
   --surface <name>            editor or any (default: editor)
@@ -289,7 +297,7 @@ Options:
   --node <name>               Visible microflow node label to select
   --tab <name>                Open Studio Pro editor tab name to activate or close
   --kind <name>               Filter open tabs by kind, e.g. microflow or page-or-document
-  --module <name>             Filter or disambiguate by Mendix module name
+  --module <name>             Filter or disambiguate by Mendix module name, or target module for create-page
   --control-type <name>       Optional dialog field type filter such as Edit or ComboBox
 `);
 }

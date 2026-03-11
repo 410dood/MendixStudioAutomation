@@ -833,9 +833,11 @@ function Open-OrSelectStudioProItemAndAttach {
     }
 
     if ($tab) {
-        Invoke-BoundsClick -Bounds $tab.boundingRectangle | Out-Null
-        Start-Sleep -Milliseconds $DelayMs
-        $attached = Get-StudioProWindowElement -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern
+        if (-not $tab.isOffscreen) {
+            Invoke-BoundsClick -Bounds $tab.boundingRectangle | Out-Null
+            Start-Sleep -Milliseconds $DelayMs
+            $attached = Get-StudioProWindowElement -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern
+        }
     }
 
     return @{
@@ -849,6 +851,7 @@ function Focus-StudioProScope {
     param(
         [System.Windows.Automation.AutomationElement]$Root,
         [string]$Scope = "editor",
+        [string]$Item = "",
         [int]$DelayMs = 250
     )
 
@@ -870,7 +873,12 @@ function Focus-StudioProScope {
             return
         }
         default {
-            $bounds = Get-ScopeBounds -Root $Root -Scope "editor"
+            $bounds = if ($Item) {
+                $editorBounds = Get-OpenEditorContentBoundsByItem -Root $Root -Item $Item
+                if ($editorBounds) { $editorBounds } else { Get-ScopeBounds -Root $Root -Scope "editor" }
+            } else {
+                Get-ScopeBounds -Root $Root -Scope "editor"
+            }
             if ($null -eq $bounds.left -or $null -eq $bounds.top -or $null -eq $bounds.right -or $null -eq $bounds.bottom) {
                 return
             }
@@ -882,10 +890,10 @@ function Focus-StudioProScope {
             }
 
             Invoke-BoundsClick -Bounds @{
-                left = $bounds.left + 8
-                top = $bounds.top + 8
-                width = $width - 16
-                height = $height - 16
+                left = $bounds.left + [Math]::Max(16, [int]($width * 0.25))
+                top = $bounds.top + [Math]::Max(16, [int]($height * 0.25))
+                width = [Math]::Max(24, [int]($width * 0.5))
+                height = [Math]::Max(24, [int]($height * 0.5))
             } | Out-Null
             Start-Sleep -Milliseconds $DelayMs
             return
@@ -917,7 +925,7 @@ function Enter-StudioProScope {
     }
 
     Set-StudioProForegroundWindow -Process $attached.Process
-    Focus-StudioProScope -Root $attached.Element -Scope $Scope -DelayMs $DelayMs
+    Focus-StudioProScope -Root $attached.Element -Scope $Scope -Item $Item -DelayMs $DelayMs
     $attached = Get-StudioProWindowElement -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern
 
     return @{
@@ -1163,11 +1171,14 @@ function Open-OrSelectStudioProItem {
     )
 
     $openTab = Find-OpenEditorTabForItem -Root $Root -Item $Item
-    if ($openTab -and -not $openTab.isOffscreen) {
-        Invoke-BoundsClick -Bounds $openTab.boundingRectangle | Out-Null
-        Start-Sleep -Milliseconds $DelayMs
+    if ($openTab) {
+        if (-not $openTab.isOffscreen) {
+            Invoke-BoundsClick -Bounds $openTab.boundingRectangle | Out-Null
+            Start-Sleep -Milliseconds $DelayMs
+        }
+
         return @{
-            method = "selectOpenTab"
+            method = if ($openTab.isOffscreen) { "reuseOpenTab" } else { "selectOpenTab" }
             tab = $openTab
         }
     }
@@ -1739,6 +1750,178 @@ function Set-DialogFieldValue {
         label = $FieldMatch.label
         field = $FieldMatch.field
         value = $Value
+    }
+}
+
+function Get-DialogNamedTextMatches {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [string]$Name = "",
+        [int]$Limit = 200
+    )
+
+    if (-not $Dialog) {
+        throw "A native Studio Pro dialog is required."
+    }
+
+    $items = @(Find-DialogNamedElements -Dialog $Dialog -Name $Name -Limit $Limit | Where-Object {
+        $_.controlType -eq "Text"
+    })
+
+    return @($items | Sort-Object `
+        @{ Expression = { $_.boundingRectangle.top } }, `
+        @{ Expression = { $_.boundingRectangle.left } })
+}
+
+function Resolve-DialogVisualCardByText {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [hashtable]$TextMatch,
+        [double]$MinWidth = 260,
+        [double]$MinHeight = 120,
+        [double]$MinLeftOffset = 280,
+        [double]$MinTopOffset = 180
+    )
+
+    if (-not $Dialog) {
+        throw "A native Studio Pro dialog is required."
+    }
+
+    if (-not $TextMatch) {
+        throw "A dialog text match is required."
+    }
+
+    $dialogBounds = Convert-BoundingRectangle -Rect $Dialog.Current.BoundingRectangle
+    $native = $null
+    if ($TextMatch.runtimeId) {
+        $native = Resolve-NativeElementByRuntimeId -Root $Dialog -ExpectedRuntimeId $TextMatch.runtimeId -Depth 20
+    }
+
+    if (-not $native) {
+        return $null
+    }
+
+    $current = $native
+    $best = $null
+    while ($current) {
+        $candidate = Convert-AutomationElement -Element $current
+        $bounds = $candidate.boundingRectangle
+        if (
+            $bounds.left -ne $null -and
+            $bounds.top -ne $null -and
+            $bounds.width -ne $null -and
+            $bounds.height -ne $null -and
+            $bounds.width -ge $MinWidth -and
+            $bounds.height -ge $MinHeight -and
+            $bounds.left -ge ($dialogBounds.left + $MinLeftOffset) -and
+            $bounds.top -ge ($dialogBounds.top + $MinTopOffset)
+        ) {
+            $best = $candidate
+            break
+        }
+
+        $current = Get-AutomationParent -Element $current
+    }
+
+    if ($best) {
+        return $best
+    }
+
+    return @{
+        name = $TextMatch.name
+        automationId = $TextMatch.automationId
+        className = $TextMatch.className
+        controlType = $TextMatch.controlType
+        frameworkId = $TextMatch.frameworkId
+        runtimeId = $TextMatch.runtimeId
+        processId = $TextMatch.processId
+        isEnabled = $TextMatch.isEnabled
+        isOffscreen = $TextMatch.isOffscreen
+        isSelected = $TextMatch.isSelected
+        boundingRectangle = @{
+            left = [math]::Max($dialogBounds.left + $MinLeftOffset, $TextMatch.boundingRectangle.left - 72)
+            top = [math]::Max($dialogBounds.top + $MinTopOffset, $TextMatch.boundingRectangle.top - 72)
+            width = [math]::Max($MinWidth, $TextMatch.boundingRectangle.width + 144)
+            height = [math]::Max($MinHeight, $TextMatch.boundingRectangle.height + 144)
+            right = [math]::Max($dialogBounds.left + $MinLeftOffset + $MinWidth, $TextMatch.boundingRectangle.right + 72)
+            bottom = [math]::Max($dialogBounds.top + $MinTopOffset + $MinHeight, $TextMatch.boundingRectangle.bottom + 72)
+        }
+    }
+}
+
+function Get-CreatePageTemplateChoices {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [int]$Limit = 60
+    )
+
+    if (-not $Dialog) {
+        throw "A native Studio Pro dialog is required."
+    }
+
+    $dialogBounds = Convert-BoundingRectangle -Rect $Dialog.Current.BoundingRectangle
+    $ignoredNames = @(
+        "Responsive (Web)",
+        "Tablet (Web)",
+        "Phone (Web)",
+        "Native mobile",
+        "Page name",
+        "Navigation layout",
+        "OK",
+        "Cancel"
+    )
+
+    $matches = @(Get-DialogNamedTextMatches -Dialog $Dialog -Limit $Limit | Where-Object {
+        $_.name -and
+        ($ignoredNames -notcontains $_.name) -and
+        $_.boundingRectangle.left -ge ($dialogBounds.left + 320) -and
+        $_.boundingRectangle.top -ge ($dialogBounds.top + 220)
+    })
+
+    return @($matches)
+}
+
+function Select-CreatePageTemplateCard {
+    param(
+        [System.Windows.Automation.AutomationElement]$Dialog,
+        [string]$Template = "",
+        [int]$DelayMs = 250
+    )
+
+    if (-not $Dialog) {
+        throw "A native Studio Pro dialog is required."
+    }
+
+    $choices = @(Get-CreatePageTemplateChoices -Dialog $Dialog -Limit 80)
+    if ($choices.Length -eq 0) {
+        return $null
+    }
+
+    $choice = @(
+        if ($Template) {
+            $choices | Where-Object { $_.name -eq $Template } | Select-Object -First 1
+        } else {
+            $choices | Select-Object -First 1
+        }
+    )
+
+    if ($choice.Count -eq 0) {
+        return $null
+    }
+
+    $card = Resolve-DialogVisualCardByText -Dialog $Dialog -TextMatch $choice[0]
+    if (-not $card) {
+        return $null
+    }
+
+    $method = Invoke-BoundsClick -Bounds $card.boundingRectangle
+    Start-Sleep -Milliseconds $DelayMs
+
+    return @{
+        choice = $choice[0]
+        card = $card
+        method = $method
+        availableChoices = @($choices)
     }
 }
 

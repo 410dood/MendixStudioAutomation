@@ -36,6 +36,7 @@ npm run send-keys -- --keys "{ESC}"
 npm run run-local
 npm run stop-local
 npm run show-responsive-web
+npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 ```
 
@@ -86,6 +87,22 @@ npm run open-item -- --item "ClinicalDocument_ShowPage"
 ```
 
 If a matching page or microflow is already open, the automation now reuses that tab first. Otherwise it falls back to Studio Pro's built-in `Go to` flow.
+
+### Page creation
+
+Create a new page through Studio Pro's native wizards:
+
+```powershell
+npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
+```
+
+You can also request a specific visible template name when the right-hand template card is already present in the `Create Page` wizard:
+
+```powershell
+npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto4" --template "Dashboard Action Center"
+```
+
+The current flow is validated for page creation in `Az_ClientManagement`. It is currently strongest on the default visible right-hand template cards in the `Create Page` dialog.
 
 ### Open tab control
 
@@ -200,6 +217,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - Some Studio Pro panes expose rows as text, some as data rows, and some as custom WPF controls.
 - The Toolbox pane is now discovered from its own dock container, which is substantially more reliable than the earlier whole-window scan.
 - The page-designer path is now validated on `Client_ClinicalDocument_V3`, including `Structure mode`, `Olari_Popup_Default`, and real Page Explorer rows like `container34`.
+- `create-page` is now validated for native page creation in `Az_ClientManagement`, including pages like `Clients`, `Clients_Auto2`, and `Clients_Auto3`.
 - Native dialog commands are now reliable enough to inspect and drive WPF dialogs like `Select Widget`.
 - `insert-widget` now performs real native widget insertion on validated visible page-explorer targets, not just dry-run resolution.
 - `invoke-dialog-control` now reports whether the target dialog actually closed after the control click.
@@ -217,6 +235,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
+- `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.
 - `run-local`, `stop-local`, and `show-responsive-web` now expose blocking Studio Pro dialogs cleanly, but they still do not verify runtime readiness or browser content.
 - `open-properties` is currently validated on the page designer and `pageExplorer`. Other scopes may still need tuning.
 

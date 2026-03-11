@@ -26,6 +26,11 @@ export const operationCatalog = {
             status: "implemented-first-pass"
         },
         {
+            id: "page.create",
+            description: "Create a Mendix page through the native New Document and Create Page wizards.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "studio.openProperties",
             description: "Open the native Studio Pro properties dialog for a selected item.",
             status: "implemented-first-pass"

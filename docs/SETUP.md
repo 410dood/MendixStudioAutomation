@@ -37,6 +37,7 @@ Use these commands to confirm the agent can see Studio Pro:
 npm run status
 npm run popup-status
 npm run wait-ready -- --timeout-ms 5000
+npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 ```
 
 If those work, try a safe selection-only command:
@@ -64,6 +65,7 @@ npm run close-tab -- --dry-run
 If a page or microflow is already open, `open-item` will now reuse that tab before falling back to Studio Pro's `Go to` dialog.
 If a page or microflow command cannot confirm that Studio Pro actually opened the requested document, it now fails explicitly instead of scraping the wrong window state.
 Dialog-oriented commands can be used against native Studio Pro windows like `Select Widget` once they are visible.
+`create-page` is now validated for native page creation when the desired template is already visible in the right-hand panel of the `Create Page` wizard.
 
 ## Safety Model
 

@@ -35,8 +35,28 @@ if ($matches.Length -eq 0) {
     throw "Could not find a visible '$Control' control in the Studio Pro dialog '$Dialog'."
 }
 
+function Get-DialogControlPreference {
+    param(
+        [hashtable]$Match
+    )
+
+    switch ($Match.controlType) {
+        "Button" { return 0 }
+        "DataItem" { return 1 }
+        "ListItem" { return 2 }
+        "TreeItem" { return 3 }
+        "CheckBox" { return 4 }
+        "RadioButton" { return 5 }
+        "ComboBox" { return 6 }
+        "Edit" { return 7 }
+        "MenuItem" { return 8 }
+        "Text" { return 20 }
+        default { return 30 }
+    }
+}
+
 $match = $matches | Sort-Object `
-    @{ Expression = { Get-ControlTypePriority -ControlType $_.controlType } }, `
+    @{ Expression = { Get-DialogControlPreference -Match $_ } }, `
     @{ Expression = { $_.boundingRectangle.top } }, `
     @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1
 
