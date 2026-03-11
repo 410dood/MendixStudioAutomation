@@ -91,6 +91,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/microflows/aggregate-list", HandleAggregateListMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/aggregate-by-attribute", HandleAggregateByAttributeMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/aggregate-by-expression", HandleAggregateByExpressionMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/change-list", HandleChangeListMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/delete-object", HandleDeleteMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/commit-object", HandleCommitMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/rollback-object", HandleRollbackMicroflowObjectAsync);
@@ -238,6 +239,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "microflow.aggregateList",
             "microflow.aggregateByAttribute",
             "microflow.aggregateByExpression",
+            "microflow.changeList",
             "microflow.deleteObject",
             "microflow.commitObject",
             "microflow.rollbackObject",
@@ -2648,6 +2650,159 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleChangeListMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var listVariableName = request.QueryString["listVariable"] ?? request.QueryString["list"] ?? request.QueryString["sourceList"];
+        var rawOperation = request.QueryString["changeListOperation"] ?? request.QueryString["operation"] ?? request.QueryString["changeType"];
+        var rawValueExpression = request.QueryString["value"] ?? request.QueryString["expression"] ?? request.QueryString["itemExpression"];
+        var outputVariableName = request.QueryString["outputVariableName"] ?? request.QueryString["outputVariable"] ?? request.QueryString["output"];
+
+        if (!TryParseChangeListActionOperation(rawOperation, out var changeListOperation))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = $"The 'changeListOperation' query parameter is invalid. Allowed values: {string.Join(", ", Enum.GetNames<ChangeListActionOperation>())}."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(listVariableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'listVariable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        var expressionInput = string.IsNullOrWhiteSpace(rawValueExpression)
+            ? (changeListOperation == ChangeListActionOperation.Clear ? "empty" : null)
+            : rawValueExpression.Trim();
+        if (string.IsNullOrWhiteSpace(expressionInput))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'value' (or 'expression') query parameter is required unless changeListOperation is Clear."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var listVariable = listVariableName.Trim();
+            var expressionText = string.Equals(expressionInput, "empty", StringComparison.OrdinalIgnoreCase)
+                ? "empty"
+                : ToExpressionText(expressionInput);
+            var expression = _microflowExpressionService.CreateFromString(expressionText);
+
+            using var tx = CurrentApp.StartTransaction($"Add Change list activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateChangeListActivity(
+                CurrentApp,
+                changeListOperation,
+                listVariable,
+                expression);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert a Change list activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                listVariable,
+                changeListOperation = changeListOperation.ToString(),
+                expression = expressionInput,
+                route = "microflows/change-list",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow change-list activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private Task HandleDeleteMicroflowObjectAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
         if (CurrentApp?.Root is not IProject project)
@@ -3508,6 +3663,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowAggregateListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/aggregate-list"),
                 microflowAggregateByAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/aggregate-by-attribute"),
                 microflowAggregateByExpressionUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/aggregate-by-expression"),
+                microflowChangeListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/change-list"),
                 microflowDeleteObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/delete-object"),
                 microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object"),
                 microflowRollbackObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/rollback-object"),
@@ -4149,6 +4305,22 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
 
         if (Enum.TryParse<AggregateFunctionEnum>(raw, ignoreCase: true, out aggregateFunction))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryParseChangeListActionOperation(string? raw, out ChangeListActionOperation operation)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            operation = ChangeListActionOperation.Add;
+            return true;
+        }
+
+        if (Enum.TryParse<ChangeListActionOperation>(raw, ignoreCase: true, out operation))
         {
             return true;
         }

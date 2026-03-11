@@ -29,6 +29,7 @@
     "add-microflow-aggregate-list": "node src/cli.mjs add-microflow-aggregate-list",
     "add-microflow-aggregate-by-attribute": "node src/cli.mjs add-microflow-aggregate-by-attribute",
     "add-microflow-aggregate-by-expression": "node src/cli.mjs add-microflow-aggregate-by-expression",
+    "add-microflow-change-list": "node src/cli.mjs add-microflow-change-list",
     "add-microflow-delete-object": "node src/cli.mjs add-microflow-delete-object",
     "add-microflow-commit-object": "node src/cli.mjs add-microflow-commit-object",
     "add-microflow-rollback-object": "node src/cli.mjs add-microflow-rollback-object",

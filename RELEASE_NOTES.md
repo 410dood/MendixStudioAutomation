@@ -1,5 +1,28 @@
 # Release Notes
 
+## 0.2.17
+
+Hybrid write-path expansion for microflow change-list operations.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/change-list`
+- Added extension capability:
+  - `microflow.changeList`
+- Added Studio Pro client support for:
+  - inserting a `Change list` action into a selected microflow via extension service APIs
+  - `Set`, `Add`, `Remove`, and `Clear` list operations
+- Added CLI plumbing and npm script:
+  - `add-microflow-change-list`
+  - `npm run add-microflow-change-list`
+- Added CLI option:
+  - `--change-list-operation`
+- Updated operation catalog with:
+  - `microflow.changeList`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.16
 
 Hybrid write-path expansion for microflow aggregate operations.

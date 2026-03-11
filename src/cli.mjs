@@ -275,6 +275,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-change-list": {
+            const result = await client.addMicroflowChangeList(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -421,6 +426,7 @@ Commands:
   add-microflow-aggregate-list Add a microflow Aggregate list activity through the extension
   add-microflow-aggregate-by-attribute Add a microflow Aggregate by attribute activity through the extension
   add-microflow-aggregate-by-expression Add a microflow Aggregate by expression activity through the extension
+  add-microflow-change-list   Add a microflow Change list activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-rollback-object Add a microflow Rollback object activity through the extension
@@ -507,6 +513,7 @@ Options:
   --association <name>        Association to mutate or retrieve by: Association, Entity.Association, or Module.Entity.Association
   --value <text>              New value/expression for change actions; alias for association filter/find expressions
   --change-type <name>        Change type for change-attribute/change-association actions: Set|Add|Remove
+  --change-list-operation <name> Change-list operation: Set|Add|Remove|Clear
   --filter-expression <text>  Expression for filter-by-association actions
   --find-expression <text>    Expression for find-by-association actions
   --aggregate-expression <text> Expression for aggregate-by-expression actions

@@ -1429,6 +1429,77 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowChangeList(options = {}) {
+        const normalized = normalizeMicroflowChangeListOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-change-list",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-change-list",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (!normalized.isOperationValid) {
+            return {
+                ok: false,
+                action: "add-microflow-change-list",
+                error: "Invalid --change-list-operation value. Allowed: Set, Add, Remove, Clear."
+            };
+        }
+
+        if ((normalized.value === undefined || normalized.value === null || normalized.value === "") && normalized.changeListOperation !== "Clear") {
+            return {
+                ok: false,
+                action: "add-microflow-change-list",
+                error: "A --value (or --expression) argument is required unless --change-list-operation is Clear."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-change-list",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.changeList"))) {
+            return {
+                ok: false,
+                action: "add-microflow-change-list",
+                error: "Extension capabilities do not include microflow.changeList."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowChangeList({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            changeListOperation: normalized.changeListOperation,
+            value: normalized.value
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-change-list",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            listVariable: normalized.listVariable,
+            changeListOperation: normalized.changeListOperation,
+            value: normalized.value
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -2517,6 +2588,25 @@ function normalizeMicroflowAggregateExpressionOptions(options, defaultOutputVari
         outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
         aggregateExpression: options.aggregateExpression ?? options.expression ?? options.value,
         aggregateFunction: options.aggregateFunction ?? options.function ?? "Count"
+    };
+}
+
+function normalizeMicroflowChangeListOptions(options) {
+    const rawOperation = options.changeListOperation ?? options.operation ?? options.changeType ?? "Add";
+    const normalizedOperation = String(rawOperation);
+    const allowedOperations = new Set(["Set", "Add", "Remove", "Clear"]);
+    const matchedOperation = [...allowedOperations]
+        .find(operation => operation.toLowerCase() === normalizedOperation.toLowerCase());
+
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        changeListOperation: matchedOperation ?? normalizedOperation,
+        isOperationValid: Boolean(matchedOperation),
+        value: options.value ?? options.expression ?? options.itemExpression
     };
 }
 
