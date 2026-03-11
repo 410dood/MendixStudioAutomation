@@ -45,6 +45,7 @@ Included in this release:
 - first-pass microflow commands:
   - `select-microflow-node`
   - `insert-action` with `--dry-run`
+- `insert-action` now records before/after microflow-editor snapshots plus any post-action dialog for live microflow mutation debugging
 - scoped commands now fail fast if they cannot confirm that the requested page or microflow actually opened
 
 Not included in this release:
@@ -64,6 +65,7 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
 - `set-dialog-field` is present but still experimental; it needs more validation across a wider range of Studio Pro property dialogs.
+- the current real `insert-action` gesture is still not inserting a visible activity on `ClinicalDocument_ShowPage`; current instrumentation shows it can open the parent microflow properties dialog instead.
 - run and responsive-browser commands now surface blocking Studio Pro dialogs, but they still do not verify a healthy Mendix runtime or browser content.
 - `open-properties` is currently strongest on the page designer and `pageExplorer`; other scopes may still need more hardening.
 - unopened documents that Studio Pro does not resolve through `Go to` now fail explicitly instead of returning misleading editor results.

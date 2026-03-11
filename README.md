@@ -131,6 +131,7 @@ Phase 2:
 - current `set-dialog-field` exists as an experimental label-based native dialog field writer for `Edit` and `ComboBox` controls
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
+- current `insert-action` now records before/after microflow-editor snapshots and any post-action dialog so failed action-insert gestures are diagnosable instead of opaque
 - current dialog commands are validated against native Studio Pro dialogs such as `Select Widget` and `Edit Template Grid 'templateGrid1'`
 - current run/browser commands drive Studio Pro shortcuts for `F5`, `Shift+F5`, and `F9`
 - current `open-properties` is validated from editor-surface targets like `Structure mode` and `Parameters (8)` on `Client_ClinicalDocument_V3`

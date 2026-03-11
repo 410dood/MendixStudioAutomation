@@ -166,6 +166,7 @@ npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Docum
 ```
 
 As with page insertion, keep `--dry-run` on until the selector path is confirmed.
+The real `insert-action` path now returns before/after microflow-editor snapshots and any post-action Studio Pro dialog, which is useful when the gesture does something unexpected on the canvas.
 
 ## Recommended Operating Sequence
 
