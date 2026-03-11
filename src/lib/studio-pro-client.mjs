@@ -154,6 +154,63 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/Set-StudioProDialogField.ps1", normalizeDialogFieldOptions(options));
     }
 
+    async listEditorMenuItems(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/List-StudioProEditorMenuItems.ps1", {
+            ProcessId: options.processId,
+            WindowTitlePattern: options.title,
+            Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
+            Element: options.element ?? options.itemName ?? options.node ?? options.widget ?? options.item,
+            DelayMs: numberOrDefault(options.delayMs, 250)
+        });
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
+    }
+
+    async invokeEditorMenuItem(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/Invoke-StudioProEditorMenuItem.ps1", {
+            ProcessId: options.processId,
+            WindowTitlePattern: options.title,
+            Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
+            Element: options.element ?? options.itemName ?? options.node ?? options.widget ?? options.item,
+            MenuItem: options.menuItem,
+            DelayMs: numberOrDefault(options.delayMs, 250)
+        });
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
+    }
+
+    async invokeEditorMenuPath(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/Invoke-StudioProEditorMenuPath.ps1", {
+            ProcessId: options.processId,
+            WindowTitlePattern: options.title,
+            Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
+            Element: options.element ?? options.itemName ?? options.node ?? options.widget ?? options.item,
+            MenuPath: options.menuPath,
+            DelayMs: numberOrDefault(options.delayMs, 250),
+            DryRun: Boolean(options.dryRun)
+        });
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
+    }
+
+    async clickEditorOffset(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/Click-StudioProEditorOffset.ps1", {
+            ProcessId: options.processId,
+            WindowTitlePattern: options.title,
+            Item: resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item,
+            Element: options.element ?? options.itemName ?? options.node ?? options.widget ?? options.item,
+            OffsetX: numberOrDefault(options.offsetX, 0),
+            OffsetY: numberOrDefault(options.offsetY, 0),
+            DelayMs: numberOrDefault(options.delayMs, 250)
+        });
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
+    }
+
     async listPageExplorerItems(options = {}) {
         const resolvedOptions = await resolvePageOption(this, options, { required: false });
         const result = await runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(resolvedOptions, "pageExplorer"));

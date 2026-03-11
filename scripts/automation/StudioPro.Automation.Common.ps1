@@ -1445,8 +1445,8 @@ function Get-StudioProPopupSummary {
         if ($nativePopup) {
             $textMatches = @(Find-MatchingElements -Root $nativePopup -Depth 8 -MaxResults 50 -ControlType "Text")
             $buttonMatches = @(Find-MatchingElements -Root $nativePopup -Depth 8 -MaxResults 20 -ControlType "Button")
-            $texts = @($textMatches | Where-Object { $_.name } | Select-Object -ExpandProperty name -Unique)
-            $buttons = @($buttonMatches | Where-Object { $_.name } | Select-Object -ExpandProperty name -Unique)
+            $texts = @($textMatches | Where-Object { $_.name } | ForEach-Object { $_.name } | Select-Object -Unique)
+            $buttons = @($buttonMatches | Where-Object { $_.name } | ForEach-Object { $_.name } | Select-Object -Unique)
         }
 
         $summaries += @{
@@ -1881,6 +1881,188 @@ function Open-PageExplorerContextMenu {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    return $null
+}
+
+function Open-EditorElementContextMenu {
+    param(
+        [int]$ProcessId = 0,
+        [string]$WindowTitlePattern = "",
+        [string]$Item = "",
+        [string]$ElementName = "",
+        [string]$MenuItemName = "",
+        [int]$DelayMs = 250,
+        [int]$Attempts = 4
+    )
+
+    if (-not $Item) {
+        throw "An editor item name is required."
+    }
+
+    $editorContext = Enter-StudioProScope -ProcessId $ProcessId -WindowTitlePattern $WindowTitlePattern -Item $Item -Scope "editor" -DelayMs $DelayMs
+    $attached = $editorContext.Attached
+    $targetMatch = $null
+    $lastPostDialog = $null
+    if ($ElementName) {
+        $targetMatch = Find-BestVisibleNamedElement -Root $attached.Element -Name $ElementName -Surface "editor" -Item $Item
+        if (-not $targetMatch) {
+            throw "Could not find a visible editor element named '$ElementName'."
+        }
+    }
+
+    for ($attempt = 0; $attempt -lt $Attempts; $attempt++) {
+        $currentRoot = (Get-StudioProWindowElement -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern).Element
+        $candidate = $null
+        $candidateSelection = $null
+
+        if ($ElementName) {
+            $candidate = Find-BestVisibleNamedElement -Root $currentRoot -Name $ElementName -Surface "editor" -Item $Item
+            if (-not $candidate) {
+                $candidate = $targetMatch
+            }
+
+            $candidateSelection = Select-AutomationMatch -Root $currentRoot -Match $candidate -DelayMs ([Math]::Max(120, $DelayMs))
+            Start-Sleep -Milliseconds 80
+        }
+
+        Set-StudioProForegroundWindow -Process $attached.Process
+        Send-KeysToForegroundWindow -Keys "+{F10}" -DelayMs ($DelayMs + 100)
+
+        $attachedAfter = Get-StudioProWindowElement -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern
+        $postDialog = Wait-ForStudioProDialogSnapshot -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -TimeoutMs ([Math]::Max(800, ($DelayMs * 3))) -PollMs 120 -Limit 30
+        $menuItems = @(Find-MatchingElements -Root $attachedAfter.Element -Depth 15 -MaxResults 150 -ControlType "MenuItem" | Where-Object {
+            $_ -and
+            -not $_.isOffscreen -and
+            $_.name -and
+            $_.name -notin @("File", "Edit", "View", "App", "Run", "Version Control", "Language", "Help")
+        })
+
+        if ($postDialog -and $menuItems.Length -eq 0) {
+            $lastPostDialog = $postDialog
+            Send-KeysToForegroundWindow -Keys "{ESC}" -DelayMs ([Math]::Max(150, $DelayMs))
+
+            if ($candidate) {
+                $points = if ($candidate.controlType -eq "Text") {
+                    @(
+                        @{ Horizontal = "center"; Vertical = "center"; Inset = 6 },
+                        @{ Horizontal = "left"; Vertical = "center"; Inset = 6 }
+                    )
+                } else {
+                    @(
+                        @{ Horizontal = "left"; Vertical = "center"; Inset = 24 },
+                        @{ Horizontal = "center"; Vertical = "center"; Inset = 12 }
+                    )
+                }
+
+                foreach ($point in $points) {
+                    Set-StudioProForegroundWindow -Process $attached.Process
+                    Invoke-BoundsRightClick -Bounds $candidate.boundingRectangle -Horizontal $point.Horizontal -Vertical $point.Vertical -Inset $point.Inset | Out-Null
+                    Start-Sleep -Milliseconds ($DelayMs + 100)
+
+                    $attachedAfter = Get-StudioProWindowElement -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern
+                    $menuItems = @(Find-MatchingElements -Root $attachedAfter.Element -Depth 15 -MaxResults 150 -ControlType "MenuItem" | Where-Object {
+                        $_ -and
+                        -not $_.isOffscreen -and
+                        $_.name -and
+                        $_.name -notin @("File", "Edit", "View", "App", "Run", "Version Control", "Language", "Help")
+                    })
+
+                    if (-not $MenuItemName -and $menuItems.Length -gt 0) {
+                        return @{
+                            Attached = $attachedAfter
+                            EditorContext = $editorContext
+                            TargetSelection = $candidateSelection
+                            Target = $candidate
+                            MenuItems = $menuItems
+                            PostDialog = $lastPostDialog
+                            Trigger = @{
+                                attempt = $attempt + 1
+                                method = "nativeRightClick"
+                                point = $point
+                                fallbackFrom = "shiftF10Dialog"
+                            }
+                        }
+                    }
+
+                    if ($MenuItemName) {
+                        $match = Find-MenuItemMatch -MenuItems $menuItems -MenuItemName $MenuItemName
+                        if ($match) {
+                            return @{
+                                Attached = $attachedAfter
+                                EditorContext = $editorContext
+                                TargetSelection = $candidateSelection
+                                Target = $candidate
+                                MenuItem = $match
+                                MenuItems = $menuItems
+                                PostDialog = $lastPostDialog
+                                Trigger = @{
+                                    attempt = $attempt + 1
+                                    method = "nativeRightClick"
+                                    point = $point
+                                    fallbackFrom = "shiftF10Dialog"
+                                }
+                            }
+                        }
+                    }
+
+                    Send-KeysToForegroundWindow -Keys "{ESC}" -DelayMs 100
+                }
+            }
+        }
+
+        if (-not $MenuItemName -and $menuItems.Length -gt 0) {
+            return @{
+                Attached = $attachedAfter
+                EditorContext = $editorContext
+                TargetSelection = $candidateSelection
+                Target = $candidate
+                MenuItems = $menuItems
+                PostDialog = $postDialog
+                Trigger = @{
+                    attempt = $attempt + 1
+                    method = "shiftF10"
+                }
+            }
+        }
+
+        if ($MenuItemName) {
+            $match = Find-MenuItemMatch -MenuItems $menuItems -MenuItemName $MenuItemName
+            if ($match) {
+                return @{
+                    Attached = $attachedAfter
+                    EditorContext = $editorContext
+                    TargetSelection = $candidateSelection
+                    Target = $candidate
+                    MenuItem = $match
+                    MenuItems = $menuItems
+                    PostDialog = $postDialog
+                    Trigger = @{
+                        attempt = $attempt + 1
+                        method = "shiftF10"
+                    }
+                }
+            }
+        }
+
+        Send-KeysToForegroundWindow -Keys "{ESC}" -DelayMs 100
+    }
+
+    if ($lastPostDialog) {
+        return @{
+            Attached = $attached
+            EditorContext = $editorContext
+            TargetSelection = $null
+            Target = $targetMatch
+            MenuItems = @()
+            PostDialog = $lastPostDialog
+            Trigger = @{
+                attempt = $Attempts
+                method = "shiftF10"
+                fallbackAttempted = $true
             }
         }
     }

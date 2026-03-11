@@ -105,6 +105,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "list-editor-menu-items": {
+            const result = await client.listEditorMenuItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "invoke-editor-menu-item": {
+            const result = await client.invokeEditorMenuItem(options);
+            formatOutput(result);
+            return;
+        }
+        case "invoke-editor-menu-path": {
+            const result = await client.invokeEditorMenuPath(options);
+            formatOutput(result);
+            return;
+        }
+        case "click-editor-offset": {
+            const result = await client.clickEditorOffset(options);
+            formatOutput(result);
+            return;
+        }
         case "list-app-explorer-items": {
             const result = await client.listAppExplorerItems(options);
             formatOutput(result);
@@ -202,6 +222,10 @@ Commands:
   list-dialog-items           List visible named controls inside a Studio Pro dialog
   invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
   set-dialog-field            Set a native Studio Pro dialog field by its visible label
+  list-editor-menu-items      Open an editor element context menu and list its items
+  invoke-editor-menu-item     Invoke a named editor element context-menu item
+  invoke-editor-menu-path     Invoke a multi-step editor context-menu path
+  click-editor-offset         Click a point relative to a visible editor element
   list-app-explorer-items     List visible App Explorer labels
   list-page-explorer-items    List visible Page Explorer labels
   list-toolbox-items          List visible Toolbox labels
@@ -239,6 +263,11 @@ Options:
   --control <name>            Visible control name inside a Studio Pro dialog
   --label <name>              Visible field label inside a Studio Pro dialog
   --value <text>              Value to set into a native Studio Pro dialog field
+  --element <name>            Visible editor element name to target for a context menu
+  --menu-item <name>          Editor context-menu item to invoke
+  --menu-path <a>b>           Editor context-menu path, e.g. "Add>Activity"
+  --offset-x <n>              Horizontal pixel offset from the target element center
+  --offset-y <n>              Vertical pixel offset from the target element center
   --target <name>             Page Explorer target container/row for insertion
   --dry-run                   Resolve the insertion path without executing it
   --microflow <name>          Microflow to open before node/action operations

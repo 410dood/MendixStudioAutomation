@@ -59,6 +59,10 @@ npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Text"
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
+npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
+npm run invoke-editor-menu-path -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType" --menu-path "Add>Activity"
+npm run invoke-editor-menu-path -- --microflow "ClinicalDocument_ShowPage" --menu-path "Add>Activity" --dry-run
+npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType" --offset-x 220 --offset-y 0
 ```
 
 Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
@@ -168,6 +172,20 @@ npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Docum
 As with page insertion, keep `--dry-run` on until the selector path is confirmed.
 The real `insert-action` path now returns before/after microflow-editor snapshots and any post-action Studio Pro dialog, which is useful when the gesture does something unexpected on the canvas.
 
+Inspect or traverse editor context menus directly:
+
+```powershell
+npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
+npm run invoke-editor-menu-path -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType" --menu-path "Add>Activity"
+npm run invoke-editor-menu-path -- --microflow "ClinicalDocument_ShowPage" --menu-path "Add>Activity" --dry-run
+```
+
+Click a placement point relative to a visible editor element:
+
+```powershell
+npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType" --offset-x 220 --offset-y 0
+```
+
 ## Recommended Operating Sequence
 
 1. Run `popup-status` or `wait-ready`.
@@ -186,6 +204,9 @@ The real `insert-action` path now returns before/after microflow-editor snapshot
 - `insert-widget` now performs real native widget insertion on validated visible page-explorer targets, not just dry-run resolution.
 - `invoke-dialog-control` now reports whether the target dialog actually closed after the control click.
 - Editor-surface property opening is validated on `Client_ClinicalDocument_V3` for targets like `Structure mode` and `Parameters (8)`.
+- Nested editor context-menu traversal now works, including `Add > Activity` on `ClinicalDocument_ShowPage`.
+- Selected microflow labels may open properties on `Shift+F10`; the editor-menu helpers now retry with native right-click when that happens.
+- `click-editor-offset` is available for placement experiments relative to visible page and microflow labels.
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.

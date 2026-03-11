@@ -35,6 +35,9 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
 - set native Studio Pro dialog fields by visible label on an experimental basis
+- list and invoke nested editor context-menu paths
+- fall back from `Shift+F10` to native right-click when selected editor labels open properties instead of a menu
+- click a point relative to a visible editor element for placement and hotspot testing
 - list open page and microflow editor tabs
 - report the best-known active editor tab
 - parse the active editor tab into document/module context
@@ -85,6 +88,10 @@ npm run list-dialogs
 npm run list-dialog-items -- --dialog "Select Widget" --limit 40
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run set-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --value "container39_test" --control-type Edit
+npm run list-editor-menu-items -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType"
+npm run invoke-editor-menu-path -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType" --menu-path "Add>Activity"
+npm run invoke-editor-menu-path -- --microflow "ClinicalDocument_ShowPage" --menu-path "Add>Activity" --dry-run
+npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element "DocumentType" --offset-x 220 --offset-y 0
 npm run list-app-explorer-items
 npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
 npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3"
@@ -132,6 +139,9 @@ Phase 2:
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
 - current `insert-action` now records before/after microflow-editor snapshots and any post-action dialog so failed action-insert gestures are diagnosable instead of opaque
+- current editor context-menu commands can traverse nested menu paths such as `Add > Activity`
+- current node-level editor context menus fall back to native right-click when `Shift+F10` opens the microflow properties dialog instead of a menu
+- current `click-editor-offset` provides a placement primitive for clicking relative to a visible page or microflow element
 - current dialog commands are validated against native Studio Pro dialogs such as `Select Widget` and `Edit Template Grid 'templateGrid1'`
 - current run/browser commands drive Studio Pro shortcuts for `F5`, `Shift+F5`, and `F9`
 - current `open-properties` is validated from editor-surface targets like `Structure mode` and `Parameters (8)` on `Client_ClinicalDocument_V3`
