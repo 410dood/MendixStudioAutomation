@@ -433,6 +433,70 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowFilterByAssociation(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/filter-by-association", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            association: options.association,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            filterExpression: options.filterExpression ?? options.expression ?? options.value
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowFindByAssociation(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/find-by-association", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            association: options.association,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            findExpression: options.findExpression ?? options.expression ?? options.value
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowChangeAssociation(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -526,6 +590,8 @@ async function resolveEndpointDiscovery(options) {
                 microflowCreateListUrl: parsed.microflowCreateListUrl,
                 microflowRetrieveDatabaseUrl: parsed.microflowRetrieveDatabaseUrl,
                 microflowRetrieveAssociationUrl: parsed.microflowRetrieveAssociationUrl,
+                microflowFilterByAssociationUrl: parsed.microflowFilterByAssociationUrl,
+                microflowFindByAssociationUrl: parsed.microflowFindByAssociationUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
                 microflowRollbackObjectUrl: parsed.microflowRollbackObjectUrl,

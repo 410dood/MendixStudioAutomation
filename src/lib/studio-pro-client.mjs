@@ -777,6 +777,156 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowFilterByAssociation(options = {}) {
+        const normalized = normalizeMicroflowAssociationListExpressionOptions(options, "FilteredByAssociation");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-association",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.association) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-association",
+                error: "An --association argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-association",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (normalized.expression === undefined || normalized.expression === null || normalized.expression === "") {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-association",
+                error: "A --filter-expression (or --expression) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-association",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.filterByAssociation"))) {
+            return {
+                ok: false,
+                action: "add-microflow-filter-by-association",
+                error: "Extension capabilities do not include microflow.filterByAssociation."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowFilterByAssociation({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            filterExpression: normalized.expression
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-filter-by-association",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            filterExpression: normalized.expression
+        };
+    }
+
+    async addMicroflowFindByAssociation(options = {}) {
+        const normalized = normalizeMicroflowAssociationListExpressionOptions(options, "FoundByAssociation");
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-association",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.association) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-association",
+                error: "An --association argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-association",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        if (normalized.expression === undefined || normalized.expression === null || normalized.expression === "") {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-association",
+                error: "A --find-expression (or --expression) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-association",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.findByAssociation"))) {
+            return {
+                ok: false,
+                action: "add-microflow-find-by-association",
+                error: "Extension capabilities do not include microflow.findByAssociation."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowFindByAssociation({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            findExpression: normalized.expression
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-find-by-association",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            findExpression: normalized.expression
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -1737,6 +1887,20 @@ function normalizeAddMicroflowRetrieveAssociationOptions(options) {
         association: options.association,
         entityVariable: options.entityVariable ?? options.entityVar ?? options.fromVariable ?? options.variable ?? options.target,
         outputVariableName: options.outputVariableName || "RetrievedByAssociation"
+    };
+}
+
+function normalizeMicroflowAssociationListExpressionOptions(options, defaultOutputVariableName = "AssociationResult") {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        association: options.association,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || defaultOutputVariableName,
+        expression: options.filterExpression ?? options.findExpression ?? options.expression ?? options.value
     };
 }
 

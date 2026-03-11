@@ -20,6 +20,8 @@
     "add-microflow-create-list": "node src/cli.mjs add-microflow-create-list",
     "add-microflow-retrieve-database": "node src/cli.mjs add-microflow-retrieve-database",
     "add-microflow-retrieve-association": "node src/cli.mjs add-microflow-retrieve-association",
+    "add-microflow-filter-by-association": "node src/cli.mjs add-microflow-filter-by-association",
+    "add-microflow-find-by-association": "node src/cli.mjs add-microflow-find-by-association",
     "add-microflow-delete-object": "node src/cli.mjs add-microflow-delete-object",
     "add-microflow-commit-object": "node src/cli.mjs add-microflow-commit-object",
     "add-microflow-rollback-object": "node src/cli.mjs add-microflow-rollback-object",

@@ -35,7 +35,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - query an in-Studio hybrid extension over a supported local webserver route
 - track and summarize automation knowledge gaps locally for prioritization
 - add opened pages to the web navigation profile via the hybrid extension route
-- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Retrieve from database`, `Retrieve by association`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
+- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Retrieve from database`, `Retrieve by association`, `Filter by association`, `Find by association`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -124,6 +124,8 @@ npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" -
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
+npm run add-microflow-filter-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FilteredClientDocumentList" --filter-expression "$ClientObj"
+npm run add-microflow-find-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FoundClientDocument" --find-expression "$ClientObj"
 npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
 npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --refresh-in-client false
@@ -225,6 +227,8 @@ Phase 2:
 - current `add-microflow-create-list` now inserts SDK-backed `Create list` activities through the hybrid extension route
 - current `add-microflow-retrieve-database` now inserts SDK-backed `Retrieve from database` activities through the hybrid extension route
 - current `add-microflow-retrieve-association` now inserts SDK-backed `Retrieve by association` activities through the hybrid extension route
+- current `add-microflow-filter-by-association` now inserts SDK-backed `Filter by association` activities through the hybrid extension route
+- current `add-microflow-find-by-association` now inserts SDK-backed `Find by association` activities through the hybrid extension route
 - current `add-microflow-delete-object` now inserts SDK-backed `Delete object` activities through the hybrid extension route
 - current `add-microflow-commit-object` now inserts SDK-backed `Commit object` activities through the hybrid extension route
 - current `add-microflow-rollback-object` now inserts SDK-backed `Rollback object` activities through the hybrid extension route

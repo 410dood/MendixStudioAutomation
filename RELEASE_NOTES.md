@@ -1,5 +1,32 @@
 # Release Notes
 
+## 0.2.12
+
+Hybrid write-path expansion for association list operations.
+
+- Added new extension routes:
+  - `/mendix-studio-automation/microflows/filter-by-association`
+  - `/mendix-studio-automation/microflows/find-by-association`
+- Added Studio Pro client support for:
+  - inserting a `Filter by association` action into a selected microflow via extension service APIs
+  - inserting a `Find by association` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm scripts:
+  - `add-microflow-filter-by-association`
+  - `add-microflow-find-by-association`
+  - `npm run add-microflow-filter-by-association`
+  - `npm run add-microflow-find-by-association`
+- Added options to support association list operations:
+  - `--list-variable` (alias `--list`)
+  - `--filter-expression`
+  - `--find-expression`
+- Updated operation catalog with:
+  - `microflow.filterByAssociation`
+  - `microflow.findByAssociation`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.11
 
 Hybrid write-path expansion for association-level microflow actions.

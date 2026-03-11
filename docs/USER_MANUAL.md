@@ -247,6 +247,18 @@ Retrieve objects by association in a microflow through the extension API:
 npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
 ```
 
+Filter a list by association in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-filter-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FilteredClientDocumentList" --filter-expression "$ClientObj"
+```
+
+Find a list item by association in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-find-by-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --list-variable "ClientDocumentList" --output-variable-name "FoundClientDocument" --find-expression "$ClientObj"
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -341,6 +353,8 @@ npm run summarize-knowledge-gaps
 - `add-microflow-create-list` inserts `Create list` activities only at the start of the selected microflow.
 - `add-microflow-retrieve-database` inserts `Retrieve from database` activities only at the start of the selected microflow.
 - `add-microflow-retrieve-association` inserts `Retrieve by association` activities only at the start of the selected microflow.
+- `add-microflow-filter-by-association` inserts `Filter by association` activities only at the start of the selected microflow.
+- `add-microflow-find-by-association` inserts `Find by association` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.

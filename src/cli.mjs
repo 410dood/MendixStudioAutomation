@@ -225,6 +225,16 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-filter-by-association": {
+            const result = await client.addMicroflowFilterByAssociation(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-find-by-association": {
+            const result = await client.addMicroflowFindByAssociation(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -361,6 +371,8 @@ Commands:
   add-microflow-create-list   Add a microflow Create list activity through the extension
   add-microflow-retrieve-database Add a microflow Retrieve from database activity through the extension
   add-microflow-retrieve-association Add a microflow Retrieve by association activity through the extension
+  add-microflow-filter-by-association Add a microflow Filter by association activity through the extension
+  add-microflow-find-by-association Add a microflow Find by association activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-rollback-object Add a microflow Rollback object activity through the extension
@@ -431,17 +443,21 @@ Options:
   --add-navigation            Attempt to add the created/opened page to web navigation via extension
   --navigation-caption <text>  Optional caption for the generated navigation item
   --entity <name>             Module-qualified or local entity to instantiate, e.g. Document.ClientDocument
-  --output-variable-name <text> Output variable name for create-object/create-list/retrieve-database/retrieve-association actions
+  --output-variable-name <text> Output variable name for create-object/create-list/retrieve-database/retrieve-association/filter-by-association/find-by-association actions
   --commit <name>             Commit mode for create/change actions: Yes|YesWithoutEvents|No
   --refresh-in-client <true|false> Refresh client after create
   --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}
   --variable <name>           Existing scope variable name for delete/commit/rollback/change-attribute/change-association actions
   --entity-variable <name>    Source object variable for retrieve-association actions
+  --list-variable <name>      Source list variable for filter/find-by-association actions
+  --list <name>               Alias for --list-variable
   --with-events <true|false>  Include events when committing objects
   --attribute <name>          Attribute to mutate: Attribute, Entity.Attribute, or Module.Entity.Attribute
   --association <name>        Association to mutate or retrieve by: Association, Entity.Association, or Module.Entity.Association
-  --value <text>              New value or expression for change-attribute action
+  --value <text>              New value/expression for change actions; alias for association filter/find expressions
   --change-type <name>        Change type for change-attribute/change-association actions: Set|Add|Remove
+  --filter-expression <text>  Expression for filter-by-association actions
+  --find-expression <text>    Expression for find-by-association actions
   --x-path-constraint <text>  Optional XPath constraint for retrieve-database action
   --retrieve-first <true|false> Retrieve first object instead of a list
   --requested-capability <text> Capability requested when recording a knowledge gap
