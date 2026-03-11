@@ -1,5 +1,27 @@
 # Release Notes
 
+## 0.2.18
+
+Hybrid write-path expansion for microflow sort-list operations.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/sort-list`
+- Added extension capability:
+  - `microflow.sortList`
+- Added Studio Pro client support for:
+  - inserting a `Sort list` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm script:
+  - `add-microflow-sort-list`
+  - `npm run add-microflow-sort-list`
+- Added CLI option:
+  - `--sort-descending`
+- Updated operation catalog with:
+  - `microflow.sortList`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.17
 
 Hybrid write-path expansion for microflow change-list operations.

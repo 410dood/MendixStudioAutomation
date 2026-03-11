@@ -1500,6 +1500,73 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowSortList(options = {}) {
+        const normalized = normalizeMicroflowSortListOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-sort-list",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.attribute) {
+            return {
+                ok: false,
+                action: "add-microflow-sort-list",
+                error: "An --attribute argument is required."
+            };
+        }
+
+        if (!normalized.listVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-sort-list",
+                error: "A --list-variable (or --list) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-sort-list",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.sortList"))) {
+            return {
+                ok: false,
+                action: "add-microflow-sort-list",
+                error: "Extension capabilities do not include microflow.sortList."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowSortList({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            sortDescending: normalized.sortDescending
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-sort-list",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            listVariable: normalized.listVariable,
+            outputVariableName: normalized.outputVariableName,
+            sortDescending: normalized.sortDescending
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -2607,6 +2674,20 @@ function normalizeMicroflowChangeListOptions(options) {
         changeListOperation: matchedOperation ?? normalizedOperation,
         isOperationValid: Boolean(matchedOperation),
         value: options.value ?? options.expression ?? options.itemExpression
+    };
+}
+
+function normalizeMicroflowSortListOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        attribute: options.attribute,
+        listVariable: options.listVariable ?? options.list ?? options.sourceList ?? options.variable,
+        outputVariableName: options.outputVariableName || options.outputVariable || "SortedList",
+        sortDescending: options.sortDescending ?? options.descending ?? "false"
     };
 }
 

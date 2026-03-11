@@ -774,6 +774,38 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowSortList(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/sort-list", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            attribute: options.attribute,
+            listVariable: options.listVariable ?? options.list ?? options.sourceList,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output,
+            sortDescending: options.sortDescending ?? options.descending
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addMicroflowChangeAssociation(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -879,6 +911,7 @@ async function resolveEndpointDiscovery(options) {
                 microflowAggregateByAttributeUrl: parsed.microflowAggregateByAttributeUrl,
                 microflowAggregateByExpressionUrl: parsed.microflowAggregateByExpressionUrl,
                 microflowChangeListUrl: parsed.microflowChangeListUrl,
+                microflowSortListUrl: parsed.microflowSortListUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
                 microflowRollbackObjectUrl: parsed.microflowRollbackObjectUrl,
