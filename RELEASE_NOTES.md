@@ -1,5 +1,32 @@
 # Release Notes
 
+## 0.2.11
+
+Hybrid write-path expansion for association-level microflow actions.
+
+- Added new extension routes:
+  - `/mendix-studio-automation/microflows/retrieve-association`
+  - `/mendix-studio-automation/microflows/change-association`
+- Added Studio Pro client support for:
+  - inserting a `Retrieve by association` action into a selected microflow via extension service APIs
+  - inserting a `Change association` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm scripts:
+  - `add-microflow-retrieve-association`
+  - `add-microflow-change-association`
+  - `npm run add-microflow-retrieve-association`
+  - `npm run add-microflow-change-association`
+- Added options to support association actions:
+  - `--association`
+  - `--entity-variable`
+  - existing `--change-type`, `--commit`, and `--value` for association changes
+- Updated operation catalog with:
+  - `microflow.retrieveAssociation`
+  - `microflow.changeAssociation`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.10
 
 External-reference adoption milestone.

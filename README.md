@@ -35,7 +35,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - query an in-Studio hybrid extension over a supported local webserver route
 - track and summarize automation knowledge gaps locally for prioritization
 - add opened pages to the web navigation profile via the hybrid extension route
-- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Retrieve from database`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`)
+- insert selected microflow activities through hybrid extension routes (`Create object`, `Create list`, `Retrieve from database`, `Retrieve by association`, `Delete object`, `Commit object`, `Rollback object`, `Change attribute`, `Change association`)
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -123,10 +123,12 @@ npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Docum
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Document" --entity "ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false
 npm run add-microflow-create-list -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList"
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
+npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
 npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
 npm run add-microflow-rollback-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --refresh-in-client false
 npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No
+npm run add-microflow-change-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --variable "ClientDocumentObj" --value "$ClientObj" --change-type Set --commit No
 ```
 
 ### Clients Page Scaffold
@@ -222,10 +224,12 @@ Phase 2:
 - current `add-microflow-create-object` now inserts SDK-backed `Create object` activities through the hybrid extension route
 - current `add-microflow-create-list` now inserts SDK-backed `Create list` activities through the hybrid extension route
 - current `add-microflow-retrieve-database` now inserts SDK-backed `Retrieve from database` activities through the hybrid extension route
+- current `add-microflow-retrieve-association` now inserts SDK-backed `Retrieve by association` activities through the hybrid extension route
 - current `add-microflow-delete-object` now inserts SDK-backed `Delete object` activities through the hybrid extension route
 - current `add-microflow-commit-object` now inserts SDK-backed `Commit object` activities through the hybrid extension route
 - current `add-microflow-rollback-object` now inserts SDK-backed `Rollback object` activities through the hybrid extension route
 - current `add-microflow-change-attribute` now inserts SDK-backed `Change attribute` activities through the hybrid extension route
+- current `add-microflow-change-association` now inserts SDK-backed `Change association` activities through the hybrid extension route
 - current editor context-menu commands can traverse nested menu paths such as `Add > Activity`
 - current node-level editor context menus fall back to native right-click when `Shift+F10` opens the microflow properties dialog instead of a menu
 - current `click-editor-offset` provides a placement primitive for clicking relative to a visible page or microflow element

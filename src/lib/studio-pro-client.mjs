@@ -712,6 +712,71 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowRetrieveAssociation(options = {}) {
+        const normalized = normalizeAddMicroflowRetrieveAssociationOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-association",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.association) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-association",
+                error: "An --association argument is required."
+            };
+        }
+
+        if (!normalized.entityVariable) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-association",
+                error: "An --entity-variable (or --variable) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-association",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.retrieveAssociation"))) {
+            return {
+                ok: false,
+                action: "add-microflow-retrieve-association",
+                error: "Extension capabilities do not include microflow.retrieveAssociation."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowRetrieveAssociation({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
+            entityVariable: normalized.entityVariable,
+            outputVariableName: normalized.outputVariableName
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-retrieve-association",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
+            entityVariable: normalized.entityVariable,
+            outputVariableName: normalized.outputVariableName
+        };
+    }
+
     async addMicroflowDeleteObject(options = {}) {
         const normalized = normalizeMicroflowVariableActionOptions(options);
         if (!normalized.microflow) {
@@ -941,6 +1006,83 @@ export class StudioProClient {
             module: normalized.module,
             entity: normalized.entity,
             attribute: normalized.attribute,
+            variable: normalized.variable,
+            value: normalized.value,
+            changeType: normalized.changeType,
+            commit: normalized.commit
+        };
+    }
+
+    async addMicroflowChangeAssociation(options = {}) {
+        const normalized = normalizeMicroflowChangeAssociationOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-change-association",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.association) {
+            return {
+                ok: false,
+                action: "add-microflow-change-association",
+                error: "An --association argument is required."
+            };
+        }
+
+        if (!normalized.variable) {
+            return {
+                ok: false,
+                action: "add-microflow-change-association",
+                error: "A --variable argument is required."
+            };
+        }
+
+        if (normalized.value === undefined || normalized.value === null) {
+            return {
+                ok: false,
+                action: "add-microflow-change-association",
+                error: "A --value argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-change-association",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.changeAssociation"))) {
+            return {
+                ok: false,
+                action: "add-microflow-change-association",
+                error: "Extension capabilities do not include microflow.changeAssociation."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowChangeAssociation({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
+            variable: normalized.variable,
+            value: normalized.value,
+            changeType: normalized.changeType,
+            commit: normalized.commit
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-change-association",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            association: normalized.association,
             variable: normalized.variable,
             value: normalized.value,
             changeType: normalized.changeType,
@@ -1585,6 +1727,19 @@ function normalizeAddMicroflowRetrieveDatabaseOptions(options) {
     };
 }
 
+function normalizeAddMicroflowRetrieveAssociationOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        association: options.association,
+        entityVariable: options.entityVariable ?? options.entityVar ?? options.fromVariable ?? options.variable ?? options.target,
+        outputVariableName: options.outputVariableName || "RetrievedByAssociation"
+    };
+}
+
 function normalizeMicroflowVariableActionOptions(options) {
     const normalizedMicroflow = options.microflow ?? options.item;
     const normalizedModule = options.module;
@@ -1609,6 +1764,21 @@ function normalizeMicroflowChangeAttributeOptions(options) {
         module: options.module,
         entity: options.entity,
         attribute: options.attribute,
+        variable: options.variable ?? options.target,
+        value: options.value,
+        changeType: options.changeType ?? "Set",
+        commit: options.commit ?? "No"
+    };
+}
+
+function normalizeMicroflowChangeAssociationOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        association: options.association,
         variable: options.variable ?? options.target,
         value: options.value,
         changeType: options.changeType ?? "Set",

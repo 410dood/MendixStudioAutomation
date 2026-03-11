@@ -220,6 +220,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-retrieve-association": {
+            const result = await client.addMicroflowRetrieveAssociation(options);
+            formatOutput(result);
+            return;
+        }
         case "add-microflow-delete-object": {
             const result = await client.addMicroflowDeleteObject(options);
             formatOutput(result);
@@ -237,6 +242,11 @@ async function main() {
         }
         case "add-microflow-change-attribute": {
             const result = await client.addMicroflowChangeAttribute(options);
+            formatOutput(result);
+            return;
+        }
+        case "add-microflow-change-association": {
+            const result = await client.addMicroflowChangeAssociation(options);
             formatOutput(result);
             return;
         }
@@ -350,10 +360,12 @@ Commands:
   add-microflow-create-object Add a microflow Create object activity through the extension
   add-microflow-create-list   Add a microflow Create list activity through the extension
   add-microflow-retrieve-database Add a microflow Retrieve from database activity through the extension
+  add-microflow-retrieve-association Add a microflow Retrieve by association activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
   add-microflow-rollback-object Add a microflow Rollback object activity through the extension
   add-microflow-change-attribute Add a microflow Change attribute activity through the extension
+  add-microflow-change-association Add a microflow Change association activity through the extension
   create-clients-page         Create a Clients page and insert a default DataGrid widget
   hybrid-context              Prefer the extension context and fall back to UI automation
   record-knowledge-gap        Record an automation capability gap for later hardening
@@ -419,15 +431,17 @@ Options:
   --add-navigation            Attempt to add the created/opened page to web navigation via extension
   --navigation-caption <text>  Optional caption for the generated navigation item
   --entity <name>             Module-qualified or local entity to instantiate, e.g. Document.ClientDocument
-  --output-variable-name <text> Output variable name for create-object/create-list/retrieve-database actions
-  --commit <name>             Create object commit mode: Yes|YesWithoutEvents|No
+  --output-variable-name <text> Output variable name for create-object/create-list/retrieve-database/retrieve-association actions
+  --commit <name>             Commit mode for create/change actions: Yes|YesWithoutEvents|No
   --refresh-in-client <true|false> Refresh client after create
   --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}
-  --variable <name>           Existing scope variable name for delete/commit/rollback/change-attribute actions
+  --variable <name>           Existing scope variable name for delete/commit/rollback/change-attribute/change-association actions
+  --entity-variable <name>    Source object variable for retrieve-association actions
   --with-events <true|false>  Include events when committing objects
   --attribute <name>          Attribute to mutate: Attribute, Entity.Attribute, or Module.Entity.Attribute
+  --association <name>        Association to mutate or retrieve by: Association, Entity.Association, or Module.Entity.Association
   --value <text>              New value or expression for change-attribute action
-  --change-type <name>        Change type for change-attribute action: Set|Add|Remove
+  --change-type <name>        Change type for change-attribute/change-association actions: Set|Add|Remove
   --x-path-constraint <text>  Optional XPath constraint for retrieve-database action
   --retrieve-first <true|false> Retrieve first object instead of a list
   --requested-capability <text> Capability requested when recording a knowledge gap

@@ -241,6 +241,12 @@ Retrieve objects from database in a microflow through the extension API:
 npm run add-microflow-retrieve-database -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --output-variable-name "ClientDocumentList" --x-path-constraint "[Status='Draft']" --retrieve-first false
 ```
 
+Retrieve objects by association in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-retrieve-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --entity-variable "ClientDocumentObj" --output-variable-name "ClientObj"
+```
+
 Delete a scoped variable in a microflow through the extension API:
 
 ```powershell
@@ -263,6 +269,12 @@ Change an attribute on a scoped variable in a microflow through the extension AP
 
 ```powershell
 npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No
+```
+
+Change an association on a scoped variable in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-change-association -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --association "ClientDocument_Client" --variable "ClientDocumentObj" --value "$ClientObj" --change-type Set --commit No
 ```
 
 As with page insertion, keep `--dry-run` on until the selector path is confirmed.
@@ -328,10 +340,12 @@ npm run summarize-knowledge-gaps
 - `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
 - `add-microflow-create-list` inserts `Create list` activities only at the start of the selected microflow.
 - `add-microflow-retrieve-database` inserts `Retrieve from database` activities only at the start of the selected microflow.
+- `add-microflow-retrieve-association` inserts `Retrieve by association` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
 - `add-microflow-rollback-object` inserts `Rollback object` activities only at the start of the selected microflow.
 - `add-microflow-change-attribute` inserts `Change attribute` activities only at the start of the selected microflow.
+- `add-microflow-change-association` inserts `Change association` activities only at the start of the selected microflow.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.

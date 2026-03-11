@@ -401,6 +401,70 @@ export class HybridExtensionClient {
             payload
         };
     }
+
+    async addMicroflowRetrieveAssociation(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/retrieve-association", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            association: options.association,
+            entityVariable: options.entityVariable ?? options.entityVar ?? options.fromVariable ?? options.variable,
+            outputVariableName: options.outputVariableName ?? options.outputVariable ?? options.output
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
+    async addMicroflowChangeAssociation(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/change-association", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            association: options.association,
+            variable: options.variable,
+            value: options.value,
+            changeType: options.changeType,
+            commit: options.commit
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
 }
 
 async function resolveEndpointDiscovery(options) {
@@ -461,10 +525,12 @@ async function resolveEndpointDiscovery(options) {
                 microflowCreateObjectUrl: parsed.microflowCreateObjectUrl,
                 microflowCreateListUrl: parsed.microflowCreateListUrl,
                 microflowRetrieveDatabaseUrl: parsed.microflowRetrieveDatabaseUrl,
+                microflowRetrieveAssociationUrl: parsed.microflowRetrieveAssociationUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
                 microflowRollbackObjectUrl: parsed.microflowRollbackObjectUrl,
                 microflowChangeAttributeUrl: parsed.microflowChangeAttributeUrl,
+                microflowChangeAssociationUrl: parsed.microflowChangeAssociationUrl,
                 baseUrl: parsed.baseUrl,
                 routePrefix: parsed.routePrefix
             }

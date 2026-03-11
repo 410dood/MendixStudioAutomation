@@ -76,10 +76,12 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/microflows/create-object", HandleCreateMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-list", HandleCreateMicroflowListAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/retrieve-database", HandleRetrieveDatabaseMicroflowAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/retrieve-association", HandleRetrieveAssociationMicroflowAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/delete-object", HandleDeleteMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/commit-object", HandleCommitMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/rollback-object", HandleRollbackMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/change-attribute", HandleChangeMicroflowAttributeAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/change-association", HandleChangeMicroflowAssociationAsync);
 
         PersistRuntimeEndpoint();
         _logService.Info($"Mendix Studio Automation extension routes registered at {WebServerBaseUrl}{RoutePrefix}");
@@ -154,10 +156,12 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "microflow.createObject",
             "microflow.createList",
             "microflow.retrieveDatabase",
+            "microflow.retrieveAssociation",
             "microflow.deleteObject",
             "microflow.commitObject",
             "microflow.rollbackObject",
             "microflow.changeAttribute",
+            "microflow.changeAssociation",
             "branch.read",
             "webserver.health",
             "webserver.context"
@@ -906,6 +910,162 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleRetrieveAssociationMicroflowAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var entityName = request.QueryString["entity"];
+        var associationName = request.QueryString["association"];
+        var entityVariable = request.QueryString["entityVariable"] ?? request.QueryString["entityVar"] ?? request.QueryString["fromVariable"];
+        var outputVariableName = request.QueryString["outputVariableName"]
+            ?? request.QueryString["outputVariable"]
+            ?? request.QueryString["output"];
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(associationName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'association' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(entityVariable))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'entityVariable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName!.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var associationResolution = ResolveAssociation(project, module, entityName, associationName);
+            if (!associationResolution.Ok)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = associationResolution.Error,
+                    entity = entityName,
+                    association = associationName,
+                    module = normalizedModuleName,
+                    matches = associationResolution.Candidates
+                }, associationResolution.StatusCode, cancellationToken);
+            }
+
+            var output = string.IsNullOrWhiteSpace(outputVariableName) ? "RetrievedByAssociation" : outputVariableName!.Trim();
+            var fromVariable = entityVariable.Trim();
+
+            using var tx = CurrentApp.StartTransaction($"Add Retrieve association activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateAssociationRetrieveSourceActivity(
+                CurrentApp,
+                associationResolution.Association!,
+                output,
+                fromVariable);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert a Retrieve by association activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                entity = associationResolution.EntityName,
+                entityModule = associationResolution.EntityModuleName,
+                association = associationResolution.Association!.Name,
+                entityVariable = fromVariable,
+                outputVariableName = output,
+                route = "microflows/retrieve-association",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow retrieve-association activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private Task HandleDeleteMicroflowObjectAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
         if (CurrentApp?.Root is not IProject project)
@@ -1269,6 +1429,193 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleChangeMicroflowAssociationAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var entityName = request.QueryString["entity"];
+        var associationName = request.QueryString["association"];
+        var variableName = request.QueryString["variable"];
+        var value = request.QueryString["value"];
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(associationName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'association' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(variableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'variable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (value is null)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'value' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var associationResolution = ResolveAssociation(project, module, entityName, associationName);
+            if (!associationResolution.Ok)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = associationResolution.Error,
+                    entity = entityName,
+                    association = associationName,
+                    module = normalizedModuleName,
+                    matches = associationResolution.Candidates
+                }, associationResolution.StatusCode, cancellationToken);
+            }
+
+            if (!TryParseChangeActionItemType(request.QueryString["changeType"], out var changeType))
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Invalid change type. Use Set, Add, or Remove.",
+                    changeType = request.QueryString["changeType"]
+                }, HttpStatusCode.BadRequest, cancellationToken);
+            }
+
+            if (!TryParseCommitEnum(request.QueryString["commit"], out var commitMode))
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Invalid commit mode. Use Yes, YesWithoutEvents, or No.",
+                    commit = request.QueryString["commit"]
+                }, HttpStatusCode.BadRequest, cancellationToken);
+            }
+
+            var expression = _microflowExpressionService.CreateFromString(ToExpressionText(value));
+            var variable = variableName.Trim();
+
+            using var tx = CurrentApp.StartTransaction($"Add Change association activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateChangeAssociationActivity(
+                CurrentApp,
+                associationResolution.Association!,
+                changeType,
+                expression,
+                variable,
+                commitMode);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert a Change association activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                entity = associationResolution.EntityName,
+                entityModule = associationResolution.EntityModuleName,
+                association = associationResolution.Association!.Name,
+                variableName = variable,
+                changeType = changeType.ToString(),
+                commit = commitMode.ToString(),
+                value,
+                route = "microflows/change-association",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow change-association activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private Task HandleChangeMicroflowAttributeAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
         if (CurrentApp?.Root is not IProject project)
@@ -1567,10 +1914,12 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 microflowCreateObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-object"),
                 microflowCreateListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-list"),
                 microflowRetrieveDatabaseUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/retrieve-database"),
+                microflowRetrieveAssociationUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/retrieve-association"),
                 microflowDeleteObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/delete-object"),
                 microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object"),
                 microflowRollbackObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/rollback-object"),
-                microflowChangeAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/change-attribute")
+                microflowChangeAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/change-attribute"),
+                microflowChangeAssociationUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/change-association")
             };
 
             File.WriteAllText(endpointFilePath, JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8);
@@ -1797,6 +2146,162 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
 
         return Enum.TryParse(raw, ignoreCase: true, out changeType);
+    }
+
+    private static AssociationResolutionResult ResolveAssociation(
+        IProject project,
+        IModule? moduleHint,
+        string? entityName,
+        string associationInput)
+    {
+        var associationText = associationInput.Trim();
+        if (associationText.Length == 0)
+        {
+            return new AssociationResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.BadRequest,
+                Error: "Association cannot be empty.",
+                Association: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: null);
+        }
+
+        string? parsedModuleName = null;
+        string? parsedEntityName = entityName?.Trim();
+        string targetAssociationName = associationText;
+
+        var parts = associationText.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 3)
+        {
+            parsedModuleName = parts[0].Trim();
+            parsedEntityName = parts[1].Trim();
+            targetAssociationName = parts[2].Trim();
+        }
+        else if (parts.Length == 2)
+        {
+            if (string.IsNullOrWhiteSpace(parsedEntityName))
+            {
+                parsedModuleName = parts[0].Trim();
+                targetAssociationName = parts[1].Trim();
+            }
+            else
+            {
+                var left = parts[0].Trim();
+                var right = parts[1].Trim();
+                if (string.Equals(left, parsedEntityName, StringComparison.OrdinalIgnoreCase))
+                {
+                    parsedEntityName = left;
+                    targetAssociationName = right;
+                }
+                else
+                {
+                    parsedModuleName = left;
+                    targetAssociationName = right;
+                }
+            }
+        }
+        else if (parts.Length > 3)
+        {
+            return new AssociationResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.BadRequest,
+                Error: "Association must be in the format Association, Module.Association, Entity.Association, or Module.Entity.Association.",
+                Association: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: null);
+        }
+
+        List<IModule> modulesToSearch;
+        if (string.IsNullOrWhiteSpace(parsedModuleName))
+        {
+            modulesToSearch = moduleHint is null
+                ? project.GetModules().ToList()
+                : [moduleHint];
+        }
+        else
+        {
+            modulesToSearch = project.GetModules()
+                .Where(module => string.Equals(module.Name, parsedModuleName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        if (modulesToSearch.Count == 0)
+        {
+            return new AssociationResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.NotFound,
+                Error: $"No module named '{parsedModuleName}' was found for association resolution.",
+                Association: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: null);
+        }
+
+        var candidates = new List<(IAssociation Association, string EntityName, string ModuleName)>();
+        foreach (var candidateModule in modulesToSearch)
+        {
+            if (candidateModule.DomainModel is null)
+            {
+                continue;
+            }
+
+            foreach (var entity in candidateModule.DomainModel.GetEntities())
+            {
+                if (string.IsNullOrWhiteSpace(parsedEntityName) is false
+                    && !string.Equals(entity.Name, parsedEntityName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                foreach (var entityAssociation in entity.GetAssociations(AssociationDirection.Both, null))
+                {
+                    var association = entityAssociation.Association;
+                    if (string.Equals(association.Name, targetAssociationName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        candidates.Add((association, entity.Name, candidateModule.Name));
+                    }
+                }
+            }
+        }
+
+        if (candidates.Count == 0)
+        {
+            return new AssociationResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.NotFound,
+                Error: $"No association named '{targetAssociationName}' was found.",
+                Association: null,
+                EntityName: parsedEntityName,
+                EntityModuleName: parsedModuleName,
+                Candidates: null);
+        }
+
+        if (candidates.Count > 1)
+        {
+            var ambiguous = candidates
+                .Select(candidate => new { association = candidate.Association.Name, entity = candidate.EntityName, module = candidate.ModuleName })
+                .ToArray();
+
+            return new AssociationResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.Conflict,
+                Error: "Multiple associations matched the request. Include --module and/or --entity to disambiguate.",
+                Association: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: ambiguous);
+        }
+
+        return new AssociationResolutionResult(
+            Ok: true,
+            StatusCode: HttpStatusCode.OK,
+            Error: null,
+            Association: candidates[0].Association,
+            EntityName: candidates[0].EntityName,
+            EntityModuleName: candidates[0].ModuleName,
+            Candidates: null);
     }
 
     private static AttributeResolutionResult ResolveAttribute(
@@ -2104,6 +2609,15 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         HttpStatusCode StatusCode,
         string? Error,
         IAttribute? Attribute,
+        string? EntityName,
+        string? EntityModuleName,
+        object[]? Candidates);
+
+    private sealed record AssociationResolutionResult(
+        bool Ok,
+        HttpStatusCode StatusCode,
+        string? Error,
+        IAssociation? Association,
         string? EntityName,
         string? EntityModuleName,
         object[]? Candidates);

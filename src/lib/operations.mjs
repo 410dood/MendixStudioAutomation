@@ -201,6 +201,11 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.retrieveAssociation",
+            description: "Insert a Retrieve by association activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.deleteObject",
             description: "Insert a Delete object activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"
@@ -218,6 +223,11 @@ export const operationCatalog = {
         {
             id: "microflow.changeAttribute",
             description: "Insert a Change attribute activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
+            id: "microflow.changeAssociation",
+            description: "Insert a Change association activity into a microflow through the extension API.",
             status: "implemented-using-hybrid-endpoint"
         },
         {
