@@ -330,6 +330,7 @@ export class StudioProClient {
             item: options.item ?? options.widget ?? options.node ?? null,
             scope: options.scope || "editor",
             dialog: dialogName,
+            dryRun: toBoolean(options.dryRun, false),
             openResult,
             syncResult
         };
@@ -850,6 +851,7 @@ export class StudioProClient {
 
         const changedEntries = Array.isArray(comparison?.diff?.changed) ? comparison.diff.changed : [];
         const continueOnError = toBoolean(options.continueOnError, false);
+        const dryRun = toBoolean(options.dryRun, false);
         if (changedEntries.length === 0) {
             return {
                 ok: true,
@@ -857,6 +859,7 @@ export class StudioProClient {
                 dialog: options.dialog,
                 batchSource: comparison.batchSource ?? null,
                 fieldsFile: comparison.fieldsFile ?? null,
+                dryRun,
                 changedCount: 0,
                 appliedCount: 0,
                 skippedUnchanged: comparison.expectedCount ?? 0,
@@ -874,6 +877,24 @@ export class StudioProClient {
             verifyToggleState: entry.expected?.verifyToggleState ?? null
         }));
 
+        if (dryRun) {
+            return {
+                ok: comparison?.diff?.missing?.length === 0,
+                action: "sync-dialog-fields",
+                dialog: options.dialog,
+                batchSource: comparison.batchSource ?? null,
+                fieldsFile: comparison.fieldsFile ?? null,
+                dryRun: true,
+                changedCount: changedEntries.length,
+                appliedCount: 0,
+                skippedUnchanged: Math.max((comparison.expectedCount ?? 0) - changedEntries.length, 0),
+                missingCount: comparison?.diff?.missing?.length ?? 0,
+                comparison,
+                plannedFields: fieldsToApply,
+                updateResult: null
+            };
+        }
+
         const updateResult = await this.setDialogFields({
             ...options,
             fieldsJson: JSON.stringify(fieldsToApply),
@@ -886,6 +907,7 @@ export class StudioProClient {
             dialog: options.dialog,
             batchSource: comparison.batchSource ?? null,
             fieldsFile: comparison.fieldsFile ?? null,
+            dryRun: false,
             changedCount: changedEntries.length,
             appliedCount: updateResult?.count ?? 0,
             skippedUnchanged: Math.max((comparison.expectedCount ?? 0) - changedEntries.length, 0),

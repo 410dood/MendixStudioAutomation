@@ -649,6 +649,7 @@ Options:
   --verify-value-contains <t> Require get/set-dialog-field to observe a post-read/write text substring
   --verify-toggle-state <t>   Require set-dialog-field to observe toggle state On|Off|Indeterminate (also accepts true/false)
   --continue-on-error <bool>  Continue batch dialog field updates after a field-level failure
+  --dry-run <bool>            Preview planned sync updates without mutating Studio Pro
   --element <name>            Visible editor element name to target for a context menu
   --menu-item <name>          Editor context-menu item to invoke
   --menu-path <a>b>           Editor context-menu path, e.g. "Add>Activity"

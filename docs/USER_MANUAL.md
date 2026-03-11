@@ -53,6 +53,7 @@ npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --ite
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run set-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --value "structureMode1" --control-type Edit --verify-value "structureMode1"
 npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json"
+npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json" --dry-run true
 ```
 
 Use these first when Studio Pro behaves unexpectedly or a command seems blocked by a popup.
@@ -144,14 +145,14 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `list-dialog-fields` is the higher-level inspection command when you want label/value pairs instead of a raw control inventory.
 `export-dialog-fields` writes those label/value pairs to JSON so they can be edited and fed back into `set-dialog-fields --fields-file ...`.
 `compare-dialog-fields` compares a saved JSON field plan with the live dialog and reports changed, missing, and extra fields before you mutate anything.
-`sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan.
+`sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan. Use `--dry-run true` to emit the planned edits without mutating Studio Pro.
 `export-properties-dialog` composes `open-properties` with `export-dialog-fields`, so a page/widget/explorer target can emit a reviewable JSON field plan in one command.
 `compare-properties-dialog` composes `open-properties` with `compare-dialog-fields`, so a target can be checked against a saved plan without manually naming the transient dialog window.
 `list-properties-dialog-fields` composes `open-properties` with `list-dialog-fields`, so field discovery can start from a real page/widget/explorer target.
 `get-properties-dialog-field` composes `open-properties` with `get-dialog-field`, so single-field reads can target a page/widget/explorer surface directly.
 `set-properties-dialog-fields` composes `open-properties` with `set-dialog-fields`, so batch property edits can also avoid hard-coded dialog captions.
 `set-properties-dialog-field` composes `open-properties` with `set-dialog-field`, so single-field edits and verification no longer need a hard-coded dialog caption.
-`sync-properties-dialog` composes `open-properties` with `sync-dialog-fields`, so a page/widget/explorer target can be opened and synchronized from one command.
+`sync-properties-dialog` composes `open-properties` with `sync-dialog-fields`, so a page/widget/explorer target can be opened and synchronized from one command. Use `--dry-run true` to preview the exact field edits before applying them.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ. Use `--fields-file` when the payload is large enough that shell quoting becomes brittle.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.

@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.52
+
+Dry-run planning for dialog sync commands.
+
+- Added `dryRun` / `--dry-run` support to `sync-dialog-fields`, returning `plannedFields` without mutating the live dialog.
+- `sync-properties-dialog` now forwards the same dry-run behavior for target-first property synchronization.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.51
 
 Target-first property discovery and batch editing.

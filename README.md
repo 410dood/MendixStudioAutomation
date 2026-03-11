@@ -92,6 +92,7 @@ npm run get-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --ite
 npm run set-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run set-properties-dialog-field -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --label "Name" --value "structureMode1" --control-type Edit --verify-value "structureMode1"
 npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json"
+npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json" --dry-run true
 npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Structure mode"
@@ -131,6 +132,7 @@ npm run list-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --control
 npm run export-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --output-file ".automation-state/dialog-fields.json"
 npm run compare-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json"
 npm run sync-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json"
+npm run sync-dialog-fields -- --dialog "Edit Data grid 2 'dataGrid21'" --fields-file ".automation-state/dialog-fields.json" --dry-run true
 npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run get-dialog-field -- --dialog "Edit Data grid 2 'dataGrid21'" --label "Show search bar" --control-type CheckBox
 npm run get-dialog-field -- --dialog "Edit Container 'container39'" --label "Name" --control-type Edit --verify-value-contains "container"
