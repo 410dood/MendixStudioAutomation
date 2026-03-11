@@ -287,6 +287,54 @@ export class StudioProClient {
         return result;
     }
 
+    async syncPropertiesDialog(options = {}) {
+        let openResult;
+        try {
+            openResult = await this.openProperties(options);
+        } catch (error) {
+            return {
+                ok: false,
+                action: "sync-properties-dialog",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+
+        const dialogName = extractDialogWindowName(openResult);
+        if (!openResult?.ok || !dialogName) {
+            return {
+                ok: false,
+                action: "sync-properties-dialog",
+                page: options.page ?? null,
+                microflow: options.microflow ?? null,
+                item: options.item ?? options.widget ?? options.node ?? null,
+                scope: options.scope || "editor",
+                error: openResult?.error ?? "Properties dialog did not open or did not report a dialog window name.",
+                openResult
+            };
+        }
+
+        const syncResult = await this.syncDialogFields({
+            ...options,
+            dialog: dialogName
+        });
+
+        return {
+            ok: Boolean(openResult?.ok) && Boolean(syncResult?.ok),
+            action: "sync-properties-dialog",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            dialog: dialogName,
+            openResult,
+            syncResult
+        };
+    }
+
     async openItem(options = {}) {
         const extensionOpenResult = await tryOpenItemViaExtension(this, options);
         if (extensionOpenResult) {
@@ -4748,6 +4796,11 @@ function compareDialogFieldSets(expectedFields, liveFields) {
 function normalizeDialogFieldExportFormat(raw) {
     const value = String(raw ?? "object").trim().toLowerCase();
     return value === "array" ? "array" : "object";
+}
+
+function extractDialogWindowName(result) {
+    const name = result?.dialog?.window?.name ?? result?.dialog?.name ?? null;
+    return typeof name === "string" && name.trim().length > 0 ? name.trim() : null;
 }
 
 function buildDialogFieldExportPayload(fields, format = "object") {

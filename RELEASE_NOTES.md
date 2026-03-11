@@ -1132,6 +1132,7 @@ Known limitations:
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
 - `insert-widget` is now producing real page mutations on validated visible targets, but broader target coverage still needs more hardening across alternate page layouts and scroll states.
 - `create-page` is currently strongest when the desired template is already visible in the right-hand template panel. Left-side template-category switching in the wizard still needs more hardening.
+- Added `sync-properties-dialog` to open a Studio Pro properties dialog from a page/microflow target and sync only the changed fields from a saved plan.
 - Added `sync-dialog-fields` to compare a live dialog with a saved plan and apply only the changed fields.
 - Added `compare-dialog-fields` to diff a live Studio Pro dialog against a saved JSON field plan.
 - Added `export-dialog-fields` to write live dialog field/value pairs into reusable JSON files.

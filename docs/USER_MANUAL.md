@@ -46,6 +46,7 @@ npm run stop-local
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
+npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json"
 ```
 
 Use these first when Studio Pro behaves unexpectedly or a command seems blocked by a popup.
@@ -138,6 +139,7 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 `export-dialog-fields` writes those label/value pairs to JSON so they can be edited and fed back into `set-dialog-fields --fields-file ...`.
 `compare-dialog-fields` compares a saved JSON field plan with the live dialog and reports changed, missing, and extra fields before you mutate anything.
 `sync-dialog-fields` builds on `compare-dialog-fields` and `set-dialog-fields` by applying only the fields that are actually out of sync with the saved plan.
+`sync-properties-dialog` composes `open-properties` with `sync-dialog-fields`, so a page/widget/explorer target can be opened and synchronized from one command.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ. Use `--fields-file` when the payload is large enough that shell quoting becomes brittle.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.

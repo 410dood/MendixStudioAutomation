@@ -60,6 +60,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "sync-properties-dialog": {
+            const result = await client.syncPropertiesDialog(options);
+            formatOutput(result);
+            return;
+        }
         case "open-item": {
             const result = await client.openItem(options);
             formatOutput(result);
@@ -478,6 +483,7 @@ Commands:
   show-responsive-web         Open the app in Studio Pro's responsive browser view
   create-page                 Create a Mendix page through the native Studio Pro wizard
   open-properties             Open the properties dialog for a selected Studio Pro item
+  sync-properties-dialog      Open a properties dialog and sync it from a JSON field plan
   open-item                   Open a Studio Pro document by name with Ctrl+G
   select-widget               Select a visible named widget or page element
   popup-status                Inspect current Studio Pro popup windows

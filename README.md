@@ -85,6 +85,7 @@ npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
+npm run sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/dialog-fields.json"
 npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Structure mode"
@@ -302,6 +303,7 @@ Phase 2:
 - current `export-dialog-fields` can write a reusable JSON batch file directly from a live Studio Pro dialog
 - current `compare-dialog-fields` can diff a live dialog against a saved JSON plan before applying changes
 - current `sync-dialog-fields` can apply only the fields that actually differ from the saved dialog plan
+- current `sync-properties-dialog` can open a Studio Pro properties dialog from a page/microflow target and apply only the changed fields from a saved plan
 - current `invoke-dialog-control` now reports whether the dialog window actually closed after the control invocation
 - current `get-dialog-field` can inspect native dialog field values and toggle state by visible label
 - current `set-dialog-fields` can apply multiple dialog property changes from one JSON payload
