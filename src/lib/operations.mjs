@@ -186,6 +186,11 @@ export const operationCatalog = {
             status: "implemented-using-hybrid-endpoint"
         },
         {
+            id: "microflow.changeAttribute",
+            description: "Insert a Change attribute activity into a microflow through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.selectNode",
             description: "Select a visible microflow node or activity label on the editor surface.",
             status: "implemented-validated"

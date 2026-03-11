@@ -707,6 +707,83 @@ export class StudioProClient {
         };
     }
 
+    async addMicroflowChangeAttribute(options = {}) {
+        const normalized = normalizeMicroflowChangeAttributeOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "add-microflow-change-attribute",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        if (!normalized.attribute) {
+            return {
+                ok: false,
+                action: "add-microflow-change-attribute",
+                error: "An --attribute argument is required."
+            };
+        }
+
+        if (!normalized.variable) {
+            return {
+                ok: false,
+                action: "add-microflow-change-attribute",
+                error: "A --variable argument is required."
+            };
+        }
+
+        if (normalized.value === undefined || normalized.value === null) {
+            return {
+                ok: false,
+                action: "add-microflow-change-attribute",
+                error: "A --value argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "add-microflow-change-attribute",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.changeAttribute"))) {
+            return {
+                ok: false,
+                action: "add-microflow-change-attribute",
+                error: "Extension capabilities do not include microflow.changeAttribute."
+            };
+        }
+
+        const result = await this.extensionClient.addMicroflowChangeAttribute({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            variable: normalized.variable,
+            value: normalized.value,
+            changeType: normalized.changeType,
+            commit: normalized.commit
+        });
+
+        return {
+            ...result,
+            action: "add-microflow-change-attribute",
+            microflow: normalized.microflow,
+            module: normalized.module,
+            entity: normalized.entity,
+            attribute: normalized.attribute,
+            variable: normalized.variable,
+            value: normalized.value,
+            changeType: normalized.changeType,
+            commit: normalized.commit
+        };
+    }
+
     async getHybridContext(options = {}) {
         const extensionStatus = await this.getExtensionStatus(options);
         if (extensionStatus?.available) {
@@ -1284,6 +1361,21 @@ function normalizeMicroflowVariableActionOptions(options) {
         variable: normalizedVariable,
         withEvents: options.withEvents ?? "false",
         refreshInClient: options.refreshInClient ?? "false"
+    };
+}
+
+function normalizeMicroflowChangeAttributeOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item,
+        module: options.module,
+        entity: options.entity,
+        attribute: options.attribute,
+        variable: options.variable ?? options.target,
+        value: options.value,
+        changeType: options.changeType ?? "Set",
+        commit: options.commit ?? "No"
     };
 }
 

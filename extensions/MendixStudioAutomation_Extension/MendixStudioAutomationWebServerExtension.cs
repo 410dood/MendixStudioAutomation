@@ -76,6 +76,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/microflows/create-object", HandleCreateMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/delete-object", HandleDeleteMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/commit-object", HandleCommitMicroflowObjectAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/change-attribute", HandleChangeMicroflowAttributeAsync);
 
         PersistRuntimeEndpoint();
         _logService.Info($"Mendix Studio Automation extension routes registered at {WebServerBaseUrl}{RoutePrefix}");
@@ -150,6 +151,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "microflow.createObject",
             "microflow.deleteObject",
             "microflow.commitObject",
+            "microflow.changeAttribute",
             "branch.read",
             "webserver.health",
             "webserver.context"
@@ -813,6 +815,194 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         }
     }
 
+    private Task HandleChangeMicroflowAttributeAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        var entityName = request.QueryString["entity"];
+        var attributeName = request.QueryString["attribute"];
+        var variableName = request.QueryString["variable"];
+        var value = request.QueryString["value"];
+
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(attributeName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'attribute' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(variableName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'variable' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        if (value is null)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'value' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+
+            var attributeResolution = ResolveAttribute(project, module, entityName, attributeName);
+            if (!attributeResolution.Ok)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = attributeResolution.Error,
+                    entity = entityName,
+                    attribute = attributeName,
+                    module = normalizedModuleName,
+                    matches = attributeResolution.Candidates
+                }, attributeResolution.StatusCode, cancellationToken);
+            }
+
+            if (!TryParseChangeActionItemType(request.QueryString["changeType"], out var changeType))
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Invalid change type. Use Set, Add, or Remove.",
+                    changeType = request.QueryString["changeType"]
+                }, HttpStatusCode.BadRequest, cancellationToken);
+            }
+
+            if (!TryParseCommitEnum(request.QueryString["commit"], out var commitMode))
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Invalid commit mode. Use Yes, YesWithoutEvents, or No.",
+                    commit = request.QueryString["commit"]
+                }, HttpStatusCode.BadRequest, cancellationToken);
+            }
+
+            var expression = _microflowExpressionService.CreateFromString(ToExpressionText(value));
+            var variable = variableName.Trim();
+
+            using var tx = CurrentApp.StartTransaction($"Add Change attribute activity to {targetMicroflow}");
+            var activity = _microflowActivitiesService.CreateChangeAttributeActivity(
+                CurrentApp,
+                attributeResolution.Attribute!,
+                changeType,
+                expression,
+                variable,
+                commitMode);
+
+            var inserted = _microflowService.TryInsertAfterStart(targetMicroflow, [activity]);
+            if (!inserted)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "The API could not insert a Change object activity at the start of the microflow.",
+                    microflow = microflowName,
+                    module = targetMicroflowModule
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            tx.Commit();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                entity = attributeResolution.EntityName,
+                entityModule = attributeResolution.EntityModuleName,
+                attribute = attributeResolution.Attribute!.Name,
+                variableName = variable,
+                changeType = changeType.ToString(),
+                commit = commitMode.ToString(),
+                value,
+                route = "microflows/change-attribute",
+                inserted
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to create microflow change-attribute activity.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
+    }
+
     private void OnActiveDocumentChanged(ActiveDocumentChanged change)
     {
         try
@@ -922,7 +1112,8 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 navigationPopulateUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/navigation/populate"),
                 microflowCreateObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-object"),
                 microflowDeleteObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/delete-object"),
-                microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object")
+                microflowCommitObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/commit-object"),
+                microflowChangeAttributeUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/change-attribute")
             };
 
             File.WriteAllText(endpointFilePath, JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8);
@@ -1140,6 +1331,151 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         };
     }
 
+    private static bool TryParseChangeActionItemType(string? raw, out ChangeActionItemType changeType)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            changeType = ChangeActionItemType.Set;
+            return true;
+        }
+
+        return Enum.TryParse(raw, ignoreCase: true, out changeType);
+    }
+
+    private static AttributeResolutionResult ResolveAttribute(
+        IProject project,
+        IModule? moduleHint,
+        string? entityName,
+        string attributeInput)
+    {
+        var attributeText = attributeInput.Trim();
+        if (attributeText.Length == 0)
+        {
+            return new AttributeResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.BadRequest,
+                Error: "Attribute cannot be empty.",
+                Attribute: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: null);
+        }
+
+        string? resolvedModuleName = null;
+        string? resolvedEntityName = entityName?.Trim();
+        string resolvedAttributeName = attributeText;
+
+        var parts = attributeText.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 3)
+        {
+            resolvedModuleName = parts[0].Trim();
+            resolvedEntityName = parts[1].Trim();
+            resolvedAttributeName = parts[2].Trim();
+        }
+        else if (parts.Length == 2 && string.IsNullOrWhiteSpace(resolvedEntityName))
+        {
+            resolvedEntityName = parts[0].Trim();
+            resolvedAttributeName = parts[1].Trim();
+        }
+        else if (parts.Length > 3)
+        {
+            return new AttributeResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.BadRequest,
+                Error: "Attribute must be in the format Attribute, Entity.Attribute, or Module.Entity.Attribute.",
+                Attribute: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: null);
+        }
+
+        if (string.IsNullOrWhiteSpace(resolvedEntityName))
+        {
+            return new AttributeResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.BadRequest,
+                Error: "Entity context is required. Use --entity or pass Module.Entity.Attribute.",
+                Attribute: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: null);
+        }
+
+        IModule? attributeModuleHint = moduleHint;
+        if (string.IsNullOrWhiteSpace(resolvedModuleName) is false)
+        {
+            attributeModuleHint = ResolveModule(project, resolvedModuleName);
+            if (attributeModuleHint is null)
+            {
+                return new AttributeResolutionResult(
+                    Ok: false,
+                    StatusCode: HttpStatusCode.NotFound,
+                    Error: $"No module named '{resolvedModuleName}' was found for attribute resolution.",
+                    Attribute: null,
+                    EntityName: null,
+                    EntityModuleName: null,
+                    Candidates: null);
+            }
+        }
+
+        var qualifiedEntity = string.IsNullOrWhiteSpace(resolvedModuleName)
+            ? resolvedEntityName
+            : $"{resolvedModuleName}.{resolvedEntityName}";
+        var entityMatches = ResolveEntities(project, qualifiedEntity, attributeModuleHint);
+        if (entityMatches.Length == 0)
+        {
+            return new AttributeResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.NotFound,
+                Error: $"No entity named '{resolvedEntityName}' was found for attribute resolution.",
+                Attribute: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: null);
+        }
+
+        if (entityMatches.Length > 1)
+        {
+            var candidates = entityMatches
+                .Select(match => new { name = match.Name, module = match.ModuleName })
+                .ToArray();
+
+            return new AttributeResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.Conflict,
+                Error: "Multiple entities matched the request. Include --module or module-qualified attribute name.",
+                Attribute: null,
+                EntityName: null,
+                EntityModuleName: null,
+                Candidates: candidates);
+        }
+
+        var targetEntity = entityMatches[0].Entity;
+        var targetAttribute = targetEntity.GetAttributes()
+            .FirstOrDefault(attribute => string.Equals(attribute.Name, resolvedAttributeName, StringComparison.OrdinalIgnoreCase));
+
+        if (targetAttribute is null)
+        {
+            return new AttributeResolutionResult(
+                Ok: false,
+                StatusCode: HttpStatusCode.NotFound,
+                Error: $"Entity '{targetEntity.Name}' does not define attribute '{resolvedAttributeName}'.",
+                Attribute: null,
+                EntityName: targetEntity.Name,
+                EntityModuleName: entityMatches[0].ModuleName,
+                Candidates: null);
+        }
+
+        return new AttributeResolutionResult(
+            Ok: true,
+            StatusCode: HttpStatusCode.OK,
+            Error: null,
+            Attribute: targetAttribute,
+            EntityName: targetEntity.Name,
+            EntityModuleName: entityMatches[0].ModuleName,
+            Candidates: null);
+    }
+
     private static bool TryParseCommitEnum(string? raw, out CommitEnum commitMode)
     {
         if (string.IsNullOrWhiteSpace(raw))
@@ -1305,4 +1641,13 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         return project.GetModules()
             .FirstOrDefault(module => string.Equals(module.Name, moduleName, StringComparison.OrdinalIgnoreCase));
     }
+
+    private sealed record AttributeResolutionResult(
+        bool Ok,
+        HttpStatusCode StatusCode,
+        string? Error,
+        IAttribute? Attribute,
+        string? EntityName,
+        string? EntityModuleName,
+        object[]? Candidates);
 }

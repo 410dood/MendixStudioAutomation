@@ -220,6 +220,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "add-microflow-change-attribute": {
+            const result = await client.addMicroflowChangeAttribute(options);
+            formatOutput(result);
+            return;
+        }
         case "create-clients-page": {
             const result = await client.createClientsPage(options);
             formatOutput(result);
@@ -315,6 +320,7 @@ Commands:
   add-microflow-create-object Add a microflow Create object activity through the extension
   add-microflow-delete-object Add a microflow Delete object activity through the extension
   add-microflow-commit-object Add a microflow Commit object activity through the extension
+  add-microflow-change-attribute Add a microflow Change attribute activity through the extension
   create-clients-page         Create a Clients page and insert a default DataGrid widget
   hybrid-context              Prefer the extension context and fall back to UI automation
   select-tab                  Activate an open Studio Pro editor tab
@@ -381,8 +387,11 @@ Options:
   --commit <name>             Create object commit mode: Yes|YesWithoutEvents|No
   --refresh-in-client <true|false> Refresh client after create
   --initial-values <json>     JSON object of initial attribute values, e.g. {"Name":"John","Amount":1}
-  --variable <name>           Existing scope variable name for delete/commit object actions
+  --variable <name>           Existing scope variable name for delete/commit/change-attribute actions
   --with-events <true|false>  Include events when committing objects
+  --attribute <name>          Attribute to mutate: Attribute, Entity.Attribute, or Module.Entity.Attribute
+  --value <text>              New value or expression for change-attribute action
+  --change-type <name>        Change type for change-attribute action: Set|Add|Remove
   --caption <text>            Optional explicit caption for add-navigation-shortcut
 `);
 }

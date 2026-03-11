@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.2.6
+
+Hybrid write-path expansion for microflow attribute mutation.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/change-attribute`
+- Added Studio Pro client support for:
+  - inserting a `Change attribute` action into a selected microflow via extension service APIs
+- Added CLI plumbing and npm script:
+  - `add-microflow-change-attribute`
+  - `npm run add-microflow-change-attribute`
+- Added options to support `Change attribute` insertion:
+  - `--attribute`
+  - `--value`
+  - `--change-type`
+  - `--entity`
+  - `--variable`
+  - `--commit`
+- Updated operation catalog with:
+  - `microflow.changeAttribute`
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+- Kept commit-related behavior unchanged (review-first workflow; no version-control commits).
+
 ## 0.2.5
 
 Hybrid write-path expansion for object lifecycle microflow activities.

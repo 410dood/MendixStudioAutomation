@@ -34,7 +34,7 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - create pages through Studio Pro's native `New Document` and `Create Page` wizards
 - query an in-Studio hybrid extension over a supported local webserver route
 - add opened pages to the web navigation profile via the hybrid extension route
-- insert selected microflow activities through hybrid extension routes (`Create object`, `Delete object`, `Commit object`)
+- insert selected microflow activities through hybrid extension routes (`Create object`, `Delete object`, `Commit object`, `Change attribute`)
 - open native Studio Pro properties dialogs from selected editor targets
 - inspect and wait for Studio Pro popups to clear
 - list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
@@ -119,6 +119,7 @@ npm run insert-action -- --microflow "ClinicalDocument_ShowPage" --target "Docum
 npm run add-microflow-create-object -- --microflow "ClinicalDocument_ShowPage" --module "Document" --entity "ClientDocument" --commit "YesWithoutEvents" --refresh-in-client false
 npm run add-microflow-delete-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj"
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
+npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No
 ```
 
 ### Clients Page Scaffold
@@ -213,6 +214,7 @@ Phase 2:
 - current `add-microflow-create-object` now inserts SDK-backed `Create object` activities through the hybrid extension route
 - current `add-microflow-delete-object` now inserts SDK-backed `Delete object` activities through the hybrid extension route
 - current `add-microflow-commit-object` now inserts SDK-backed `Commit object` activities through the hybrid extension route
+- current `add-microflow-change-attribute` now inserts SDK-backed `Change attribute` activities through the hybrid extension route
 - current editor context-menu commands can traverse nested menu paths such as `Add > Activity`
 - current node-level editor context menus fall back to native right-click when `Shift+F10` opens the microflow properties dialog instead of a menu
 - current `click-editor-offset` provides a placement primitive for clicking relative to a visible page or microflow element

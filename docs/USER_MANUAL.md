@@ -241,6 +241,12 @@ Commit a scoped variable in a microflow through the extension API:
 npm run add-microflow-commit-object -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --variable "ClientDocumentObj" --with-events false --refresh-in-client false
 ```
 
+Change an attribute on a scoped variable in a microflow through the extension API:
+
+```powershell
+npm run add-microflow-change-attribute -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement" --entity "Document.ClientDocument" --attribute "Status" --variable "ClientDocumentObj" --value "Draft" --change-type Set --commit No
+```
+
 As with page insertion, keep `--dry-run` on until the selector path is confirmed.
 The real `insert-action` path now returns before/after microflow-editor snapshots and any post-action Studio Pro dialog, which is useful when the gesture does something unexpected on the canvas.
 
@@ -294,6 +300,7 @@ npm run click-editor-offset -- --microflow "ClinicalDocument_ShowPage" --element
 - `add-microflow-create-object` inserts `Create object` activities only at the start of the selected microflow.
 - `add-microflow-delete-object` inserts `Delete object` activities only at the start of the selected microflow.
 - `add-microflow-commit-object` inserts `Commit object` activities only at the start of the selected microflow.
+- `add-microflow-change-attribute` inserts `Change attribute` activities only at the start of the selected microflow.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
 - `set-dialog-field` is currently experimental and needs more validation across a wider set of Studio Pro dialogs.
 - `create-page` currently assumes the target template is already visible in the right-hand template panel. Left-pane template-category switching still needs more hardening.

@@ -219,6 +219,39 @@ export class HybridExtensionClient {
         };
     }
 
+    async addMicroflowChangeAttribute(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/change-attribute", {
+            microflow: options.microflow ?? options.item,
+            module: options.module,
+            entity: options.entity,
+            attribute: options.attribute,
+            variable: options.variable,
+            value: options.value,
+            changeType: options.changeType,
+            commit: options.commit
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async addNavigationShortcut(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {
@@ -339,6 +372,7 @@ async function resolveEndpointDiscovery(options) {
                 microflowCreateObjectUrl: parsed.microflowCreateObjectUrl,
                 microflowDeleteObjectUrl: parsed.microflowDeleteObjectUrl,
                 microflowCommitObjectUrl: parsed.microflowCommitObjectUrl,
+                microflowChangeAttributeUrl: parsed.microflowChangeAttributeUrl,
                 baseUrl: parsed.baseUrl,
                 routePrefix: parsed.routePrefix
             }
