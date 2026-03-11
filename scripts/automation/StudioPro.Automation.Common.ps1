@@ -123,6 +123,16 @@ function Convert-AutomationElement {
         $runtimeId = @()
     }
 
+    $isSelected = $null
+    try {
+        $selectionItemPattern = $null
+        if ($Element.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$selectionItemPattern)) {
+            $isSelected = [bool]$selectionItemPattern.Current.IsSelected
+        }
+    } catch {
+        $isSelected = $null
+    }
+
     return @{
         name = $Element.Current.Name
         automationId = $Element.Current.AutomationId
@@ -133,6 +143,7 @@ function Convert-AutomationElement {
         processId = $Element.Current.ProcessId
         isEnabled = $Element.Current.IsEnabled
         isOffscreen = $Element.Current.IsOffscreen
+        isSelected = $isSelected
         boundingRectangle = Convert-BoundingRectangle -Rect $Element.Current.BoundingRectangle
     }
 }
@@ -156,7 +167,7 @@ function Get-ChildElements {
         $children += $collection.Item($index)
     }
 
-    return ,$children
+    return @($children)
 }
 
 function Expand-AutomationTree {
@@ -171,7 +182,7 @@ function Expand-AutomationTree {
         return $node
     }
 
-    $children = Get-ChildElements -Element $Element
+    $children = @(Get-ChildElements -Element $Element)
     $childNodes = @()
     $childCount = $children.Length
     $limit = [math]::Min($childCount, $MaxChildren)
@@ -261,7 +272,7 @@ function Find-MatchingElements {
             return
         }
 
-        $children = Get-ChildElements -Element $Node
+        $children = @(Get-ChildElements -Element $Node)
         $childCount = $children.Length
         for ($index = 0; $index -lt $childCount; $index++) {
             Search-Node -Node $children[$index] -CurrentDepth ($CurrentDepth - 1)
@@ -272,7 +283,7 @@ function Find-MatchingElements {
     }
 
     Search-Node -Node $Root -CurrentDepth $Depth
-    return ,($results.ToArray())
+    return @($results.ToArray())
 }
 
 function Invoke-ElementAction {
@@ -449,7 +460,7 @@ function Get-DockTabMatch {
         [string]$Name
     )
 
-    $matches = Find-MatchingElements -Root $Root -Depth 12 -MaxResults 10 -Name $Name -ControlType "TabItem"
+    $matches = @(Find-MatchingElements -Root $Root -Depth 12 -MaxResults 10 -Name $Name -ControlType "TabItem")
     if ($matches.Length -eq 0) {
         return $null
     }
@@ -488,7 +499,7 @@ function Get-ScopeBounds {
     )
 
     $rootBounds = (Convert-AutomationElement -Element $Root).boundingRectangle
-    $rawTabItems = Find-MatchingElements -Root $Root -Depth 12 -MaxResults 100 -ControlType "TabItem"
+    $rawTabItems = @(Find-MatchingElements -Root $Root -Depth 12 -MaxResults 100 -ControlType "TabItem")
     $tabItems = @()
     foreach ($candidate in $rawTabItems) {
         if ($null -eq $candidate) {
@@ -657,6 +668,20 @@ function Select-OpenEditorTabByName {
     return $match
 }
 
+function Get-ActiveEditorTab {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root
+    )
+
+    $tabs = @(Get-OpenEditorTabs -Root $Root)
+    $selectedTab = $tabs | Where-Object { $_.isSelected -eq $true } | Select-Object -First 1
+    if ($selectedTab) {
+        return $selectedTab
+    }
+
+    return $null
+}
+
 function Find-OpenEditorTabForItem {
     param(
         [System.Windows.Automation.AutomationElement]$Root,
@@ -690,7 +715,7 @@ function Open-OrSelectStudioProItem {
     )
 
     $openTab = Find-OpenEditorTabForItem -Root $Root -Item $Item
-    if ($openTab) {
+    if ($openTab -and -not $openTab.isOffscreen) {
         Invoke-BoundsClick -Bounds $openTab.boundingRectangle | Out-Null
         Start-Sleep -Milliseconds $DelayMs
         return @{
@@ -713,7 +738,7 @@ function Find-BestVisibleNamedElement {
         [string]$Surface = "editor"
     )
 
-    $matches = Find-MatchingElements -Root $Root -Depth 15 -MaxResults 50 -Name $Name
+    $matches = @(Find-MatchingElements -Root $Root -Depth 15 -MaxResults 50 -Name $Name)
     $candidates = @($matches | Where-Object {
         $_.name -eq $Name -and
         -not $_.isOffscreen -and
@@ -743,14 +768,14 @@ function Get-StudioProPopupWindows {
         [System.Windows.Automation.AutomationElement]$Root
     )
 
-    $windows = Find-MatchingElements -Root $Root -Depth 6 -MaxResults 25 -ControlType "Window"
+    $windows = @(Find-MatchingElements -Root $Root -Depth 6 -MaxResults 25 -ControlType "Window")
     $popups = @($windows | Where-Object {
         $_.className -eq "Popup" -and
         -not $_.isOffscreen -and
         $_.boundingRectangle.top -ne $null
     })
 
-    return ,$popups
+    return @($popups)
 }
 
 function Get-StudioProPopupSummary {
@@ -767,8 +792,8 @@ function Get-StudioProPopupSummary {
         $buttons = @()
 
         if ($nativePopup) {
-            $textMatches = Find-MatchingElements -Root $nativePopup -Depth 8 -MaxResults 50 -ControlType "Text"
-            $buttonMatches = Find-MatchingElements -Root $nativePopup -Depth 8 -MaxResults 20 -ControlType "Button"
+            $textMatches = @(Find-MatchingElements -Root $nativePopup -Depth 8 -MaxResults 50 -ControlType "Text")
+            $buttonMatches = @(Find-MatchingElements -Root $nativePopup -Depth 8 -MaxResults 20 -ControlType "Button")
             $texts = @($textMatches | Where-Object { $_.name } | Select-Object -ExpandProperty name -Unique)
             $buttons = @($buttonMatches | Where-Object { $_.name } | Select-Object -ExpandProperty name -Unique)
         }
@@ -780,7 +805,7 @@ function Get-StudioProPopupSummary {
         }
     }
 
-    return ,$summaries
+    return @($summaries)
 }
 
 function Wait-ForStudioProReady {
@@ -822,7 +847,7 @@ function Select-PageExplorerItemByName {
     )
 
     $scopeBounds = Get-ScopeBounds -Root $Root -Scope "pageExplorer"
-    $texts = Find-MatchingElements -Root $Root -Depth 20 -MaxResults 400 -ControlType "Text"
+    $texts = @(Find-MatchingElements -Root $Root -Depth 20 -MaxResults 400 -ControlType "Text")
     $matches = @($texts | Where-Object {
         $_.name -eq $Item -and
         -not $_.isOffscreen -and
@@ -845,7 +870,7 @@ function Select-AppExplorerItemByName {
     )
 
     $scopeBounds = Get-ScopeBounds -Root $Root -Scope "appExplorer"
-    $texts = Find-MatchingElements -Root $Root -Depth 20 -MaxResults 400 -ControlType "Text"
+    $texts = @(Find-MatchingElements -Root $Root -Depth 20 -MaxResults 400 -ControlType "Text")
     $matches = @($texts | Where-Object {
         $_.name -eq $Item -and
         -not $_.isOffscreen -and
@@ -868,7 +893,7 @@ function Select-ToolboxItemByName {
     )
 
     $scopeBounds = Get-ScopeBounds -Root $Root -Scope "toolbox"
-    $texts = Find-MatchingElements -Root $Root -Depth 25 -MaxResults 500 -ControlType "Text"
+    $texts = @(Find-MatchingElements -Root $Root -Depth 25 -MaxResults 500 -ControlType "Text")
     $matches = @($texts | Where-Object {
         $_.name -eq $Item -and
         -not $_.isOffscreen -and
@@ -925,7 +950,7 @@ function Get-VisibleTextMatches {
         }
     }
 
-    return ,$results
+    return @($results)
 }
 
 function Resolve-NativeElementByRuntimeId {
@@ -943,7 +968,7 @@ function Resolve-NativeElementByRuntimeId {
         return $null
     }
 
-    $children = Get-ChildElements -Element $Root
+    $children = @(Get-ChildElements -Element $Root)
     $childCount = $children.Length
     for ($index = 0; $index -lt $childCount; $index++) {
         $match = Resolve-NativeElementByRuntimeId -Root $children[$index] -ExpectedRuntimeId $ExpectedRuntimeId -Depth ($Depth - 1)

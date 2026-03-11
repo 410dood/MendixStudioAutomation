@@ -31,6 +31,8 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - select a visible named widget or page element on the active designer surface
 - inspect and wait for Studio Pro popups to clear
 - list open page and microflow editor tabs
+- report the best-known active editor tab
+- parse the active editor tab into document/module context
 - activate an already open editor tab directly
 - select an `App Explorer` row by exact visible name
 - select a `Page Explorer` row by exact visible name
@@ -55,6 +57,8 @@ npm run select-widget -- --page "Client_ClinicalDocument_V4" --widget "Olari_Pop
 npm run popup-status
 npm run wait-ready -- --timeout-ms 60000
 npm run list-open-tabs
+npm run active-tab
+npm run active-context
 npm run select-tab -- --tab "Client_ClinicalDocument_V3 [Az_ClientManagement]"
 npm run select-app-explorer-item -- --item "Client_ClinicalDocument_V3"
 npm run select-explorer-item -- --page "Client_ClinicalDocument_V4" --item "SNIP_PopupSubHeader_Program_StageTemplate"
@@ -91,6 +95,7 @@ Phase 2:
 
 - higher-level operations: open page, open microflow, expand module, open toolbox category
 - current `open-item`, `select-widget`, `select-explorer-item`, `insert-widget`, `select-microflow-node`, and `insert-action` now prefer an already open matching editor tab before falling back to `Go to`
+- current `active-tab` uses the true UI Automation selection state when available, and otherwise falls back to the last tab explicitly activated by this automation
 - current `select-widget` targets visible named elements on the active page editor; deeper Page Explorer tree selection still needs refinement
 - current `select-explorer-item` targets exact visible row names from the Page Explorer grid
 - current `select-toolbox-item` targets exact visible text items from the Toolbox pane

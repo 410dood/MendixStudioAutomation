@@ -1,4 +1,5 @@
 import { runPowerShellScript } from "./powershell.mjs";
+import { readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
 
 export class StudioProClient {
     async snapshot(options = {}) {
@@ -14,11 +15,15 @@ export class StudioProClient {
     }
 
     async openItem(options = {}) {
-        return runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizeOpenItemOptions(options));
+        const result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizeOpenItemOptions(options));
+        await rememberActiveTabFromPayload(result);
+        return result;
     }
 
     async selectWidget(options = {}) {
-        return runPowerShellScript("scripts/automation/Select-StudioProPageWidget.ps1", normalizeSelectWidgetOptions(options));
+        const result = await runPowerShellScript("scripts/automation/Select-StudioProPageWidget.ps1", normalizeSelectWidgetOptions(options));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
     }
 
     async getPopupStatus(options = {}) {
@@ -34,7 +39,9 @@ export class StudioProClient {
     }
 
     async selectExplorerItem(options = {}) {
-        return runPowerShellScript("scripts/automation/Select-StudioProExplorerItem.ps1", normalizeSelectExplorerItemOptions(options));
+        const result = await runPowerShellScript("scripts/automation/Select-StudioProExplorerItem.ps1", normalizeSelectExplorerItemOptions(options));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
     }
 
     async selectToolboxItem(options = {}) {
@@ -77,25 +84,126 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/List-StudioProOpenTabs.ps1", normalizeProcessOptions(options));
     }
 
+    async getActiveTab(options = {}) {
+        const result = await runPowerShellScript("scripts/automation/Get-StudioProActiveTab.ps1", normalizeProcessOptions(options));
+        if (result?.activeTab?.name) {
+            return {
+                ...result,
+                activeTabSource: "uia"
+            };
+        }
+
+        const remembered = await readLastKnownActiveTab();
+        if (!remembered?.tab?.name) {
+            return result;
+        }
+
+        const openTabs = await this.listOpenTabs(options);
+        const match = Array.isArray(openTabs?.items)
+            ? openTabs.items.find(tab => tab?.name === remembered.tab.name)
+            : null;
+
+        if (!match) {
+            return result;
+        }
+
+        return {
+            ...result,
+            activeTab: match,
+            activeTabSource: "lastKnown"
+        };
+    }
+
+    async getActiveContext(options = {}) {
+        const result = await this.getActiveTab(options);
+        const tab = result?.activeTab ?? null;
+
+        return {
+            ...result,
+            context: tab ? parseStudioProTabContext(tab.name) : null
+        };
+    }
+
     async selectTab(options = {}) {
-        return runPowerShellScript("scripts/automation/Select-StudioProTab.ps1", {
+        const result = await runPowerShellScript("scripts/automation/Select-StudioProTab.ps1", {
             ...normalizeProcessOptions(options),
             Tab: options.tab,
             DelayMs: numberOrDefault(options.delayMs, 250)
         });
+        await rememberActiveTabFromPayload(result);
+        return result;
     }
 
     async insertWidget(options = {}) {
-        return runPowerShellScript("scripts/automation/Insert-StudioProWidget.ps1", normalizeInsertWidgetOptions(options));
+        const result = await runPowerShellScript("scripts/automation/Insert-StudioProWidget.ps1", normalizeInsertWidgetOptions(options));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
     }
 
     async selectMicroflowNode(options = {}) {
-        return runPowerShellScript("scripts/automation/Select-StudioProMicroflowNode.ps1", normalizeSelectMicroflowNodeOptions(options));
+        const result = await runPowerShellScript("scripts/automation/Select-StudioProMicroflowNode.ps1", normalizeSelectMicroflowNodeOptions(options));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
     }
 
     async insertAction(options = {}) {
-        return runPowerShellScript("scripts/automation/Insert-StudioProMicroflowAction.ps1", normalizeInsertActionOptions(options));
+        const result = await runPowerShellScript("scripts/automation/Insert-StudioProMicroflowAction.ps1", normalizeInsertActionOptions(options));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        return result;
     }
+}
+
+async function rememberActiveTabFromPayload(payload) {
+    const tab = isTabShape(payload?.target)
+        ? payload.target
+        : isTabShape(payload?.tab)
+            ? payload.tab
+            : null;
+
+    if (tab?.controlType === "TabItem" && tab?.name) {
+        await writeLastKnownActiveTab(tab);
+    }
+}
+
+function isTabShape(value) {
+    return Boolean(value && typeof value === "object" && value.controlType === "TabItem" && value.name);
+}
+
+function parseStudioProTabContext(tabName) {
+    const moduleMatch = /^(.*)\s\[(.+)\]$/.exec(tabName ?? "");
+    const documentName = moduleMatch ? moduleMatch[1] : tabName;
+    const moduleName = moduleMatch ? moduleMatch[2] : null;
+
+    return {
+        tabName,
+        documentName,
+        moduleName,
+        kind: inferStudioProDocumentKind(documentName)
+    };
+}
+
+function inferStudioProDocumentKind(documentName) {
+    if (!documentName) {
+        return "unknown";
+    }
+
+    if (documentName.startsWith("SNIP_")) {
+        return "snippet";
+    }
+
+    if (/^(ACT_|SUB_|DS_|IVK_|OCH_|BCO_|BDE_|ADE_|BCe_)/.test(documentName)) {
+        return "microflow";
+    }
+
+    if (/(ShowPage|Save|Delete|Create|Retrieve|Commit|Validate|Unlock|SignAndLock)$/.test(documentName)) {
+        return "microflow";
+    }
+
+    if (documentName.includes("Domain model")) {
+        return "domain-model";
+    }
+
+    return "page-or-document";
 }
 
 function normalizeSnapshotOptions(options) {

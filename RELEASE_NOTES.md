@@ -12,6 +12,8 @@ Included in this release:
 - popup inspection and wait-until-ready commands
 - document opening through Studio Pro `Go to`
 - open-editor tab listing and direct tab activation
+- best-known active editor tab reporting with last-known fallback
+- active editor context parsing from the current tab title
 - first-pass editor selection for page widgets
 - first-pass selection for:
   - App Explorer items

@@ -24,7 +24,7 @@ switch ($Scope) {
     }
 }
 
-$matches = Get-VisibleTextMatches -Root $attached.Element -Scope $Scope -Limit $Limit
+$matches = @(Get-VisibleTextMatches -Root $attached.Element -Scope $Scope -Limit $Limit)
 
 $payload = @{
     ok = $true

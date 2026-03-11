@@ -21,7 +21,10 @@
     "list-toolbox-items": "node src/cli.mjs list-toolbox-items",
     "list-editor-labels": "node src/cli.mjs list-editor-labels",
     "list-open-tabs": "node src/cli.mjs list-open-tabs",
+    "active-tab": "node src/cli.mjs active-tab",
+    "active-context": "node src/cli.mjs active-context",
     "select-tab": "node src/cli.mjs select-tab",
+    "operations": "node src/cli.mjs operations",
     "insert-widget": "node src/cli.mjs insert-widget",
     "select-microflow-node": "node src/cli.mjs select-microflow-node",
     "insert-action": "node src/cli.mjs insert-action"

@@ -85,6 +85,16 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "active-tab": {
+            const result = await client.getActiveTab(options);
+            formatOutput(result);
+            return;
+        }
+        case "active-context": {
+            const result = await client.getActiveContext(options);
+            formatOutput(result);
+            return;
+        }
         case "select-tab": {
             const result = await client.selectTab(options);
             formatOutput(result);
@@ -138,6 +148,8 @@ Commands:
   list-toolbox-items          List visible Toolbox labels
   list-editor-labels          List visible editor labels
   list-open-tabs              List open page and microflow editor tabs
+  active-tab                  Get the currently active open editor tab
+  active-context              Parse the active tab into document/module context
   select-tab                  Activate an open Studio Pro editor tab
   insert-widget              Prepare or execute first-pass widget insertion
   select-microflow-node      Select a visible microflow node label

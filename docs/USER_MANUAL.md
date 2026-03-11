@@ -63,6 +63,18 @@ List the currently open page and microflow tabs:
 npm run list-open-tabs
 ```
 
+Report the best-known active tab:
+
+```powershell
+npm run active-tab
+```
+
+Parse the current tab into document and module context:
+
+```powershell
+npm run active-context
+```
+
 Activate one directly:
 
 ```powershell
@@ -128,6 +140,8 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - Some Studio Pro panes expose rows as text, some as data rows, and some as custom WPF controls.
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
+- `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.
+- `active-context` is a best-effort parser based on the open tab title. It is useful for command routing, but it is not yet a full Mendix document classifier.
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 

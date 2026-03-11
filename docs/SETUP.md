@@ -49,6 +49,8 @@ You can also confirm that open document tabs are discoverable:
 
 ```powershell
 npm run list-open-tabs
+npm run active-tab
+npm run active-context
 ```
 
 If a page or microflow is already open, `open-item` will now reuse that tab before falling back to Studio Pro's `Go to` dialog.

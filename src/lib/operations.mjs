@@ -36,6 +36,16 @@ export const operationCatalog = {
             status: "implemented"
         },
         {
+            id: "studio.getActiveTab",
+            description: "Report the currently active open page or microflow editor tab.",
+            status: "implemented"
+        },
+        {
+            id: "studio.getActiveContext",
+            description: "Parse the active editor tab into a best-effort document and module context.",
+            status: "implemented"
+        },
+        {
             id: "studio.selectTab",
             description: "Activate an already open page or microflow editor tab.",
             status: "implemented"
