@@ -64,6 +64,12 @@ Prefer the extension context and fall back to UI automation if the extension is 
 npm run hybrid-context
 ```
 
+List activity metadata for a target microflow:
+
+```powershell
+npm run list-microflow-activities -- --microflow "ClinicalDocument_ShowPage" --module "Az_ClientManagement"
+```
+
 The extension project lives in `extensions\MendixStudioAutomation_Extension` and is installed into the Mendix app with `scripts\Install-MendixStudioAutomationExtension.ps1`.
 
 ### Generic discovery

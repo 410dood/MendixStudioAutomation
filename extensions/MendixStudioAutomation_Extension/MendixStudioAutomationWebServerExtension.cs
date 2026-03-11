@@ -79,6 +79,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
         webServer.AddRoute($"{RoutePrefix}/ui/quick-create-object/open", HandleOpenQuickCreateObjectDialogAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/search", HandleSearchDocumentsAsync);
         webServer.AddRoute($"{RoutePrefix}/documents/open", HandleOpenDocumentAsync);
+        webServer.AddRoute($"{RoutePrefix}/microflows/list-activities", HandleListMicroflowActivitiesAsync);
         webServer.AddRoute($"{RoutePrefix}/navigation/populate", HandlePopulateNavigationAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-object", HandleCreateMicroflowObjectAsync);
         webServer.AddRoute($"{RoutePrefix}/microflows/create-list", HandleCreateMicroflowListAsync);
@@ -235,6 +236,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "document.active.read",
             "documents.search",
             "documents.open",
+            "microflow.listActivities",
             "ui.quickCreateObjectDialog",
             "navigation.populate",
             "microflow.createObject",
@@ -369,6 +371,99 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             opened,
             match = matches[0]
         }, opened ? HttpStatusCode.OK : HttpStatusCode.InternalServerError, cancellationToken);
+    }
+
+    private Task HandleListMicroflowActivitiesAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
+    {
+        if (CurrentApp?.Root is not IProject project)
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "No active Mendix app model is available."
+            }, HttpStatusCode.ServiceUnavailable, cancellationToken);
+        }
+
+        var microflowName = request.QueryString["microflow"] ?? request.QueryString["name"];
+        var moduleName = request.QueryString["module"];
+        if (string.IsNullOrWhiteSpace(microflowName))
+        {
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = "The 'microflow' query parameter is required."
+            }, HttpStatusCode.BadRequest, cancellationToken);
+        }
+
+        try
+        {
+            var normalizedModuleName = string.IsNullOrWhiteSpace(moduleName) ? null : moduleName.Trim();
+            var module = ResolveModule(project, normalizedModuleName);
+            if (normalizedModuleName is not null && module is null)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = $"No module named '{normalizedModuleName}' was found.",
+                    module = normalizedModuleName
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            var microflowMatches = ResolveMicroflows(project, module, microflowName, allowAllModules: true);
+            if (microflowMatches.Length == 0)
+            {
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = module is null
+                        ? $"No matching microflow named '{microflowName}' was found."
+                        : $"No matching microflow named '{microflowName}' was found in module '{module.Name}'.",
+                    microflow = microflowName,
+                    module = module?.Name
+                }, HttpStatusCode.NotFound, cancellationToken);
+            }
+
+            if (microflowMatches.Length > 1)
+            {
+                var ambiguousMicroflows = microflowMatches
+                    .Select(match => new { name = match.Name, module = match.ModuleName })
+                    .ToArray();
+
+                return WriteJsonAsync(response, new
+                {
+                    ok = false,
+                    error = "Multiple microflows matched the request. Include --module to disambiguate.",
+                    microflow = microflowName,
+                    module = normalizedModuleName,
+                    matches = ambiguousMicroflows
+                }, HttpStatusCode.Conflict, cancellationToken);
+            }
+
+            var targetMicroflow = microflowMatches[0].Microflow;
+            var targetMicroflowModule = microflowMatches[0].ModuleName;
+            var activities = _microflowService.GetAllMicroflowActivities(targetMicroflow)
+                .Select((activity, index) => SummarizeMicroflowActivity(activity, index))
+                .ToArray();
+
+            return WriteJsonAsync(response, new
+            {
+                ok = true,
+                microflow = microflowName,
+                microflowModule = targetMicroflowModule,
+                count = activities.Length,
+                items = activities,
+                route = "microflows/list-activities"
+            }, HttpStatusCode.OK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logService.Error("Failed to list microflow activities.", ex);
+            return WriteJsonAsync(response, new
+            {
+                ok = false,
+                error = ex.Message
+            }, HttpStatusCode.InternalServerError, cancellationToken);
+        }
     }
 
     private Task HandlePopulateNavigationAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
@@ -4643,6 +4738,7 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
                 capabilitiesUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/capabilities"),
                 quickCreateObjectDialogUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/ui/quick-create-object"),
                 quickCreateObjectDialogOpenUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/ui/quick-create-object/open"),
+                microflowListActivitiesUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/list-activities"),
                 navigationPopulateUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/navigation/populate"),
                 microflowCreateObjectUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-object"),
                 microflowCreateListUrl = CombineUrl(WebServerBaseUrl, $"{RoutePrefix}/microflows/create-list"),
@@ -4979,6 +5075,103 @@ public sealed class MendixStudioAutomationWebServerExtension : WebServerExtensio
             "1" => true,
             "0" => false,
             _ => fallback
+        };
+    }
+
+    private static object SummarizeMicroflowActivity(IActivity activity, int index)
+    {
+        var actionActivity = activity as IActionActivity;
+        var action = actionActivity?.Action;
+        var variables = new List<string>();
+        var listOperationType = action is IListOperationAction listOperationAction
+            ? listOperationAction.Operation?.GetType().Name
+            : null;
+        var secondListOrObjectVariableName = action is IListOperationAction listOperationActionWithBinary
+            && listOperationActionWithBinary.Operation is IBinaryListOperation binaryListOperation
+                ? binaryListOperation.SecondListOrObjectVariableName
+                : null;
+
+        static void AddIfPresent(List<string> target, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                target.Add(value.Trim());
+            }
+        }
+
+        if (action is ICreateObjectAction createObjectAction)
+        {
+            AddIfPresent(variables, createObjectAction.OutputVariableName);
+        }
+
+        if (action is ICreateListAction createListAction)
+        {
+            AddIfPresent(variables, createListAction.OutputVariableName);
+        }
+
+        if (action is IRetrieveAction retrieveAction)
+        {
+            AddIfPresent(variables, retrieveAction.OutputVariableName);
+        }
+
+        if (action is IAggregateListAction aggregateListAction)
+        {
+            AddIfPresent(variables, aggregateListAction.InputListVariableName);
+            AddIfPresent(variables, aggregateListAction.OutputVariableName);
+        }
+
+        if (action is IChangeObjectAction changeObjectAction)
+        {
+            AddIfPresent(variables, changeObjectAction.ChangeVariableName);
+        }
+
+        if (action is IChangeListAction changeListAction)
+        {
+            AddIfPresent(variables, changeListAction.ChangeVariableName);
+        }
+
+        if (action is ICommitAction commitAction)
+        {
+            AddIfPresent(variables, commitAction.CommitVariableName);
+        }
+
+        if (action is IDeleteAction deleteAction)
+        {
+            AddIfPresent(variables, deleteAction.DeleteVariableName);
+        }
+
+        if (action is IRollbackAction rollbackAction)
+        {
+            AddIfPresent(variables, rollbackAction.RollbackVariableName);
+        }
+
+        if (action is IListOperationAction operationAction)
+        {
+            AddIfPresent(variables, operationAction.OutputVariableName);
+        }
+
+        if (action is IMicroflowCallAction microflowCallAction)
+        {
+            AddIfPresent(variables, microflowCallAction.OutputVariableName);
+        }
+
+        AddIfPresent(variables, secondListOrObjectVariableName);
+
+        var uniqueVariables = variables
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return new
+        {
+            index,
+            activityType = activity.GetType().Name,
+            caption = actionActivity?.Caption,
+            disabled = actionActivity?.Disabled,
+            actionType = action?.GetType().Name,
+            listOperationType,
+            secondListOrObjectVariableName,
+            variables = uniqueVariables
         };
     }
 

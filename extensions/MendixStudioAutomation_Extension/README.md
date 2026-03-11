@@ -17,6 +17,7 @@ It uses the official `Mendix.StudioPro.ExtensionsAPI` package pinned to the exac
   - `/mendix-studio-automation/ui/quick-create-object/open`
   - `/mendix-studio-automation/documents/search`
   - `/mendix-studio-automation/documents/open`
+  - `/mendix-studio-automation/microflows/list-activities`
   - `/mendix-studio-automation/navigation/populate`
   - `/mendix-studio-automation/microflows/create-object`
   - `/mendix-studio-automation/microflows/create-list`

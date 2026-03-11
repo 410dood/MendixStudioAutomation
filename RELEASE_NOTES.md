@@ -1,5 +1,27 @@
 # Release Notes
 
+## 0.2.24
+
+Hybrid microflow activity inspection route.
+
+- Added new extension route:
+  - `/mendix-studio-automation/microflows/list-activities`
+- Added extension capability:
+  - `microflow.listActivities`
+- Added Studio Pro client and CLI support:
+  - `list-microflow-activities`
+  - `npm run list-microflow-activities`
+- Added operation catalog entry:
+  - `microflow.listActivities`
+- Payload includes activity-level metadata for each microflow activity:
+  - activity/action type
+  - caption and disabled state (when available)
+  - variable-oriented hints (output/input variables, list-operation second variable, etc.)
+- Updated documentation:
+  - README
+  - User Manual
+  - Extension README
+
 ## 0.2.23
 
 Hybrid retrieve-database expansion with sorting and range expressions.

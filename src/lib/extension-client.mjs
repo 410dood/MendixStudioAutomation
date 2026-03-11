@@ -161,6 +161,33 @@ export class HybridExtensionClient {
         };
     }
 
+    async listMicroflowActivities(options = {}) {
+        const discovery = await resolveEndpointDiscovery(options);
+        if (!discovery.available) {
+            return {
+                ok: false,
+                available: false,
+                source: discovery.source,
+                endpointFile: discovery.endpointFile,
+                reason: discovery.reason ?? "The extension runtime endpoint file is not available."
+            };
+        }
+
+        const payload = await fetchJson(buildExtensionUrl(discovery.endpoints.baseUrl, "microflows/list-activities", {
+            microflow: options.microflow ?? options.item ?? options.name,
+            module: options.module
+        }), options.timeoutMs);
+
+        return {
+            ok: true,
+            available: true,
+            source: discovery.source,
+            endpointFile: discovery.endpointFile,
+            endpoints: discovery.endpoints,
+            payload
+        };
+    }
+
     async openQuickCreateObjectDialog(options = {}) {
         const discovery = await resolveEndpointDiscovery(options);
         if (!discovery.available) {

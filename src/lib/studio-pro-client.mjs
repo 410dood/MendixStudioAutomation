@@ -565,6 +565,47 @@ export class StudioProClient {
         return this.extensionClient.openDocument(options);
     }
 
+    async listMicroflowActivities(options = {}) {
+        const normalized = normalizeMicroflowActivityListOptions(options);
+        if (!normalized.microflow) {
+            return {
+                ok: false,
+                action: "list-microflow-activities",
+                error: "A --microflow (or --item) argument is required."
+            };
+        }
+
+        const extensionStatus = await this.getExtensionStatus(options);
+        if (!extensionStatus?.available) {
+            return {
+                ok: false,
+                action: "list-microflow-activities",
+                error: extensionStatus?.reason ?? "Extension endpoint is not available."
+            };
+        }
+
+        if (!(await this.hasExtensionCapability(normalized.processId, normalized.title, "microflow.listActivities"))) {
+            return {
+                ok: false,
+                action: "list-microflow-activities",
+                error: "Extension capabilities do not include microflow.listActivities."
+            };
+        }
+
+        const result = await this.extensionClient.listMicroflowActivities({
+            ...options,
+            microflow: normalized.microflow,
+            module: normalized.module
+        });
+
+        return {
+            ...result,
+            action: "list-microflow-activities",
+            microflow: normalized.microflow,
+            module: normalized.module
+        };
+    }
+
     async openQuickCreateObjectDialog(options = {}) {
         const normalized = normalizeOpenQuickCreateObjectDialogOptions(options);
         const extensionStatus = await this.getExtensionStatus(options);
@@ -3042,6 +3083,15 @@ function normalizeOpenQuickCreateObjectDialogOptions(options) {
         module: options.module,
         entity: options.entity || "Document.ClientDocument",
         outputVariableName: options.outputVariableName || "CreatedObject"
+    };
+}
+
+function normalizeMicroflowActivityListOptions(options) {
+    return {
+        processId: options.processId,
+        title: options.title,
+        microflow: options.microflow ?? options.item ?? options.name,
+        module: options.module
     };
 }
 

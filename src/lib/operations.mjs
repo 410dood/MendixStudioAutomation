@@ -191,6 +191,11 @@ export const operationCatalog = {
             status: "implemented-dry-run-validated"
         },
         {
+            id: "microflow.listActivities",
+            description: "List microflow activities and variable-oriented metadata through the extension API.",
+            status: "implemented-using-hybrid-endpoint"
+        },
+        {
             id: "microflow.connectNodes",
             description: "Connect two microflow nodes on the designer surface.",
             status: "planned"
