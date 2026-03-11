@@ -6,6 +6,26 @@ export const operationCatalog = {
             description: "Attach to the running Mendix Studio Pro main window."
         },
         {
+            id: "studio.sendKeys",
+            description: "Send a key chord to the active Studio Pro window or editor context.",
+            status: "implemented"
+        },
+        {
+            id: "studio.runLocal",
+            description: "Run the current app locally from Studio Pro.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "studio.stopLocal",
+            description: "Stop the currently running local app from Studio Pro.",
+            status: "implemented-first-pass"
+        },
+        {
+            id: "studio.showResponsiveWeb",
+            description: "Open the current app in Studio Pro's responsive browser view.",
+            status: "implemented-first-pass"
+        },
+        {
             id: "explorer.openItem",
             description: "Open an App Explorer item such as a module, page, or microflow.",
             status: "implemented-via-go-to"
@@ -24,6 +44,21 @@ export const operationCatalog = {
             id: "toolbox.selectItem",
             description: "Select an exact visible Toolbox item.",
             status: "implemented-validated"
+        },
+        {
+            id: "studio.listDialogs",
+            description: "List open Studio Pro modal and editor dialogs.",
+            status: "implemented"
+        },
+        {
+            id: "dialog.listItems",
+            description: "List visible named controls inside an open Studio Pro dialog.",
+            status: "implemented"
+        },
+        {
+            id: "dialog.invokeControl",
+            description: "Click or select a visible named control inside an open Studio Pro dialog.",
+            status: "implemented"
         },
         {
             id: "studio.listVisibleLabels",

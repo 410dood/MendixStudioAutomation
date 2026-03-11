@@ -32,6 +32,10 @@ npm run status
 npm run snapshot -- --depth 2 --max-children 20
 npm run popup-status
 npm run wait-ready -- --timeout-ms 15000
+npm run send-keys -- --keys "{ESC}"
+npm run run-local
+npm run stop-local
+npm run show-responsive-web
 ```
 
 Use these first when Studio Pro behaves unexpectedly or a command seems blocked by a popup.
@@ -45,6 +49,17 @@ npm run click -- --name "Toolbox" --control-type TabItem
 ```
 
 Use `find` to inspect what Studio Pro is exposing through UI Automation before building new selectors.
+
+### Dialog inspection and control
+
+```powershell
+npm run list-dialogs
+npm run list-dialog-items -- --dialog "Select Widget" --limit 40
+npm run invoke-dialog-control -- --dialog "Select Widget" --control "Text"
+npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
+```
+
+Use these commands whenever Studio Pro opens a native WPF dialog and you want to inspect or drive it directly.
 
 ### Open assets
 
@@ -121,6 +136,8 @@ npm run insert-widget -- --page "Client_ClinicalDocument_V3" --target "container
 
 Remove `--dry-run` only when you want to execute the current first-pass insertion flow.
 
+The current insertion path prefers the native `Page Explorer -> Add widget... -> Select Widget` dialog. It can open and inspect that dialog, but the final page mutation is still being hardened.
+
 ### Microflow helpers
 
 Select a visible microflow node label:
@@ -151,6 +168,7 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - Some Studio Pro panes expose rows as text, some as data rows, and some as custom WPF controls.
 - The Toolbox pane is now discovered from its own dock container, which is substantially more reliable than the earlier whole-window scan.
 - The page-designer path is now validated on `Client_ClinicalDocument_V3`, including `Structure mode`, `Olari_Popup_Default`, and real Page Explorer rows like `container34`.
+- Native dialog commands are now reliable enough to inspect and drive WPF dialogs like `Select Widget`.
 - The active pane layout affects which selectors are valid.
 - Open editor tabs can be detected and selected, but Studio Pro may still report them as `isOffscreen` even when their bounds are usable.
 - `active-tab` falls back to the last tab explicitly selected by this automation if Studio Pro does not expose a selected tab through UI Automation.
@@ -160,6 +178,7 @@ As with page insertion, keep `--dry-run` on until the selector path is confirmed
 - `App Explorer` selection is present but still less reliable than `Page Explorer` and `Toolbox` selection in the current repo state.
 - `open-item` still needs additional hardening for all unopened assets, especially microflows.
 - Commands that specify `--page` or `--microflow` now fail explicitly if the requested editor tab could not be confirmed after opening.
+- `run-local`, `stop-local`, and `show-responsive-web` currently verify that the correct Studio Pro shortcuts were sent, but they do not yet verify runtime readiness or browser content.
 
 ## Non-Goal
 

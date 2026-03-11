@@ -14,6 +14,38 @@ export class StudioProClient {
         return runPowerShellScript("scripts/automation/Invoke-StudioProAction.ps1", normalizeActionOptions(options));
     }
 
+    async sendKeys(options = {}) {
+        const resolvedOptions = await resolveContextItemOption(this, options);
+        const result = await runPowerShellScript("scripts/automation/Send-StudioProKeys.ps1", normalizeSendKeysOptions(resolvedOptions));
+        await rememberActiveTabFromPayload(result?.openMethod);
+        await rememberActiveTabFromPayload(result);
+        if (result?.openMethod?.method === "goTo") {
+            await rememberActiveTabByItemName(this, resolvedOptions.page ?? resolvedOptions.microflow ?? resolvedOptions.item, options);
+        }
+        return result;
+    }
+
+    async runLocalApp(options = {}) {
+        return this.sendKeys({
+            ...options,
+            keys: "{F5}"
+        });
+    }
+
+    async stopLocalApp(options = {}) {
+        return this.sendKeys({
+            ...options,
+            keys: "+{F5}"
+        });
+    }
+
+    async showResponsiveWeb(options = {}) {
+        return this.sendKeys({
+            ...options,
+            keys: "{F9}"
+        });
+    }
+
     async openItem(options = {}) {
         const normalizedOptions = normalizeOpenItemOptions(options);
         let result = await runPowerShellScript("scripts/automation/Open-StudioProItem.ps1", normalizedOptions);
@@ -86,6 +118,18 @@ export class StudioProClient {
 
     async listAppExplorerItems(options = {}) {
         return runPowerShellScript("scripts/automation/List-StudioProVisibleTexts.ps1", normalizeVisibleTextOptions(options, "appExplorer"));
+    }
+
+    async listDialogs(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProDialogs.ps1", normalizeProcessOptions(options));
+    }
+
+    async listDialogItems(options = {}) {
+        return runPowerShellScript("scripts/automation/List-StudioProDialogItems.ps1", normalizeDialogItemOptions(options));
+    }
+
+    async invokeDialogControl(options = {}) {
+        return runPowerShellScript("scripts/automation/Invoke-StudioProDialogControl.ps1", normalizeDialogControlOptions(options));
     }
 
     async listPageExplorerItems(options = {}) {
@@ -557,6 +601,19 @@ function normalizeActionOptions(options) {
     };
 }
 
+function normalizeSendKeysOptions(options) {
+    return {
+        ProcessId: options.processId,
+        WindowTitlePattern: options.title,
+        Item: options.item,
+        Page: options.page,
+        Microflow: options.microflow,
+        Scope: options.scope,
+        Keys: options.keys,
+        DelayMs: numberOrDefault(options.delayMs, 250)
+    };
+}
+
 function normalizeOpenItemOptions(options) {
     return {
         ProcessId: options.processId,
@@ -628,6 +685,27 @@ function normalizeSelectToolboxItemOptions(options) {
         ProcessId: options.processId,
         WindowTitlePattern: options.title,
         Item: options.item,
+        DelayMs: numberOrDefault(options.delayMs, 250)
+    };
+}
+
+function normalizeDialogItemOptions(options) {
+    return {
+        ProcessId: options.processId,
+        WindowTitlePattern: options.title,
+        Dialog: options.dialog,
+        Name: options.name,
+        Limit: numberOrDefault(options.limit, 200)
+    };
+}
+
+function normalizeDialogControlOptions(options) {
+    return {
+        ProcessId: options.processId,
+        WindowTitlePattern: options.title,
+        Dialog: options.dialog,
+        Control: options.control,
+        ControlType: options.controlType,
         DelayMs: numberOrDefault(options.delayMs, 250)
     };
 }

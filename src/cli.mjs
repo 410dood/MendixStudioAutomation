@@ -25,6 +25,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "send-keys": {
+            const result = await client.sendKeys(options);
+            formatOutput(result);
+            return;
+        }
+        case "run-local": {
+            const result = await client.runLocalApp(options);
+            formatOutput(result);
+            return;
+        }
+        case "stop-local": {
+            const result = await client.stopLocalApp(options);
+            formatOutput(result);
+            return;
+        }
+        case "show-responsive-web": {
+            const result = await client.showResponsiveWeb(options);
+            formatOutput(result);
+            return;
+        }
         case "open-item": {
             const result = await client.openItem(options);
             formatOutput(result);
@@ -57,6 +77,21 @@ async function main() {
         }
         case "select-toolbox-item": {
             const result = await client.selectToolboxItem(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-dialogs": {
+            const result = await client.listDialogs(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-dialog-items": {
+            const result = await client.listDialogItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "invoke-dialog-control": {
+            const result = await client.invokeDialogControl(options);
             formatOutput(result);
             return;
         }
@@ -141,6 +176,10 @@ Commands:
   snapshot                    Alias for status
   find                        Search for an element in Studio Pro
   click                       Invoke or click a matched element
+  send-keys                   Send a Studio Pro key chord to the foreground editor
+  run-local                   Run the current app locally in Studio Pro
+  stop-local                  Stop a locally running app in Studio Pro
+  show-responsive-web         Open the app in Studio Pro's responsive browser view
   open-item                   Open a Studio Pro document by name with Ctrl+G
   select-widget               Select a visible named widget or page element
   popup-status                Inspect current Studio Pro popup windows
@@ -148,6 +187,9 @@ Commands:
   select-app-explorer-item   Select an App Explorer row by exact name
   select-explorer-item        Select a Page Explorer row by exact name
   select-toolbox-item         Select a Toolbox item by exact name
+  list-dialogs                List open Studio Pro modal/editor dialogs
+  list-dialog-items           List visible named controls inside a Studio Pro dialog
+  invoke-dialog-control       Click/select a visible named control in a Studio Pro dialog
   list-app-explorer-items     List visible App Explorer labels
   list-page-explorer-items    List visible Page Explorer labels
   list-toolbox-items          List visible Toolbox labels
@@ -173,6 +215,7 @@ Options:
   --control-type <text>       Control type filter, e.g. TreeItem
   --runtime-id <a.b.c>        Runtime id returned by find/snapshot
   --max-results <n>           Max matches returned by find
+  --keys <value>              Studio Pro key chord for send-keys, e.g. "{F5}" or "^,"
   --item <name>               Document, page, snippet, microflow, or entity name to open
   --page <name>               Page to open before selecting a widget
   --widget <name>             Visible widget or element name to select
@@ -180,6 +223,8 @@ Options:
   --item <name>               Explorer row name or document name, depending on command
   --timeout-ms <n>            Wait timeout in milliseconds
   --poll-ms <n>               Wait poll interval in milliseconds
+  --dialog <name>             Open Studio Pro dialog window name
+  --control <name>            Visible control name inside a Studio Pro dialog
   --target <name>             Page Explorer target container/row for insertion
   --dry-run                   Resolve the insertion path without executing it
   --microflow <name>          Microflow to open before node/action operations

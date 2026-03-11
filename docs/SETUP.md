@@ -45,6 +45,8 @@ If those work, try a safe selection-only command:
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
 npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3" --limit 12
 npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3" --limit 12
+npm run list-dialogs
+npm run send-keys -- --keys "{ESC}"
 ```
 
 You can also confirm that open document tabs are discoverable:
@@ -61,6 +63,7 @@ npm run close-tab -- --dry-run
 
 If a page or microflow is already open, `open-item` will now reuse that tab before falling back to Studio Pro's `Go to` dialog.
 If a page or microflow command cannot confirm that Studio Pro actually opened the requested document, it now fails explicitly instead of scraping the wrong window state.
+Dialog-oriented commands can be used against native Studio Pro windows like `Select Widget` once they are visible.
 
 ## Safety Model
 

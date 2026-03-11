@@ -10,6 +10,8 @@ Included in this release:
 - PowerShell UI Automation helpers for Studio Pro window discovery and interaction
 - Studio Pro attach, snapshot, search, click, and focus support
 - popup inspection and wait-until-ready commands
+- generic Studio Pro key-chord sending
+- first-pass shortcuts for local run, stop, and responsive web
 - document opening through Studio Pro `Go to`
 - open-editor tab listing and direct tab activation
 - best-known active editor tab reporting with last-known fallback
@@ -20,6 +22,7 @@ Included in this release:
 - open-tab commands now support module-based filtering and disambiguation
 - `find` now handles single-match results correctly
 - first-pass editor selection for page widgets
+- native Studio Pro dialog discovery, dialog item listing, and dialog control invocation
 - first-pass selection for:
   - App Explorer items
   - Page Explorer items
@@ -28,6 +31,8 @@ Included in this release:
 - editor inspection can now scope itself to the active microflow editor container
 - editor inspection now scopes correctly to the active page designer for `Client_ClinicalDocument_V3`
 - first-pass `insert-widget` flow with `--dry-run`
+- `insert-widget` now reaches the native `Select Widget` dialog from Page Explorer targets
+- `insert-widget` now disambiguates duplicate widget names in the `Select Widget` dialog by testing whether the `Select` button becomes enabled
 - page-side widget selection is now validated against live page-designer controls and page-explorer rows
 - first-pass microflow commands:
   - `select-microflow-node`
@@ -39,6 +44,7 @@ Not included in this release:
 - Mendix project commit support
 - Mendix branch merge support
 - guaranteed insertion reliability across every Studio Pro pane/layout state
+- verified end-to-end local runtime health checks after `F5`/`F9`
 - stable automation for all unopened microflows/documents
 
 Known limitations:
@@ -48,4 +54,6 @@ Known limitations:
 - `select-app-explorer-item` still needs more hardening against alternate left-pane states.
 - page explorer can still report Studio Pro's empty-state placeholder for some page tabs; the command now reports that cleanly instead of scraping unrelated panes.
 - page-designer validation is currently strongest on `Client_ClinicalDocument_V3`; other pages may still need selector tuning.
+- `insert-widget` can now open the native widget picker dialog, but the final page-model mutation is not yet reliable enough to treat as complete authoring.
+- run and responsive-browser commands currently verify shortcut delivery, not full runtime/browser readiness.
 - unopened documents that Studio Pro does not resolve through `Go to` now fail explicitly instead of returning misleading editor results.

@@ -63,7 +63,15 @@ if (-not $DryRun) {
 
         $dialogStrategy = @{
             targetSelection = $dialogContext.TargetSelection
-            contextMenu = $dialogContext.ContextMenu
+            contextMenu = if ($dialogContext.ContextMenu) {
+                @{
+                    menuItem = $dialogContext.ContextMenu.MenuItem
+                    menuItems = @($dialogContext.ContextMenu.MenuItems | Select-Object -First 20)
+                    trigger = $dialogContext.ContextMenu.Trigger
+                }
+            } else {
+                $null
+            }
             menuSelection = $dialogContext.MenuSelection
             dialogWindow = $dialogContext.DialogWindow
             widgetSelection = $widgetSelection

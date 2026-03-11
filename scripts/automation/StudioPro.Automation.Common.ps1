@@ -575,6 +575,51 @@ function Escape-SendKeysText {
     return $escaped
 }
 
+function Normalize-MenuCaption {
+    param(
+        [string]$Text
+    )
+
+    if ($null -eq $Text) {
+        return ""
+    }
+
+    $normalized = $Text.Trim().ToLowerInvariant()
+    $normalized = $normalized.Replace("…", "")
+    $normalized = $normalized.Replace("...", "")
+    $normalized = $normalized.Replace("â€¦", "")
+    return $normalized.Trim()
+}
+
+function Find-MenuItemMatch {
+    param(
+        [object[]]$MenuItems,
+        [string]$MenuItemName
+    )
+
+    if (-not $MenuItems -or -not $MenuItemName) {
+        return $null
+    }
+
+    $normalizedExpected = Normalize-MenuCaption -Text $MenuItemName
+    $exact = @($MenuItems | Where-Object {
+        (Normalize-MenuCaption -Text $_.name) -eq $normalizedExpected
+    } | Select-Object -First 1)
+    if ($exact.Length -gt 0) {
+        return $exact[0]
+    }
+
+    $prefix = @($MenuItems | Where-Object {
+        $candidate = Normalize-MenuCaption -Text $_.name
+        $candidate.StartsWith($normalizedExpected)
+    } | Select-Object -First 1)
+    if ($prefix.Length -gt 0) {
+        return $prefix[0]
+    }
+
+    return $null
+}
+
 function Open-StudioProItemByName {
     param(
         [System.Diagnostics.Process]$Process,
@@ -1575,6 +1620,56 @@ function Open-PageExplorerContextMenu {
             @{ Expression = { $_.boundingRectangle.top } })
 
         foreach ($candidate in $candidateOrder) {
+            $candidateSelection = Select-AutomationMatch -Root $currentRoot -Match $candidate -DelayMs ([Math]::Max(120, $DelayMs))
+            Start-Sleep -Milliseconds 80
+
+            Set-StudioProForegroundWindow -Process $Process
+            Send-KeysToForegroundWindow -Keys "+{F10}" -DelayMs ($DelayMs + 100)
+
+            $attached = Get-StudioProWindowElement -ProcessId $Process.Id -WindowTitlePattern $WindowTitlePattern
+            $menuItems = @(Find-MatchingElements -Root $attached.Element -Depth 15 -MaxResults 150 -ControlType "MenuItem" | Where-Object {
+                $_ -and
+                -not $_.isOffscreen -and
+                $_.name -and
+                $_.name -notin @("File", "Edit", "View", "App", "Run", "Version Control", "Language", "Help")
+            })
+
+            if (-not $MenuItemName -and $menuItems.Length -gt 0) {
+                return @{
+                    Attached = $attached
+                    MenuItems = $menuItems
+                    Trigger = @{
+                        attempt = $attempt + 1
+                        candidate = $candidate
+                        candidateSelection = $candidateSelection
+                        point = @{
+                            method = "shiftF10"
+                        }
+                    }
+                }
+            }
+
+            if ($MenuItemName) {
+                $match = Find-MenuItemMatch -MenuItems $menuItems -MenuItemName $MenuItemName
+                if ($match) {
+                    return @{
+                        Attached = $attached
+                        MenuItem = $match
+                        MenuItems = $menuItems
+                        Trigger = @{
+                            attempt = $attempt + 1
+                            candidate = $candidate
+                            candidateSelection = $candidateSelection
+                            point = @{
+                                method = "shiftF10"
+                            }
+                        }
+                    }
+                }
+            }
+
+            Send-KeysToForegroundWindow -Keys "{ESC}" -DelayMs 100
+
             $points = if ($candidate.controlType -eq "Text") {
                 @(
                     @{ Horizontal = "center"; Vertical = "center"; Inset = 6 },
@@ -1614,11 +1709,11 @@ function Open-PageExplorerContextMenu {
                 }
 
                 if ($MenuItemName) {
-                    $match = @($menuItems | Where-Object { $_.name -eq $MenuItemName } | Select-Object -First 1)
-                    if ($match.Length -gt 0) {
+                    $match = Find-MenuItemMatch -MenuItems $menuItems -MenuItemName $MenuItemName
+                    if ($match) {
                         return @{
                             Attached = $attached
-                            MenuItem = $match[0]
+                            MenuItem = $match
                             MenuItems = $menuItems
                             Trigger = @{
                                 attempt = $attempt + 1
@@ -1668,16 +1763,20 @@ function Open-AddWidgetDialogForPageExplorerItem {
         -Process $attached.Process `
         -Root $attached.Element `
         -TargetMatch $targetSelection.target `
-        -MenuItemName "Add widget…" `
+        -MenuItemName "Add widget" `
         -DelayMs $DelayMs `
         -Attempts $ContextMenuAttempts
 
-    if (-not $contextMenu -or -not $contextMenu.MenuItem) {
+    $menuSelection = $null
+    if ($contextMenu -and $contextMenu.MenuItem) {
+        $menuSelection = Select-AutomationMatch -Root $contextMenu.Attached.Element -Match $contextMenu.MenuItem -DelayMs ($DelayMs + 100)
+    }
+
+    $dialogWait = Wait-ForStudioProWindowByName -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -Name "Select Widget" -TimeoutMs $DialogTimeoutMs -PollMs 250
+    if ((-not $contextMenu -or -not $contextMenu.MenuItem) -and (-not $dialogWait -or -not $dialogWait.Window)) {
         throw "Could not open the Page Explorer context menu for '$Target'."
     }
 
-    $menuSelection = Select-AutomationMatch -Root $contextMenu.Attached.Element -Match $contextMenu.MenuItem -DelayMs ($DelayMs + 100)
-    $dialogWait = Wait-ForStudioProWindowByName -ProcessId $attached.Process.Id -WindowTitlePattern $WindowTitlePattern -Name "Select Widget" -TimeoutMs $DialogTimeoutMs -PollMs 250
     if (-not $dialogWait -or -not $dialogWait.Window) {
         throw "Studio Pro did not open the 'Select Widget' dialog."
     }
@@ -1722,11 +1821,48 @@ function Select-WidgetDialogItemByName {
         return $null
     }
 
-    $match = $items | Sort-Object `
+    $ordered = @($items | Sort-Object `
         @{ Expression = { $_.boundingRectangle.top } }, `
-        @{ Expression = { $_.boundingRectangle.left } } | Select-Object -First 1
+        @{ Expression = { $_.boundingRectangle.left } })
 
-    return Select-AutomationMatch -Root $Dialog -Match $match -DelayMs $DelayMs
+    $firstSelection = $null
+    foreach ($match in $ordered) {
+        $selection = Select-AutomationMatch -Root $Dialog -Match $match -DelayMs $DelayMs
+        if (-not $firstSelection) {
+            $firstSelection = $selection
+        }
+
+        $selectButtons = @(Find-DialogNamedElements -Dialog $Dialog -Name "Select" -Limit 20 | Where-Object {
+            $_.name -eq "Select" -and $_.controlType -eq "Button"
+        } | Sort-Object `
+            @{ Expression = { $_.boundingRectangle.top } }, `
+            @{ Expression = { $_.boundingRectangle.left } })
+        $selectButton = if ($selectButtons.Length -gt 0) { $selectButtons[0] } else { $null }
+
+        if ($selectButton -and $selectButton.isEnabled) {
+            return @{
+                method = $selection.method
+                supportsSelectionItem = $selection.supportsSelectionItem
+                supportsInvoke = $selection.supportsInvoke
+                isSelected = $selection.isSelected
+                target = $selection.target
+                selectButtonEnabled = $true
+            }
+        }
+    }
+
+    return if ($firstSelection) {
+        @{
+            method = $firstSelection.method
+            supportsSelectionItem = $firstSelection.supportsSelectionItem
+            supportsInvoke = $firstSelection.supportsInvoke
+            isSelected = $firstSelection.isSelected
+            target = $firstSelection.target
+            selectButtonEnabled = $false
+        }
+    } else {
+        $null
+    }
 }
 
 function Invoke-WidgetDialogButton {
@@ -1821,18 +1957,26 @@ function Select-AutomationMatch {
     if ($native) {
         $selectionPattern = $null
         if ($native.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$selectionPattern)) {
-            $supportsSelectionItem = $true
-            $selectionPattern.Select()
-            $method = "selectionItemPattern"
-            Start-Sleep -Milliseconds $DelayMs
-            $isSelected = [bool]$selectionPattern.Current.IsSelected
+            try {
+                $supportsSelectionItem = $true
+                $selectionPattern.Select()
+                $method = "selectionItemPattern"
+                Start-Sleep -Milliseconds $DelayMs
+                $isSelected = [bool]$selectionPattern.Current.IsSelected
+            } catch {
+                $method = $null
+            }
         } else {
             $invokePattern = $null
             if ($native.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$invokePattern)) {
-                $supportsInvoke = $true
-                $invokePattern.Invoke()
-                $method = "invokePattern"
-                Start-Sleep -Milliseconds $DelayMs
+                try {
+                    $supportsInvoke = $true
+                    $invokePattern.Invoke()
+                    $method = "invokePattern"
+                    Start-Sleep -Milliseconds $DelayMs
+                } catch {
+                    $method = $null
+                }
             }
         }
     }

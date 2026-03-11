@@ -29,7 +29,10 @@ That keeps the core editable in this repo without waiting on a local .NET SDK or
 - invoke or click a matched UI element
 - open a document by name through Studio Pro's built-in `Go to` workflow
 - select a visible named widget or page element on the active designer surface
+- send arbitrary key chords to Studio Pro or the active editor context
+- trigger first-pass local run and responsive web shortcuts from Studio Pro
 - inspect and wait for Studio Pro popups to clear
+- list open Studio Pro dialogs, inspect dialog controls, and invoke dialog controls
 - list open page and microflow editor tabs
 - report the best-known active editor tab
 - parse the active editor tab into document/module context
@@ -56,6 +59,9 @@ npm run snapshot -- --depth 2 --max-children 15
 npm run find -- --name "App Explorer"
 npm run find -- --control-type TreeItem --name "Document"
 npm run click -- --runtime-id "42.333896.3.1"
+npm run send-keys -- --page "Client_ClinicalDocument_V3" --scope editor --keys "^,"
+npm run run-local
+npm run show-responsive-web
 npm run open-item -- --item "Client_ClinicalDocument_V4"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Olari_Popup_Default"
 npm run select-widget -- --page "Client_ClinicalDocument_V3" --widget "Structure mode"
@@ -72,6 +78,9 @@ npm run close-tab -- --dry-run
 npm run select-app-explorer-item -- --item "Client_ClinicalDocument_V3"
 npm run select-explorer-item -- --page "Client_ClinicalDocument_V3" --item "container34"
 npm run select-toolbox-item -- --item "Text"
+npm run list-dialogs
+npm run list-dialog-items -- --dialog "Select Widget" --limit 40
+npm run invoke-dialog-control -- --dialog "Select Widget" --control "Select" --control-type Button
 npm run list-app-explorer-items
 npm run list-page-explorer-items -- --page "Client_ClinicalDocument_V3"
 npm run list-toolbox-items -- --page "Client_ClinicalDocument_V3"
@@ -110,8 +119,11 @@ Phase 2:
 - current `select-explorer-item` targets exact visible Page Explorer rows from the Page Explorer dock container and is validated against `container34`
 - current `select-toolbox-item` targets exact visible Toolbox items from the Toolbox dock container and is validated for both page and microflow toolbox content
 - current `insert-widget` supports a dry-run verification mode and is validated end-to-end for resolving `container34` + `Text`
+- current `insert-widget` can open and traverse the native `Select Widget` dialog, including disambiguating duplicate widget names like `Text`
 - current `select-microflow-node` uses the active microflow editor container instead of the whole window
 - current `insert-action` follows the same pattern for microflow actions and is verified in `--dry-run` mode
+- current dialog commands are validated against native Studio Pro dialogs such as `Select Widget` and `Edit Template Grid 'templateGrid1'`
+- current run/browser commands drive Studio Pro shortcuts for `F5`, `Shift+F5`, and `F9`
 - operation recorder and selector stabilization
 
 ## Explicit Non-Goal
