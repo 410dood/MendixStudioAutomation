@@ -70,6 +70,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "set-page-widget-properties": {
+            const result = await client.setPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "invoke-page-widget-property-control": {
             const result = await client.invokePageWidgetPropertyControl(options);
             formatOutput(result);
@@ -137,6 +142,11 @@ async function main() {
         }
         case "set-page-explorer-item-property": {
             const result = await client.setPageExplorerItemProperty(options);
+            formatOutput(result);
+            return;
+        }
+        case "set-page-explorer-item-properties": {
+            const result = await client.setPageExplorerItemProperties(options);
             formatOutput(result);
             return;
         }
@@ -705,6 +715,7 @@ Commands:
   export-page-widget-properties Export a page widget property plan to JSON
   get-page-widget-property    Read one property field for a page widget
   set-page-widget-property    Set one property field for a page widget
+  set-page-widget-properties  Apply batch field edits for a page widget from JSON input
   invoke-page-widget-property-control Invoke a named control in a page widget properties dialog
   compare-page-widget-properties Compare a page widget against a saved property plan
   sync-page-widget-properties Apply or preview a page widget property plan
@@ -719,6 +730,7 @@ Commands:
   export-page-explorer-item-properties Export a page explorer item property plan to JSON
   get-page-explorer-item-property Read one property field for a page explorer item
   set-page-explorer-item-property Set one property field for a page explorer item
+  set-page-explorer-item-properties Apply batch field edits for a page explorer item from JSON input
   invoke-page-explorer-item-property-control Invoke a named control in a page explorer item properties dialog
   compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
   sync-page-explorer-item-properties Apply or preview a page explorer item property plan

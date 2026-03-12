@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.67
+
+Batch field-edit aliases for page-target property workflows.
+
+- Added `set-page-widget-properties` and `set-page-explorer-item-properties`.
+- These expose batch field-plan mutation directly from page widgets and Page Explorer targets, without dropping down to generic property-dialog commands.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.66
 
 Direct field-listing aliases for page-target property workflows.
