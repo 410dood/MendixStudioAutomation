@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.2.61
+
+Page Explorer item property workflow aliases.
+
+- Added `export-page-explorer-item-properties`, `compare-page-explorer-item-properties`, `sync-page-explorer-item-properties`, and `inspect-page-explorer-item-properties`.
+- These mirror the page-widget aliases but default to `pageExplorer` semantics for structural page nodes like containers and layout rows.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
+## 0.2.60
+
+Page-widget property workflow aliases.
+
+- Added `export-page-widget-properties`, `compare-page-widget-properties`, `sync-page-widget-properties`, and `inspect-page-widget-properties`.
+- These wrap the existing property-dialog workflow with page/widget semantics and page-designer-oriented defaults for `OK` versus `Cancel`.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.59
 
 Persisted raw dialog sync plans.

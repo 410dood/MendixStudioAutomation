@@ -75,6 +75,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-page-explorer-item-properties": {
+            const result = await client.exportPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "compare-page-explorer-item-properties": {
+            const result = await client.comparePageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "sync-page-explorer-item-properties": {
+            const result = await client.syncPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "inspect-page-explorer-item-properties": {
+            const result = await client.inspectPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "open-properties": {
             const result = await client.openProperties(options);
             formatOutput(result);
@@ -586,6 +606,10 @@ Commands:
   compare-page-widget-properties Compare a page widget against a saved property plan
   sync-page-widget-properties Apply or preview a page widget property plan
   inspect-page-widget-properties Inspect both fields and raw controls for a page widget
+  export-page-explorer-item-properties Export a page explorer item property plan to JSON
+  compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
+  sync-page-explorer-item-properties Apply or preview a page explorer item property plan
+  inspect-page-explorer-item-properties Inspect both fields and raw controls for a page explorer item
   open-properties             Open the properties dialog for a selected Studio Pro item
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
