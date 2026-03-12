@@ -145,6 +145,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-review-page-widget-properties": {
+            const result = await client.exportReviewPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "export-page-explorer-item-properties": {
             const result = await client.exportPageExplorerItemProperties(options);
             formatOutput(result);
@@ -232,6 +237,11 @@ async function main() {
         }
         case "export-inspect-page-explorer-item-properties": {
             const result = await client.exportInspectPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-review-page-explorer-item-properties": {
+            const result = await client.exportReviewPageExplorerItemProperties(options);
             formatOutput(result);
             return;
         }
@@ -770,6 +780,7 @@ Commands:
   sync-page-widget-property-items Build a raw-control sync plan for a page widget properties dialog
   export-sync-page-widget-property-items Export a raw-control sync plan for a page widget properties dialog
   export-inspect-page-widget-properties Export the combined widget inspection payload to JSON
+  export-review-page-widget-properties Export a combined review bundle for a page widget
   export-page-explorer-item-properties Export a page explorer item property plan to JSON
   open-page-explorer-item-properties Open the native properties dialog for a page explorer item
   get-page-explorer-item-property Read one property field for a page explorer item
@@ -788,6 +799,7 @@ Commands:
   sync-page-explorer-item-property-items Build a raw-control sync plan for a page explorer item properties dialog
   export-sync-page-explorer-item-property-items Export a raw-control sync plan for a page explorer item properties dialog
   export-inspect-page-explorer-item-properties Export the combined explorer-item inspection payload to JSON
+  export-review-page-explorer-item-properties Export a combined review bundle for a page explorer item
   open-properties             Open the properties dialog for a selected Studio Pro item
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan

@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.71
+
+Combined review-bundle exports for page-target property workflows.
+
+- Added `export-review-page-widget-properties` and `export-review-page-explorer-item-properties`.
+- These persist one review artifact containing the current inspect payload and any optional field-level or raw-control diff/sync analysis supplied through `--fields-*` or `--items-*` inputs.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.70
 
 Direct open-only aliases for page-target property workflows.

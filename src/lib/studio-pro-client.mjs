@@ -473,6 +473,70 @@ export class StudioProClient {
         };
     }
 
+    async exportReviewPageWidgetProperties(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-review-page-widget-properties",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const inspectResult = await this.inspectPageWidgetProperties(options);
+        if (!inspectResult?.ok) {
+            return {
+                ...inspectResult,
+                action: "export-review-page-widget-properties"
+            };
+        }
+
+        let compareResult = null;
+        let syncResult = null;
+        if (options.fieldsFile || options.fieldsJson) {
+            compareResult = await this.comparePageWidgetProperties(options);
+            syncResult = await this.syncPageWidgetProperties({
+                ...options,
+                dryRun: true
+            });
+        }
+
+        let compareItemsResult = null;
+        let syncItemsResult = null;
+        if (options.itemsFile || options.itemsJson) {
+            compareItemsResult = await this.comparePageWidgetPropertyItems(options);
+            syncItemsResult = await this.syncPageWidgetPropertyItems(options);
+        }
+
+        const payload = {
+            ok: inspectResult.ok
+                && (compareResult?.ok ?? true)
+                && (syncResult?.ok ?? true)
+                && (compareItemsResult?.ok ?? true)
+                && (syncItemsResult?.ok ?? true),
+            action: "export-review-page-widget-properties",
+            page: inspectResult.page ?? null,
+            widget: inspectResult.widget ?? null,
+            scope: inspectResult.scope ?? null,
+            inspectResult,
+            compareResult,
+            syncResult,
+            compareItemsResult,
+            syncItemsResult
+        };
+
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+
+        return {
+            ok: payload.ok,
+            action: "export-review-page-widget-properties",
+            page: payload.page,
+            widget: payload.widget,
+            scope: payload.scope,
+            outputFile
+        };
+    }
+
     async exportPageExplorerItemProperties(options = {}) {
         const normalized = normalizePageExplorerPropertyOptions(options);
         return this.exportPropertiesDialog({
@@ -710,6 +774,70 @@ export class StudioProClient {
             page: result.page ?? null,
             item: result.item ?? null,
             scope: result.scope ?? null,
+            outputFile
+        };
+    }
+
+    async exportReviewPageExplorerItemProperties(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-review-page-explorer-item-properties",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const inspectResult = await this.inspectPageExplorerItemProperties(options);
+        if (!inspectResult?.ok) {
+            return {
+                ...inspectResult,
+                action: "export-review-page-explorer-item-properties"
+            };
+        }
+
+        let compareResult = null;
+        let syncResult = null;
+        if (options.fieldsFile || options.fieldsJson) {
+            compareResult = await this.comparePageExplorerItemProperties(options);
+            syncResult = await this.syncPageExplorerItemProperties({
+                ...options,
+                dryRun: true
+            });
+        }
+
+        let compareItemsResult = null;
+        let syncItemsResult = null;
+        if (options.itemsFile || options.itemsJson) {
+            compareItemsResult = await this.comparePageExplorerItemPropertyItems(options);
+            syncItemsResult = await this.syncPageExplorerItemPropertyItems(options);
+        }
+
+        const payload = {
+            ok: inspectResult.ok
+                && (compareResult?.ok ?? true)
+                && (syncResult?.ok ?? true)
+                && (compareItemsResult?.ok ?? true)
+                && (syncItemsResult?.ok ?? true),
+            action: "export-review-page-explorer-item-properties",
+            page: inspectResult.page ?? null,
+            item: inspectResult.item ?? null,
+            scope: inspectResult.scope ?? null,
+            inspectResult,
+            compareResult,
+            syncResult,
+            compareItemsResult,
+            syncItemsResult
+        };
+
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+
+        return {
+            ok: payload.ok,
+            action: "export-review-page-explorer-item-properties",
+            page: payload.page,
+            item: payload.item,
+            scope: payload.scope,
             outputFile
         };
     }
