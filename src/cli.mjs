@@ -60,6 +60,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "open-page-widget-properties": {
+            const result = await client.openPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "get-page-widget-property": {
             const result = await client.getPageWidgetProperty(options);
             formatOutput(result);
@@ -142,6 +147,11 @@ async function main() {
         }
         case "export-page-explorer-item-properties": {
             const result = await client.exportPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "open-page-explorer-item-properties": {
+            const result = await client.openPageExplorerItemProperties(options);
             formatOutput(result);
             return;
         }
@@ -743,6 +753,7 @@ Commands:
   show-responsive-web         Open the app in Studio Pro's responsive browser view
   create-page                 Create a Mendix page through the native Studio Pro wizard
   export-page-widget-properties Export a page widget property plan to JSON
+  open-page-widget-properties Open the native properties dialog for a page widget
   get-page-widget-property    Read one property field for a page widget
   set-page-widget-property    Set one property field for a page widget
   set-page-widget-properties  Apply batch field edits for a page widget from JSON input
@@ -760,6 +771,7 @@ Commands:
   export-sync-page-widget-property-items Export a raw-control sync plan for a page widget properties dialog
   export-inspect-page-widget-properties Export the combined widget inspection payload to JSON
   export-page-explorer-item-properties Export a page explorer item property plan to JSON
+  open-page-explorer-item-properties Open the native properties dialog for a page explorer item
   get-page-explorer-item-property Read one property field for a page explorer item
   set-page-explorer-item-property Set one property field for a page explorer item
   set-page-explorer-item-properties Apply batch field edits for a page explorer item from JSON input

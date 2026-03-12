@@ -85,6 +85,7 @@ npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"
 npm run export-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --output-file ".automation-state/structure-mode-properties.json" --finalize-dialog "Cancel"
+npm run open-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode"
 npm run get-page-widget-property -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --label "Name" --control-type Edit --finalize-dialog "Cancel"
 npm run set-page-widget-property -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --label "Name" --value "structureMode1" --control-type Edit --verify-value "structureMode1" --finalize-dialog "OK"
 npm run set-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --finalize-dialog "OK"
@@ -102,6 +103,7 @@ npm run sync-page-widget-property-items -- --page "Client_ClinicalDocument_V3" -
 npm run export-sync-page-widget-property-items -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --items-file ".automation-state/structure-mode-items.json" --output-file ".automation-state/structure-mode-sync-plan.json" --finalize-dialog "Cancel"
 npm run export-inspect-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control-type Edit --limit 50 --output-file ".automation-state/structure-mode-inspect.json" --finalize-dialog "Cancel"
 npm run export-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --output-file ".automation-state/container34-properties.json" --scope pageExplorer --finalize-dialog "Cancel"
+npm run open-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer
 npm run get-page-explorer-item-property -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --label "Name" --control-type Edit --finalize-dialog "Cancel"
 npm run set-page-explorer-item-property -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --label "Name" --value "container34_test" --control-type Edit --verify-value "container34_test" --finalize-dialog "OK"
 npm run set-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --fields-file ".automation-state/container34-properties.json" --finalize-dialog "OK"

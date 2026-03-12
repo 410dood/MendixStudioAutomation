@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.70
+
+Direct open-only aliases for page-target property workflows.
+
+- Added `open-page-widget-properties` and `open-page-explorer-item-properties`.
+- These expose the native properties dialog directly from page widgets and Page Explorer targets when the goal is inspection or manual follow-on automation rather than an immediate read/write action.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.69
 
 Persisted field-diff exports for target-first property workflows.
