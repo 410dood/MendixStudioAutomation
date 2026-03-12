@@ -270,6 +270,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-review-properties-dialog": {
+            const result = await client.exportReviewPropertiesDialog(options);
+            formatOutput(result);
+            return;
+        }
         case "list-properties-dialog-fields": {
             const result = await client.listPropertiesDialogFields(options);
             formatOutput(result);
@@ -810,6 +815,7 @@ Commands:
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
   export-compare-properties-dialog Open a properties dialog and export a field diff to JSON
+  export-review-properties-dialog Open a properties dialog and export a combined review bundle
   list-properties-dialog-fields Open a properties dialog and list resolved field/value pairs
   list-properties-dialog-items Open a properties dialog and list raw visible controls
   export-properties-dialog-items Open a properties dialog and export raw visible controls to JSON

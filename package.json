@@ -57,6 +57,7 @@
     "export-review-page-explorer-item-properties": "node src/cli.mjs export-review-page-explorer-item-properties",
     "export-properties-dialog": "node src/cli.mjs export-properties-dialog",
     "export-compare-properties-dialog": "node src/cli.mjs export-compare-properties-dialog",
+    "export-review-properties-dialog": "node src/cli.mjs export-review-properties-dialog",
     "export-properties-dialog-items": "node src/cli.mjs export-properties-dialog-items",
     "compare-properties-dialog": "node src/cli.mjs compare-properties-dialog",
     "compare-properties-dialog-items": "node src/cli.mjs compare-properties-dialog-items",

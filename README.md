@@ -128,6 +128,7 @@ npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
 npm run export-compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json" --output-file ".automation-state/structure-mode-field-diff.json"
 npm run export-sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json" --output-file ".automation-state/structure-mode-field-sync-plan.json"
+npm run export-review-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json" --items-file ".automation-state/structure-mode-items.json" --output-file ".automation-state/structure-mode-review.json"
 npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control-type Edit
 npm run list-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --limit 50
 npm run export-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-items.json"

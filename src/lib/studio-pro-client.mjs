@@ -1093,6 +1093,85 @@ export class StudioProClient {
         };
     }
 
+    async exportReviewPropertiesDialog(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-review-properties-dialog",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const fieldsResult = await this.listPropertiesDialogFields({
+            ...options,
+            finalizeDialog: null
+        });
+        if (!fieldsResult?.ok) {
+            return {
+                ...fieldsResult,
+                action: "export-review-properties-dialog"
+            };
+        }
+
+        const itemsResult = await this.listPropertiesDialogItems(options);
+        if (!itemsResult?.ok) {
+            return {
+                ...itemsResult,
+                action: "export-review-properties-dialog"
+            };
+        }
+
+        let compareResult = null;
+        let syncResult = null;
+        if (options.fieldsFile || options.fieldsJson) {
+            compareResult = await this.comparePropertiesDialog(options);
+            syncResult = await this.syncPropertiesDialog({
+                ...options,
+                dryRun: true
+            });
+        }
+
+        let compareItemsResult = null;
+        let syncItemsResult = null;
+        if (options.itemsFile || options.itemsJson) {
+            compareItemsResult = await this.comparePropertiesDialogItems(options);
+            syncItemsResult = await this.syncPropertiesDialogItems(options);
+        }
+
+        const payload = {
+            ok: fieldsResult.ok
+                && itemsResult.ok
+                && (compareResult?.ok ?? true)
+                && (syncResult?.ok ?? true)
+                && (compareItemsResult?.ok ?? true)
+                && (syncItemsResult?.ok ?? true),
+            action: "export-review-properties-dialog",
+            page: options.page ?? null,
+            microflow: options.microflow ?? null,
+            item: options.item ?? options.widget ?? options.node ?? null,
+            scope: options.scope || "editor",
+            fieldsResult,
+            itemsResult,
+            compareResult,
+            syncResult,
+            compareItemsResult,
+            syncItemsResult
+        };
+
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+
+        return {
+            ok: payload.ok,
+            action: "export-review-properties-dialog",
+            page: payload.page,
+            microflow: payload.microflow,
+            item: payload.item,
+            scope: payload.scope,
+            outputFile
+        };
+    }
+
     async comparePropertiesDialog(options = {}) {
         let openResult;
         try {

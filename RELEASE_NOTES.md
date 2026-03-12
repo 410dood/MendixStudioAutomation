@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.73
+
+Generic review-bundle export for properties dialogs.
+
+- Added `export-review-properties-dialog`.
+- This persists one review artifact containing the current field/value view, raw control view, and any optional field-level or raw-control diff/sync analysis supplied through saved plans.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.72
 
 Generalized create-page-with-widget authoring workflow.
