@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.2.69
+
+Persisted field-diff exports for target-first property workflows.
+
+- Added generic `export-compare-properties-dialog` for field-diff review artifacts.
+- Added `export-compare-page-widget-properties` and `export-compare-page-explorer-item-properties`.
+- These persist field-level comparison results to JSON so planned page-target deltas can be reviewed independently of sync planning.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.68
 
 Persisted field-sync plan exports for target-first property workflows.

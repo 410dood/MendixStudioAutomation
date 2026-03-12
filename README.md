@@ -90,6 +90,7 @@ npm run set-page-widget-property -- --page "Client_ClinicalDocument_V3" --widget
 npm run set-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --finalize-dialog "OK"
 npm run invoke-page-widget-property-control -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control "Apply" --control-type Button
 npm run compare-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --finalize-dialog "Cancel"
+npm run export-compare-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --output-file ".automation-state/structure-mode-field-diff.json" --finalize-dialog "Cancel"
 npm run sync-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --dry-run true
 npm run export-sync-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --output-file ".automation-state/structure-mode-field-sync-plan.json" --finalize-dialog "Cancel"
 npm run inspect-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control-type Edit --limit 50 --finalize-dialog "Cancel"
@@ -106,6 +107,7 @@ npm run set-page-explorer-item-property -- --page "Client_ClinicalDocument_V3" -
 npm run set-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --fields-file ".automation-state/container34-properties.json" --finalize-dialog "OK"
 npm run invoke-page-explorer-item-property-control -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --control "Apply" --control-type Button
 npm run compare-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --fields-file ".automation-state/container34-properties.json" --scope pageExplorer --finalize-dialog "Cancel"
+npm run export-compare-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --fields-file ".automation-state/container34-properties.json" --output-file ".automation-state/container34-field-diff.json" --finalize-dialog "Cancel"
 npm run sync-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --fields-file ".automation-state/container34-properties.json" --scope pageExplorer --dry-run true
 npm run export-sync-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --fields-file ".automation-state/container34-properties.json" --output-file ".automation-state/container34-field-sync-plan.json" --finalize-dialog "Cancel"
 npm run inspect-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --control-type Edit --limit 50 --finalize-dialog "Cancel"
@@ -119,6 +121,7 @@ npm run export-inspect-page-explorer-item-properties -- --page "Client_ClinicalD
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-properties.json"
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
+npm run export-compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json" --output-file ".automation-state/structure-mode-field-diff.json"
 npm run export-sync-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json" --output-file ".automation-state/structure-mode-field-sync-plan.json"
 npm run list-properties-dialog-fields -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --control-type Edit
 npm run list-properties-dialog-items -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --limit 50

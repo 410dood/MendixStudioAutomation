@@ -320,6 +320,17 @@ export class StudioProClient {
         });
     }
 
+    async exportComparePageWidgetProperties(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.exportComparePropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
     async inspectPageWidgetProperties(options = {}) {
         const normalized = normalizePageWidgetPropertyOptions(options);
         const fieldsResult = await this.listPropertiesDialogFields({
@@ -532,6 +543,17 @@ export class StudioProClient {
     async exportSyncPageExplorerItemProperties(options = {}) {
         const normalized = normalizePageExplorerPropertyOptions(options);
         return this.exportSyncPropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async exportComparePageExplorerItemProperties(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.exportComparePropertiesDialog({
             ...options,
             page: normalized.page,
             item: normalized.item,
@@ -860,6 +882,37 @@ export class StudioProClient {
             openResult,
             exportResult,
             finalizeResult
+        };
+    }
+
+    async exportComparePropertiesDialog(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-compare-properties-dialog",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const result = await this.comparePropertiesDialog(options);
+        if (!result?.ok) {
+            return {
+                ...result,
+                action: "export-compare-properties-dialog"
+            };
+        }
+
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(result, null, 2)}\n`, "utf8");
+
+        return {
+            ok: true,
+            action: "export-compare-properties-dialog",
+            page: result.page ?? null,
+            microflow: result.microflow ?? null,
+            item: result.item ?? null,
+            scope: result.scope ?? null,
+            outputFile
         };
     }
 

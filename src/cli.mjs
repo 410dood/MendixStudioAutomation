@@ -85,6 +85,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-compare-page-widget-properties": {
+            const result = await client.exportComparePageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "sync-page-widget-properties": {
             const result = await client.syncPageWidgetProperties(options);
             formatOutput(result);
@@ -165,6 +170,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-compare-page-explorer-item-properties": {
+            const result = await client.exportComparePageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "sync-page-explorer-item-properties": {
             const result = await client.syncPageExplorerItemProperties(options);
             formatOutput(result);
@@ -227,6 +237,11 @@ async function main() {
         }
         case "compare-properties-dialog": {
             const result = await client.comparePropertiesDialog(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-compare-properties-dialog": {
+            const result = await client.exportComparePropertiesDialog(options);
             formatOutput(result);
             return;
         }
@@ -733,6 +748,7 @@ Commands:
   set-page-widget-properties  Apply batch field edits for a page widget from JSON input
   invoke-page-widget-property-control Invoke a named control in a page widget properties dialog
   compare-page-widget-properties Compare a page widget against a saved property plan
+  export-compare-page-widget-properties Export a field diff for a page widget property plan
   sync-page-widget-properties Apply or preview a page widget property plan
   export-sync-page-widget-properties Export a dry-run field sync plan for a page widget
   inspect-page-widget-properties Inspect both fields and raw controls for a page widget
@@ -749,6 +765,7 @@ Commands:
   set-page-explorer-item-properties Apply batch field edits for a page explorer item from JSON input
   invoke-page-explorer-item-property-control Invoke a named control in a page explorer item properties dialog
   compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
+  export-compare-page-explorer-item-properties Export a field diff for a page explorer item property plan
   sync-page-explorer-item-properties Apply or preview a page explorer item property plan
   export-sync-page-explorer-item-properties Export a dry-run field sync plan for a page explorer item
   inspect-page-explorer-item-properties Inspect both fields and raw controls for a page explorer item
@@ -762,6 +779,7 @@ Commands:
   open-properties             Open the properties dialog for a selected Studio Pro item
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
+  export-compare-properties-dialog Open a properties dialog and export a field diff to JSON
   list-properties-dialog-fields Open a properties dialog and list resolved field/value pairs
   list-properties-dialog-items Open a properties dialog and list raw visible controls
   export-properties-dialog-items Open a properties dialog and export raw visible controls to JSON
