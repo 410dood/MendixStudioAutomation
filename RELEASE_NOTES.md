@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.2.63
+
+Single-field and control actions for page-target property workflows.
+
+- Added `get-page-widget-property`, `set-page-widget-property`, and `invoke-page-widget-property-control`.
+- Added `get-page-explorer-item-property`, `set-page-explorer-item-property`, and `invoke-page-explorer-item-property-control`.
+- These provide one-off page-authoring edits without requiring a full saved property plan.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.62
 
 Exportable combined property inspection for page targets.

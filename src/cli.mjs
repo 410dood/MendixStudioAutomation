@@ -60,6 +60,21 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "get-page-widget-property": {
+            const result = await client.getPageWidgetProperty(options);
+            formatOutput(result);
+            return;
+        }
+        case "set-page-widget-property": {
+            const result = await client.setPageWidgetProperty(options);
+            formatOutput(result);
+            return;
+        }
+        case "invoke-page-widget-property-control": {
+            const result = await client.invokePageWidgetPropertyControl(options);
+            formatOutput(result);
+            return;
+        }
         case "compare-page-widget-properties": {
             const result = await client.comparePageWidgetProperties(options);
             formatOutput(result);
@@ -82,6 +97,21 @@ async function main() {
         }
         case "export-page-explorer-item-properties": {
             const result = await client.exportPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "get-page-explorer-item-property": {
+            const result = await client.getPageExplorerItemProperty(options);
+            formatOutput(result);
+            return;
+        }
+        case "set-page-explorer-item-property": {
+            const result = await client.setPageExplorerItemProperty(options);
+            formatOutput(result);
+            return;
+        }
+        case "invoke-page-explorer-item-property-control": {
+            const result = await client.invokePageExplorerItemPropertyControl(options);
             formatOutput(result);
             return;
         }
@@ -613,11 +643,17 @@ Commands:
   show-responsive-web         Open the app in Studio Pro's responsive browser view
   create-page                 Create a Mendix page through the native Studio Pro wizard
   export-page-widget-properties Export a page widget property plan to JSON
+  get-page-widget-property    Read one property field for a page widget
+  set-page-widget-property    Set one property field for a page widget
+  invoke-page-widget-property-control Invoke a named control in a page widget properties dialog
   compare-page-widget-properties Compare a page widget against a saved property plan
   sync-page-widget-properties Apply or preview a page widget property plan
   inspect-page-widget-properties Inspect both fields and raw controls for a page widget
   export-inspect-page-widget-properties Export the combined widget inspection payload to JSON
   export-page-explorer-item-properties Export a page explorer item property plan to JSON
+  get-page-explorer-item-property Read one property field for a page explorer item
+  set-page-explorer-item-property Set one property field for a page explorer item
+  invoke-page-explorer-item-property-control Invoke a named control in a page explorer item properties dialog
   compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
   sync-page-explorer-item-properties Apply or preview a page explorer item property plan
   inspect-page-explorer-item-properties Inspect both fields and raw controls for a page explorer item

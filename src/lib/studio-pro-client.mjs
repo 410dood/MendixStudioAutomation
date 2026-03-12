@@ -243,6 +243,39 @@ export class StudioProClient {
         });
     }
 
+    async getPageWidgetProperty(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.getPropertiesDialogField({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async setPageWidgetProperty(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.setPropertiesDialogField({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async invokePageWidgetPropertyControl(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.invokePropertiesDialogControl({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
     async comparePageWidgetProperties(options = {}) {
         const normalized = normalizePageWidgetPropertyOptions(options);
         return this.comparePropertiesDialog({
@@ -334,6 +367,39 @@ export class StudioProClient {
     async exportPageExplorerItemProperties(options = {}) {
         const normalized = normalizePageExplorerPropertyOptions(options);
         return this.exportPropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async getPageExplorerItemProperty(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.getPropertiesDialogField({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async setPageExplorerItemProperty(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.setPropertiesDialogField({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async invokePageExplorerItemPropertyControl(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.invokePropertiesDialogControl({
             ...options,
             page: normalized.page,
             item: normalized.item,
