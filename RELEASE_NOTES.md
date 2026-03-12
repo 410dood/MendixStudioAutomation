@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.2.75
+
+Integrated FlaUI into existing snapshot and dialog inspection commands.
+
+- `snapshot` now supports `--backend flaui`.
+- `list-dialogs` now supports `--backend flaui`.
+- This means the new desktop automation runner is no longer isolated behind separate commands; it can now participate in the existing Studio Pro inspection path.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.74
 
 Added a FlaUI-backed desktop automation runner.

@@ -82,6 +82,8 @@ npm run run-local-verify -- --url "http://localhost:8080" --verify-follow-redire
 npm run run-local-verify -- --url "http://localhost:8080" --verify-follow-redirects true --verify-final-url "/index.html" --verify-status 200
 npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-status 200
 npm run show-responsive-web
+npm run snapshot -- --backend flaui
+npm run list-dialogs -- --backend flaui
 npm run build-flaui-runner
 npm run flaui-snapshot -- --title "Mendix Studio Pro"
 npm run flaui-list-dialogs -- --title "Mendix Studio Pro"

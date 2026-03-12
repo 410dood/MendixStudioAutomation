@@ -1,9 +1,11 @@
 import { execFile } from "node:child_process";
+import { access } from "node:fs/promises";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const projectPath = resolve(process.cwd(), "tools", "MendixStudioAutomation.FlaUI", "MendixStudioAutomation.FlaUI.csproj");
+const runnerDllPath = resolve(process.cwd(), "tools", "MendixStudioAutomation.FlaUI", "bin", "Debug", "net8.0-windows", "MendixStudioAutomation.FlaUI.dll");
 
 export class FlaUIClient {
     async build() {
@@ -49,13 +51,9 @@ export class FlaUIClient {
     }
 
     async run(command, options = {}) {
+        await this.ensureBuilt();
         const args = [
-            "run",
-            "--project",
-            projectPath,
-            "--verbosity",
-            "quiet",
-            "--",
+            runnerDllPath,
             command,
             ...buildArgs(options)
         ];
@@ -87,6 +85,17 @@ export class FlaUIClient {
                 action: `flaui-${command}`,
                 error: stderr || stdout || (error instanceof Error ? error.message : String(error))
             };
+        }
+    }
+
+    async ensureBuilt() {
+        try {
+            await access(runnerDllPath);
+        } catch {
+            const buildResult = await this.build();
+            if (!buildResult?.ok) {
+                throw new Error(buildResult?.error || "Failed to build the FlaUI runner.");
+            }
         }
     }
 }

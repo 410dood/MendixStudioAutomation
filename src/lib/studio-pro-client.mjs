@@ -14,6 +14,9 @@ export class StudioProClient {
     }
 
     async snapshot(options = {}) {
+        if (isFlaUIBackend(options)) {
+            return this.flauiSnapshot(options);
+        }
         return runPowerShellScript("scripts/automation/Get-StudioProSnapshot.ps1", normalizeSnapshotOptions(options));
     }
 
@@ -1857,6 +1860,9 @@ export class StudioProClient {
     }
 
     async listDialogs(options = {}) {
+        if (isFlaUIBackend(options)) {
+            return this.flauiListDialogs(options);
+        }
         return runPowerShellScript("scripts/automation/List-StudioProDialogs.ps1", normalizeProcessOptions(options));
     }
 
@@ -6204,6 +6210,11 @@ function toBoolean(raw, fallback = false) {
     }
 
     return fallback;
+}
+
+function isFlaUIBackend(options) {
+    const backend = options?.backend ?? options?.automationBackend ?? null;
+    return typeof backend === "string" && backend.toLowerCase() === "flaui";
 }
 
 function extractHtmlTitle(bodyText) {

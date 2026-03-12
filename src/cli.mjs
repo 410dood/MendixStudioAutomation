@@ -940,6 +940,7 @@ Options:
   --title <text>              Match Studio Pro main window title
   --process-id <id>           Target a specific Studio Pro process
   --process-name <text>       Match a specific Windows process name for FlaUI commands
+  --backend <name>            Automation backend override, e.g. flaui for snapshot/list-dialogs
   --depth <n>                 UI tree traversal depth
   --max-children <n>          Max children emitted per node
   --name <text>               Element name filter
