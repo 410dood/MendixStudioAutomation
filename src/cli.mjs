@@ -90,6 +90,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "list-page-widget-property-items": {
+            const result = await client.listPageWidgetPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
         case "export-page-widget-property-items": {
             const result = await client.exportPageWidgetPropertyItems(options);
             formatOutput(result);
@@ -147,6 +152,11 @@ async function main() {
         }
         case "inspect-page-explorer-item-properties": {
             const result = await client.inspectPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "list-page-explorer-item-property-items": {
+            const result = await client.listPageExplorerItemPropertyItems(options);
             formatOutput(result);
             return;
         }
@@ -689,6 +699,7 @@ Commands:
   compare-page-widget-properties Compare a page widget against a saved property plan
   sync-page-widget-properties Apply or preview a page widget property plan
   inspect-page-widget-properties Inspect both fields and raw controls for a page widget
+  list-page-widget-property-items List raw visible controls for a page widget properties dialog
   export-page-widget-property-items Export raw visible controls for a page widget properties dialog
   compare-page-widget-property-items Compare raw visible controls for a page widget properties dialog
   sync-page-widget-property-items Build a raw-control sync plan for a page widget properties dialog
@@ -701,6 +712,7 @@ Commands:
   compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
   sync-page-explorer-item-properties Apply or preview a page explorer item property plan
   inspect-page-explorer-item-properties Inspect both fields and raw controls for a page explorer item
+  list-page-explorer-item-property-items List raw visible controls for a page explorer item properties dialog
   export-page-explorer-item-property-items Export raw visible controls for a page explorer item properties dialog
   compare-page-explorer-item-property-items Compare raw visible controls for a page explorer item properties dialog
   sync-page-explorer-item-property-items Build a raw-control sync plan for a page explorer item properties dialog

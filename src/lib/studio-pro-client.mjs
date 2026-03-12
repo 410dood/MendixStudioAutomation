@@ -334,6 +334,17 @@ export class StudioProClient {
         };
     }
 
+    async listPageWidgetPropertyItems(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.listPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
     async exportPageWidgetPropertyItems(options = {}) {
         const normalized = normalizePageWidgetPropertyOptions(options);
         return this.exportPropertiesDialogItems({
@@ -508,6 +519,17 @@ export class StudioProClient {
             fieldsResult,
             itemsResult
         };
+    }
+
+    async listPageExplorerItemPropertyItems(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.listPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
     }
 
     async exportPageExplorerItemPropertyItems(options = {}) {

@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.65
+
+Direct raw-control listing aliases for page-target property workflows.
+
+- Added `list-page-widget-property-items` and `list-page-explorer-item-property-items`.
+- These expose raw visible WPF controls directly from page widgets and Page Explorer targets, without requiring the broader combined inspect payload or a JSON export.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.64
 
 Raw-control page-target aliases for widget and Page Explorer property workflows.
