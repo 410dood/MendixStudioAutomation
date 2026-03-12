@@ -117,8 +117,29 @@ export class StudioProClient {
         return result;
     }
 
-    async createClientsPage(options = {}) {
-        const normalized = normalizeCreateClientsPageOptions(options);
+    async createPageWithWidget(options = {}) {
+        const normalized = normalizeCreatePageWithWidgetOptions(options);
+        if (!normalized.module) {
+            return {
+                ok: false,
+                action: "create-page-with-widget",
+                error: "A --module argument is required."
+            };
+        }
+        if (!normalized.pageName) {
+            return {
+                ok: false,
+                action: "create-page-with-widget",
+                error: "A --page-name (or --name) argument is required."
+            };
+        }
+        if (!normalized.widget) {
+            return {
+                ok: false,
+                action: "create-page-with-widget",
+                error: "A --widget argument is required."
+            };
+        }
         const createResult = await this.createPage({
             processId: normalized.processId,
             title: normalized.title,
@@ -132,7 +153,7 @@ export class StudioProClient {
         if (!createResult?.pageCreated && !createResult?.ok) {
             return {
                 ok: false,
-                action: "create-clients-page",
+                action: "create-page-with-widget",
                 stage: "create-page",
                 error: createResult?.error ?? "Studio Pro did not confirm that the new page was opened.",
                 createResult
@@ -151,7 +172,7 @@ export class StudioProClient {
         if (!targetName) {
             return {
                 ok: false,
-                action: "create-clients-page",
+                action: "create-page-with-widget",
                 stage: "locate-target",
                 pageName: normalized.pageName,
                 createResult,
@@ -214,7 +235,7 @@ export class StudioProClient {
 
         return {
             ok: createResult?.ok && insertResult?.ok,
-            action: "create-clients-page",
+            action: "create-page-with-widget",
             pageName: normalized.pageName,
             module: normalized.module,
             selectedTarget: targetName,
@@ -229,6 +250,14 @@ export class StudioProClient {
             pageExplorer,
             insertResult,
             capabilities
+        };
+    }
+
+    async createClientsPage(options = {}) {
+        const result = await this.createPageWithWidget(normalizeCreateClientsPageOptions(options));
+        return {
+            ...result,
+            action: "create-clients-page"
         };
     }
 
@@ -5197,14 +5226,23 @@ function normalizeCreatePageOptions(options) {
 }
 
 function normalizeCreateClientsPageOptions(options) {
+    return normalizeCreatePageWithWidgetOptions({
+        ...options,
+        module: options.module || "Az_ClientManagement",
+        pageName: options.pageName || options.name || "Clients",
+        widget: options.widget || "Data Grid 2"
+    });
+}
+
+function normalizeCreatePageWithWidgetOptions(options) {
     return {
         processId: options.processId,
         title: options.title,
-        module: options.module || "Az_ClientManagement",
-        pageName: options.pageName || options.name || "Clients",
+        module: options.module,
+        pageName: options.pageName || options.name,
         template: options.template,
         target: options.target,
-        widget: options.widget || "Data Grid 2",
+        widget: options.widget,
         addNavigation: options.addNavigation || options.navigation || options.navigationShortcut,
         navigationCaption: options.navigationCaption || options.navigationItem || options.menuItem,
         delayMs: numberOrDefault(options.delayMs, 250),

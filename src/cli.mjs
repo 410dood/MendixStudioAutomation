@@ -55,6 +55,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "create-page-with-widget": {
+            const result = await client.createPageWithWidget(options);
+            formatOutput(result);
+            return;
+        }
         case "export-page-widget-properties": {
             const result = await client.exportPageWidgetProperties(options);
             formatOutput(result);
@@ -762,6 +767,7 @@ Commands:
   stop-local                  Stop a locally running app in Studio Pro
   show-responsive-web         Open the app in Studio Pro's responsive browser view
   create-page                 Create a Mendix page through the native Studio Pro wizard
+  create-page-with-widget     Create a page and insert an initial widget
   export-page-widget-properties Export a page widget property plan to JSON
   open-page-widget-properties Open the native properties dialog for a page widget
   get-page-widget-property    Read one property field for a page widget
@@ -972,9 +978,9 @@ Options:
   --action-type <name>        Activity/action type filter for find-microflow-activities
   --type <name>               Extension document type, e.g. Microflow or Page
   --control-type <name>       Optional dialog field type filter such as Edit or ComboBox
-  --widget <name>             Widget name for create-clients-page (defaults to Data Grid 2)
-  --target <name>             Optional explicit Page Explorer target for create-clients-page
-  --template <name>           Optional page template to use for create-clients-page
+  --widget <name>             Widget name for create-page-with-widget or create-clients-page
+  --target <name>             Optional explicit Page Explorer target for create-page-with-widget or create-clients-page
+  --template <name>           Optional page template to use for create-page-with-widget or create-clients-page
   --page-explorer-limit <n>   Max Page Explorer rows considered as insert targets
   --timeout-ms <n>            Wait timeout in milliseconds
   --add-navigation            Attempt to add the created/opened page to web navigation via extension

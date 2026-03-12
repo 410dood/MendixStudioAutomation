@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.2.72
+
+Generalized create-page-with-widget authoring workflow.
+
+- Added `create-page-with-widget`, which generalizes the existing create-and-seed flow beyond the `Clients` page case.
+- `create-clients-page` now reuses the generalized workflow and remains as the opinionated convenience alias.
+- The generalized workflow supports optional initial widget insertion target selection and optional navigation creation through the existing extension-backed path.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.71
 
 Combined review-bundle exports for page-target property workflows.

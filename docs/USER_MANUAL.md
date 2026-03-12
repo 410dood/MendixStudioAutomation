@@ -45,6 +45,7 @@ npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --v
 npm run stop-local
 npm run show-responsive-web
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
+npm run create-page-with-widget -- --module "Az_ClientManagement" --page-name "Clients_Auto4" --widget "Data Grid 2" --add-navigation --navigation-caption "Clients Auto 4"
 npm run export-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --output-file ".automation-state/structure-mode-properties.json" --finalize-dialog "Cancel"
 npm run get-page-widget-property -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --label "Name" --control-type Edit --finalize-dialog "Cancel"
 npm run set-page-widget-property -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --label "Name" --value "structureMode1" --control-type Edit --verify-value "structureMode1" --finalize-dialog "OK"
