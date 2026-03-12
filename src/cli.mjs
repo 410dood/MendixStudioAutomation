@@ -90,6 +90,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-sync-page-widget-properties": {
+            const result = await client.exportSyncPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "inspect-page-widget-properties": {
             const result = await client.inspectPageWidgetProperties(options);
             formatOutput(result);
@@ -162,6 +167,11 @@ async function main() {
         }
         case "sync-page-explorer-item-properties": {
             const result = await client.syncPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-sync-page-explorer-item-properties": {
+            const result = await client.exportSyncPageExplorerItemProperties(options);
             formatOutput(result);
             return;
         }
@@ -272,6 +282,11 @@ async function main() {
         }
         case "sync-properties-dialog": {
             const result = await client.syncPropertiesDialog(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-sync-properties-dialog": {
+            const result = await client.exportSyncPropertiesDialog(options);
             formatOutput(result);
             return;
         }
@@ -719,6 +734,7 @@ Commands:
   invoke-page-widget-property-control Invoke a named control in a page widget properties dialog
   compare-page-widget-properties Compare a page widget against a saved property plan
   sync-page-widget-properties Apply or preview a page widget property plan
+  export-sync-page-widget-properties Export a dry-run field sync plan for a page widget
   inspect-page-widget-properties Inspect both fields and raw controls for a page widget
   list-page-widget-property-fields List resolved field/value pairs for a page widget properties dialog
   list-page-widget-property-items List raw visible controls for a page widget properties dialog
@@ -734,6 +750,7 @@ Commands:
   invoke-page-explorer-item-property-control Invoke a named control in a page explorer item properties dialog
   compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
   sync-page-explorer-item-properties Apply or preview a page explorer item property plan
+  export-sync-page-explorer-item-properties Export a dry-run field sync plan for a page explorer item
   inspect-page-explorer-item-properties Inspect both fields and raw controls for a page explorer item
   list-page-explorer-item-property-fields List resolved field/value pairs for a page explorer item properties dialog
   list-page-explorer-item-property-items List raw visible controls for a page explorer item properties dialog
@@ -751,6 +768,7 @@ Commands:
   compare-properties-dialog-items Open a properties dialog and compare raw visible controls to JSON
   sync-properties-dialog-items Open a properties dialog and build a raw-control sync plan
   export-sync-properties-dialog-items Open a properties dialog and export a raw-control sync plan to JSON
+  export-sync-properties-dialog Open a properties dialog and export a field sync plan to JSON
   invoke-properties-dialog-control Open a properties dialog and invoke a named control inside it
   get-properties-dialog-field Open a properties dialog and read one labeled field
   set-properties-dialog-fields Open a properties dialog and apply batch field edits

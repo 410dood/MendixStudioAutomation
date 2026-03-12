@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.2.68
+
+Persisted field-sync plan exports for target-first property workflows.
+
+- Added generic `export-sync-properties-dialog` for field-plan review artifacts.
+- Added `export-sync-page-widget-properties` and `export-sync-page-explorer-item-properties`.
+- These persist field-level dry-run sync results to JSON so planned page-target mutations can be reviewed before any live apply step.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.67
 
 Batch field-edit aliases for page-target property workflows.

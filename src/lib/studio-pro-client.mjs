@@ -309,6 +309,17 @@ export class StudioProClient {
         });
     }
 
+    async exportSyncPageWidgetProperties(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.exportSyncPropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
     async inspectPageWidgetProperties(options = {}) {
         const normalized = normalizePageWidgetPropertyOptions(options);
         const fieldsResult = await this.listPropertiesDialogFields({
@@ -510,6 +521,17 @@ export class StudioProClient {
     async syncPageExplorerItemProperties(options = {}) {
         const normalized = normalizePageExplorerPropertyOptions(options);
         return this.syncPropertiesDialog({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async exportSyncPageExplorerItemProperties(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.exportSyncPropertiesDialog({
             ...options,
             page: normalized.page,
             item: normalized.item,
@@ -753,6 +775,41 @@ export class StudioProClient {
             openResult,
             syncResult,
             finalizeResult
+        };
+    }
+
+    async exportSyncPropertiesDialog(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-sync-properties-dialog",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const result = await this.syncPropertiesDialog({
+            ...options,
+            dryRun: toBoolean(options.dryRun, true)
+        });
+        if (!result?.ok) {
+            return {
+                ...result,
+                action: "export-sync-properties-dialog"
+            };
+        }
+
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(result, null, 2)}\n`, "utf8");
+
+        return {
+            ok: true,
+            action: "export-sync-properties-dialog",
+            page: result.page ?? null,
+            microflow: result.microflow ?? null,
+            item: result.item ?? null,
+            scope: result.scope ?? null,
+            dryRun: result.dryRun ?? true,
+            outputFile
         };
     }
 
