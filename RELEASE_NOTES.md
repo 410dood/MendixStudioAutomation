@@ -1,5 +1,21 @@
 # Release Notes
 
+## 0.2.74
+
+Added a FlaUI-backed desktop automation runner.
+
+- Added a new Windows desktop automation tool project under `tools/MendixStudioAutomation.FlaUI`.
+- Installed `FlaUI.Core` `5.0.0` and `FlaUI.UIA3` `5.0.0`.
+- Added CLI commands:
+  - `build-flaui-runner`
+  - `flaui-snapshot`
+  - `flaui-list-dialogs`
+  - `flaui-find-elements`
+- This establishes a second automation substrate alongside the PowerShell UI Automation scripts so Studio Pro inspection can be hardened without depending on only one Windows automation path.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.73
 
 Generic review-bundle export for properties dialogs.

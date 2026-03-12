@@ -82,6 +82,10 @@ npm run run-local-verify -- --url "http://localhost:8080" --verify-follow-redire
 npm run run-local-verify -- --url "http://localhost:8080" --verify-follow-redirects true --verify-final-url "/index.html" --verify-status 200
 npm run run-local-verify -- --url "http://localhost:8080" --verify-only true --verify-status 200
 npm run show-responsive-web
+npm run build-flaui-runner
+npm run flaui-snapshot -- --title "Mendix Studio Pro"
+npm run flaui-list-dialogs -- --title "Mendix Studio Pro"
+npm run flaui-find-elements -- --title "Mendix Studio Pro" --scope main --name-contains "Properties" --limit 25
 npm run create-page -- --module "Az_ClientManagement" --page-name "Clients_Auto3"
 npm run create-page-with-widget -- --module "Az_ClientManagement" --page-name "Clients_Auto4" --widget "Data Grid 2" --add-navigation --navigation-caption "Clients Auto 4"
 npm run create-clients-page -- --module "Az_ClientManagement" --page-name "Clients" --widget "Data Grid 2"

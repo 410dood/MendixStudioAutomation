@@ -9,3 +9,5 @@ extensions/*/bin/
 extensions/*/obj/
 extensions/*/dist/
 extensions/*/runtime/
+tools/*/bin/
+tools/*/obj/

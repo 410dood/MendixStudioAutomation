@@ -50,6 +50,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "build-flaui-runner": {
+            const result = await client.buildFlaUIRunner(options);
+            formatOutput(result);
+            return;
+        }
+        case "flaui-snapshot": {
+            const result = await client.flauiSnapshot(options);
+            formatOutput(result);
+            return;
+        }
+        case "flaui-list-dialogs": {
+            const result = await client.flauiListDialogs(options);
+            formatOutput(result);
+            return;
+        }
+        case "flaui-find-elements": {
+            const result = await client.flauiFindElements(options);
+            formatOutput(result);
+            return;
+        }
         case "create-page": {
             const result = await client.createPage(options);
             formatOutput(result);
@@ -771,6 +791,10 @@ Commands:
   run-local-verify            Run the app locally and wait until a local URL responds
   stop-local                  Stop a locally running app in Studio Pro
   show-responsive-web         Open the app in Studio Pro's responsive browser view
+  build-flaui-runner          Restore and build the FlaUI desktop automation runner
+  flaui-snapshot              Inspect the Studio Pro main window through FlaUI
+  flaui-list-dialogs          List Studio Pro top-level dialog windows through FlaUI
+  flaui-find-elements         Search descendants in a Studio Pro FlaUI scope
   create-page                 Create a Mendix page through the native Studio Pro wizard
   create-page-with-widget     Create a page and insert an initial widget
   export-page-widget-properties Export a page widget property plan to JSON
@@ -915,6 +939,7 @@ Commands:
 Options:
   --title <text>              Match Studio Pro main window title
   --process-id <id>           Target a specific Studio Pro process
+  --process-name <text>       Match a specific Windows process name for FlaUI commands
   --depth <n>                 UI tree traversal depth
   --max-children <n>          Max children emitted per node
   --name <text>               Element name filter
@@ -988,6 +1013,7 @@ Options:
   --target <name>             Optional explicit Page Explorer target for create-page-with-widget or create-clients-page
   --template <name>           Optional page template to use for create-page-with-widget or create-clients-page
   --page-explorer-limit <n>   Max Page Explorer rows considered as insert targets
+  --limit <n>                 Limit results returned by FlaUI or list-style commands
   --timeout-ms <n>            Wait timeout in milliseconds
   --add-navigation            Attempt to add the created/opened page to web navigation via extension
   --navigation-caption <text>  Optional caption for the generated navigation item

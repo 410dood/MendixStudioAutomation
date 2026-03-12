@@ -3,12 +3,14 @@ import { resolve } from "node:path";
 import { runPowerShellScript } from "./powershell.mjs";
 import { clearLastKnownActiveTab, readLastKnownActiveTab, writeLastKnownActiveTab } from "./state-store.mjs";
 import { HybridExtensionClient } from "./extension-client.mjs";
+import { FlaUIClient } from "./flaui-client.mjs";
 import { listKnowledgeGaps, recordKnowledgeGap, summarizeKnowledgeGaps } from "./knowledge-gap-store.mjs";
 import { searchAutomationKnowledgeBase } from "./rag-search.mjs";
 
 export class StudioProClient {
     constructor() {
         this.extensionClient = new HybridExtensionClient();
+        this.flauiClient = new FlaUIClient();
     }
 
     async snapshot(options = {}) {
@@ -106,6 +108,22 @@ export class StudioProClient {
             ...options,
             keys: "{F9}"
         });
+    }
+
+    async buildFlaUIRunner() {
+        return this.flauiClient.build();
+    }
+
+    async flauiSnapshot(options = {}) {
+        return this.flauiClient.snapshot(options);
+    }
+
+    async flauiListDialogs(options = {}) {
+        return this.flauiClient.listDialogs(options);
+    }
+
+    async flauiFindElements(options = {}) {
+        return this.flauiClient.findElements(options);
     }
 
     async createPage(options = {}) {
