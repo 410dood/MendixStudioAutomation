@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.62
+
+Exportable combined property inspection for page targets.
+
+- Added `export-inspect-page-widget-properties` to persist a page widget's combined fields-plus-raw-controls inspection payload.
+- Added `export-inspect-page-explorer-item-properties` to persist the same combined inspection payload for Page Explorer targets.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.61
 
 Page Explorer item property workflow aliases.

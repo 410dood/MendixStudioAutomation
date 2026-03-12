@@ -301,6 +301,36 @@ export class StudioProClient {
         };
     }
 
+    async exportInspectPageWidgetProperties(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-inspect-page-widget-properties",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const result = await this.inspectPageWidgetProperties(options);
+        if (!result?.ok) {
+            return {
+                ...result,
+                action: "export-inspect-page-widget-properties"
+            };
+        }
+
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(result, null, 2)}\n`, "utf8");
+
+        return {
+            ok: true,
+            action: "export-inspect-page-widget-properties",
+            page: result.page ?? null,
+            widget: result.widget ?? null,
+            scope: result.scope ?? null,
+            outputFile
+        };
+    }
+
     async exportPageExplorerItemProperties(options = {}) {
         const normalized = normalizePageExplorerPropertyOptions(options);
         return this.exportPropertiesDialog({
@@ -367,6 +397,36 @@ export class StudioProClient {
             scope: normalized.scope,
             fieldsResult,
             itemsResult
+        };
+    }
+
+    async exportInspectPageExplorerItemProperties(options = {}) {
+        if (!options.outputFile) {
+            return {
+                ok: false,
+                action: "export-inspect-page-explorer-item-properties",
+                error: "An --output-file argument is required."
+            };
+        }
+
+        const result = await this.inspectPageExplorerItemProperties(options);
+        if (!result?.ok) {
+            return {
+                ...result,
+                action: "export-inspect-page-explorer-item-properties"
+            };
+        }
+
+        const outputFile = resolve(process.cwd(), String(options.outputFile));
+        await writeFile(outputFile, `${JSON.stringify(result, null, 2)}\n`, "utf8");
+
+        return {
+            ok: true,
+            action: "export-inspect-page-explorer-item-properties",
+            page: result.page ?? null,
+            item: result.item ?? null,
+            scope: result.scope ?? null,
+            outputFile
         };
     }
 

@@ -49,10 +49,12 @@ npm run export-page-widget-properties -- --page "Client_ClinicalDocument_V3" --w
 npm run compare-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --finalize-dialog "Cancel"
 npm run sync-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --dry-run true
 npm run inspect-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control-type Edit --limit 50 --finalize-dialog "Cancel"
+npm run export-inspect-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control-type Edit --limit 50 --output-file ".automation-state/structure-mode-inspect.json" --finalize-dialog "Cancel"
 npm run export-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --output-file ".automation-state/container34-properties.json" --scope pageExplorer --finalize-dialog "Cancel"
 npm run compare-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --fields-file ".automation-state/container34-properties.json" --scope pageExplorer --finalize-dialog "Cancel"
 npm run sync-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --fields-file ".automation-state/container34-properties.json" --scope pageExplorer --dry-run true
 npm run inspect-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --control-type Edit --limit 50 --finalize-dialog "Cancel"
+npm run export-inspect-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --control-type Edit --limit 50 --output-file ".automation-state/container34-inspect.json" --finalize-dialog "Cancel"
 npm run open-properties -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor
 npm run export-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --output-file ".automation-state/structure-mode-properties.json"
 npm run compare-properties-dialog -- --page "Client_ClinicalDocument_V3" --item "Structure mode" --scope editor --fields-file ".automation-state/structure-mode-properties.json"
@@ -184,6 +186,7 @@ Use these commands whenever Studio Pro opens a native WPF dialog and you want to
 Use `--finalize-dialog "OK"` when a property edit should be committed, or `--finalize-dialog "Cancel"` / `"Close"` when a review-style command should dismiss the window after inspection.
 Use the `*-page-widget-properties` commands when you want the same workflow expressed in page/widget terms instead of raw property-dialog terms.
 Use the `*-page-explorer-item-properties` commands when the real authoring target lives in Page Explorer, such as containers, layouts, rows, or other structural page nodes.
+Use the `export-inspect-*` variants when you want one JSON artifact that contains both the resolved field view and the raw control view of the target's properties dialog.
 `get-dialog-field` reads the current post-rendered value for a field selected by visible label and returns the same `observedValue` shape used by `set-dialog-field`.
 `set-dialog-fields` applies multiple label-based edits from one JSON payload. Use a JSON object for simple label-to-value mapping or an array/object of entries when per-field control types and verification rules differ. Use `--fields-file` when the payload is large enough that shell quoting becomes brittle.
 `list-dialog-items` and other element-inspection commands now also include `textValue` for controls that expose a native `ValuePattern`, which makes dialog state easier to inspect before mutating it.

@@ -75,6 +75,11 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-inspect-page-widget-properties": {
+            const result = await client.exportInspectPageWidgetProperties(options);
+            formatOutput(result);
+            return;
+        }
         case "export-page-explorer-item-properties": {
             const result = await client.exportPageExplorerItemProperties(options);
             formatOutput(result);
@@ -92,6 +97,11 @@ async function main() {
         }
         case "inspect-page-explorer-item-properties": {
             const result = await client.inspectPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-inspect-page-explorer-item-properties": {
+            const result = await client.exportInspectPageExplorerItemProperties(options);
             formatOutput(result);
             return;
         }
@@ -606,10 +616,12 @@ Commands:
   compare-page-widget-properties Compare a page widget against a saved property plan
   sync-page-widget-properties Apply or preview a page widget property plan
   inspect-page-widget-properties Inspect both fields and raw controls for a page widget
+  export-inspect-page-widget-properties Export the combined widget inspection payload to JSON
   export-page-explorer-item-properties Export a page explorer item property plan to JSON
   compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
   sync-page-explorer-item-properties Apply or preview a page explorer item property plan
   inspect-page-explorer-item-properties Inspect both fields and raw controls for a page explorer item
+  export-inspect-page-explorer-item-properties Export the combined explorer-item inspection payload to JSON
   open-properties             Open the properties dialog for a selected Studio Pro item
   export-properties-dialog    Open a properties dialog and export its field plan to JSON
   compare-properties-dialog   Open a properties dialog and compare it to a JSON field plan
