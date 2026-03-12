@@ -90,6 +90,26 @@ async function main() {
             formatOutput(result);
             return;
         }
+        case "export-page-widget-property-items": {
+            const result = await client.exportPageWidgetPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "compare-page-widget-property-items": {
+            const result = await client.comparePageWidgetPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "sync-page-widget-property-items": {
+            const result = await client.syncPageWidgetPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-sync-page-widget-property-items": {
+            const result = await client.exportSyncPageWidgetPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
         case "export-inspect-page-widget-properties": {
             const result = await client.exportInspectPageWidgetProperties(options);
             formatOutput(result);
@@ -127,6 +147,26 @@ async function main() {
         }
         case "inspect-page-explorer-item-properties": {
             const result = await client.inspectPageExplorerItemProperties(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-page-explorer-item-property-items": {
+            const result = await client.exportPageExplorerItemPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "compare-page-explorer-item-property-items": {
+            const result = await client.comparePageExplorerItemPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "sync-page-explorer-item-property-items": {
+            const result = await client.syncPageExplorerItemPropertyItems(options);
+            formatOutput(result);
+            return;
+        }
+        case "export-sync-page-explorer-item-property-items": {
+            const result = await client.exportSyncPageExplorerItemPropertyItems(options);
             formatOutput(result);
             return;
         }
@@ -649,6 +689,10 @@ Commands:
   compare-page-widget-properties Compare a page widget against a saved property plan
   sync-page-widget-properties Apply or preview a page widget property plan
   inspect-page-widget-properties Inspect both fields and raw controls for a page widget
+  export-page-widget-property-items Export raw visible controls for a page widget properties dialog
+  compare-page-widget-property-items Compare raw visible controls for a page widget properties dialog
+  sync-page-widget-property-items Build a raw-control sync plan for a page widget properties dialog
+  export-sync-page-widget-property-items Export a raw-control sync plan for a page widget properties dialog
   export-inspect-page-widget-properties Export the combined widget inspection payload to JSON
   export-page-explorer-item-properties Export a page explorer item property plan to JSON
   get-page-explorer-item-property Read one property field for a page explorer item
@@ -657,6 +701,10 @@ Commands:
   compare-page-explorer-item-properties Compare a page explorer item against a saved property plan
   sync-page-explorer-item-properties Apply or preview a page explorer item property plan
   inspect-page-explorer-item-properties Inspect both fields and raw controls for a page explorer item
+  export-page-explorer-item-property-items Export raw visible controls for a page explorer item properties dialog
+  compare-page-explorer-item-property-items Compare raw visible controls for a page explorer item properties dialog
+  sync-page-explorer-item-property-items Build a raw-control sync plan for a page explorer item properties dialog
+  export-sync-page-explorer-item-property-items Export a raw-control sync plan for a page explorer item properties dialog
   export-inspect-page-explorer-item-properties Export the combined explorer-item inspection payload to JSON
   open-properties             Open the properties dialog for a selected Studio Pro item
   export-properties-dialog    Open a properties dialog and export its field plan to JSON

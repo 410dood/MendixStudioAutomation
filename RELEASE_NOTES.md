@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.2.64
+
+Raw-control page-target aliases for widget and Page Explorer property workflows.
+
+- Added `export-page-widget-property-items`, `compare-page-widget-property-items`, `sync-page-widget-property-items`, and `export-sync-page-widget-property-items`.
+- Added `export-page-explorer-item-property-items`, `compare-page-explorer-item-property-items`, `sync-page-explorer-item-property-items`, and `export-sync-page-explorer-item-property-items`.
+- These expose raw WPF control export, diffing, and sync-plan workflows directly from page widgets and Page Explorer targets without dropping down to generic property-dialog commands.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.63
 
 Single-field and control actions for page-target property workflows.

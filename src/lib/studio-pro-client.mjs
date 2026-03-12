@@ -334,6 +334,50 @@ export class StudioProClient {
         };
     }
 
+    async exportPageWidgetPropertyItems(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.exportPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async comparePageWidgetPropertyItems(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.comparePropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async syncPageWidgetPropertyItems(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.syncPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async exportSyncPageWidgetPropertyItems(options = {}) {
+        const normalized = normalizePageWidgetPropertyOptions(options);
+        return this.exportSyncPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.widget,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
     async exportInspectPageWidgetProperties(options = {}) {
         if (!options.outputFile) {
             return {
@@ -464,6 +508,50 @@ export class StudioProClient {
             fieldsResult,
             itemsResult
         };
+    }
+
+    async exportPageExplorerItemPropertyItems(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.exportPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async comparePageExplorerItemPropertyItems(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.comparePropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async syncPageExplorerItemPropertyItems(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.syncPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
+    }
+
+    async exportSyncPageExplorerItemPropertyItems(options = {}) {
+        const normalized = normalizePageExplorerPropertyOptions(options);
+        return this.exportSyncPropertiesDialogItems({
+            ...options,
+            page: normalized.page,
+            item: normalized.item,
+            scope: normalized.scope,
+            finalizeDialog: normalized.finalizeDialog
+        });
     }
 
     async exportInspectPageExplorerItemProperties(options = {}) {
