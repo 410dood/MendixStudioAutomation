@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.2.66
+
+Direct field-listing aliases for page-target property workflows.
+
+- Added `list-page-widget-property-fields` and `list-page-explorer-item-property-fields`.
+- These expose resolved field/value pairs directly from page widgets and Page Explorer targets, without requiring a broader combined inspect payload.
+- Updated docs:
+  - `README.md`
+  - `docs/USER_MANUAL.md`
+
 ## 0.2.65
 
 Direct raw-control listing aliases for page-target property workflows.

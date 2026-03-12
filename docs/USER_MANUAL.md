@@ -52,6 +52,7 @@ npm run invoke-page-widget-property-control -- --page "Client_ClinicalDocument_V
 npm run compare-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --finalize-dialog "Cancel"
 npm run sync-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --fields-file ".automation-state/structure-mode-properties.json" --dry-run true
 npm run inspect-page-widget-properties -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control-type Edit --limit 50 --finalize-dialog "Cancel"
+npm run list-page-widget-property-fields -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --control-type Edit --limit 50 --finalize-dialog "Cancel"
 npm run list-page-widget-property-items -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --limit 50 --finalize-dialog "Cancel"
 npm run export-page-widget-property-items -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --output-file ".automation-state/structure-mode-items.json" --finalize-dialog "Cancel"
 npm run compare-page-widget-property-items -- --page "Client_ClinicalDocument_V3" --widget "Structure mode" --items-file ".automation-state/structure-mode-items.json" --finalize-dialog "Cancel"
@@ -65,6 +66,7 @@ npm run invoke-page-explorer-item-property-control -- --page "Client_ClinicalDoc
 npm run compare-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --fields-file ".automation-state/container34-properties.json" --scope pageExplorer --finalize-dialog "Cancel"
 npm run sync-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --fields-file ".automation-state/container34-properties.json" --scope pageExplorer --dry-run true
 npm run inspect-page-explorer-item-properties -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --control-type Edit --limit 50 --finalize-dialog "Cancel"
+npm run list-page-explorer-item-property-fields -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --control-type Edit --limit 50 --finalize-dialog "Cancel"
 npm run list-page-explorer-item-property-items -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --limit 50 --finalize-dialog "Cancel"
 npm run export-page-explorer-item-property-items -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --output-file ".automation-state/container34-items.json" --finalize-dialog "Cancel"
 npm run compare-page-explorer-item-property-items -- --page "Client_ClinicalDocument_V3" --item "container34" --scope pageExplorer --items-file ".automation-state/container34-items.json" --finalize-dialog "Cancel"
